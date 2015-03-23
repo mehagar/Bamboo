@@ -15,4 +15,5 @@
     <string name="ViewMap">View Map</string>
     <string name="LearnMore">Learn More</string>
 
+    <string name="title_activity_interactive_map">BambooFinderMap</string>
 </resources>
