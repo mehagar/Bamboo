@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -67,6 +69,8 @@ public class InteractiveMapActivity extends FragmentActivity {
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
 
+        new GetObservationsTask().execute("");
+
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
@@ -86,5 +90,16 @@ public class InteractiveMapActivity extends FragmentActivity {
             }
         }
         return filteredObservations;
+    }
+
+    class GetObservationsTask extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... url) {
+            ApiManager.getObservationsFromNetwork(null);
+            return "";
+        }
+
+        protected void onPostExecute(String result) {
+            Log.d("InteractiveMap", "in onPostExecute");
+        }
     }
 }
