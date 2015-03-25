@@ -2,9 +2,11 @@ package com.alabama.bamboofinder;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -64,6 +66,16 @@ public class InteractiveMapActivity extends FragmentActivity {
      */
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                Log.d("InteractiveCamera", "Camera was changed." + " Latitude : " + cameraPosition.target.latitude +
+                " Longitude : " + cameraPosition.target.longitude);
+            }
+        });
+
+        // TODO: set other listener methods for when a marker is clicked
     }
 
     private ArrayList<Observation> getFilteredObservations(SearchFilter sf) {
