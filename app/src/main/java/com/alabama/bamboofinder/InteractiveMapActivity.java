@@ -24,7 +24,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ArrayList<Observation> mObservations;
     private LatLng mLastPosition;
-    private HashMap<String, Marker> mMarkerIds;
+    private HashMap<Marker, String> mMarkerIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +76,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void setUpMap() {
         // TODO: get the user's position and make it the starting point
         mMap.setMyLocationEnabled(true);
-        mMarkerIds = new HashMap<String, Marker>();
-
-        mLastPosition = new LatLng(33.2, -87.5); // Tuscaloosa
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 14.0f));
-
-        LatLngBounds curScreen = getScreenBoundingBox();
-        new GetObservationsTask().execute(curScreen);
+        mMarkerIds = new HashMap<Marker, String>();
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
@@ -97,8 +91,18 @@ public class InteractiveMapActivity extends ActionBarActivity {
             }
         });
 
-        // TODO: set other listener methods for when a marker is clicked
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                String id = mMarkerIds.get(marker);
+                Log.d(TAG, "Got id : " + id);
+                // Start ObservationDetailActivity here with id of observation
+                return false; // default behavior: still show info window
+            }
+        });
 
+        mLastPosition = new LatLng(33.2109, -87.5461); // Tuscaloosa
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
     }
 
     private LatLngBounds getScreenBoundingBox() {
@@ -109,9 +113,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations() {
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
-            if(!mMarkerIds.containsKey(o.getId())) {
+            if(!mMarkerIds.containsValue(o.getId())) {
                 Marker m = mMap.addMarker(new MarkerOptions().position(o.getLocation()).title(o.getId()));
-                mMarkerIds.put(o.getId(), m);
+                mMarkerIds.put(m, o.getId());
             }
         }
     }
