@@ -2,6 +2,12 @@ package com.alabama.bamboofinder;
 
 import android.location.Location;
 import android.media.Image;
+import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -10,19 +16,35 @@ import java.util.Date;
  */
 
 public class Observation {
+    private static final String TAG = "observation";
+
+    private static final String JSON_LATITUDE = "latitude";
+    private static final String JSON_LONGITUDE = "longitude";
 
     private Date mTimeStamp;
     private String mDescription;
     private boolean mValidated;
     private String mOwnerUserName;
     private Image mImage;
-    private Location mLocation;
+    private LatLng mLocation;
 
-    public Location getLocation() {
+    public Observation(JSONObject obs) {
+        double latitude;
+        double longitude;
+        try {
+            latitude = obs.getDouble(JSON_LATITUDE);
+            longitude = obs.getDouble(JSON_LONGITUDE);
+            mLocation = new LatLng(latitude, longitude);
+        } catch(JSONException e) {
+            Log.e(TAG, "Error parsing json in Observation constructor");
+        }
+    }
+
+    public LatLng getLocation() {
         return mLocation;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(LatLng location) {
         this.mLocation = location;
     }
 

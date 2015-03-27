@@ -16,6 +16,8 @@ import java.util.ArrayList;
 
 public class InteractiveMapActivity extends FragmentActivity {
 
+    private static final String TAG = "InteractiveMap";
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ArrayList<Observation> mObservations;
 
@@ -69,17 +71,35 @@ public class InteractiveMapActivity extends FragmentActivity {
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
 
-        new GetObservationsTask().execute("");
+        // TODO: get the user's position and make it the starting point
+
+        LatLngBounds curScreen = getScreenBoundingBox();
+        new GetObservationsTask().execute(curScreen);
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                Log.d("InteractiveCamera", "Camera was changed." + " Latitude : " + cameraPosition.target.latitude +
+                Log.d(TAG, "Camera was changed." + " Latitude : " + cameraPosition.target.latitude +
                 " Longitude : " + cameraPosition.target.longitude);
+                LatLngBounds curScreen = getScreenBoundingBox();
+                new GetObservationsTask().execute(curScreen);
             }
         });
 
         // TODO: set other listener methods for when a marker is clicked
+    }
+
+    private LatLngBounds getScreenBoundingBox() {
+        return mMap.getProjection()
+                .getVisibleRegion().latLngBounds;
+    }
+
+    private void showObservations() {
+        // clear all markers from the screen
+        mMap.clear();
+        for(Observation o : mObservations) {
+            mMap.addMarker(new MarkerOptions().position(o.getLocation()).title("Dummy Title"));
+        }
     }
 
     private ArrayList<Observation> getFilteredObservations(SearchFilter sf) {
@@ -92,14 +112,16 @@ public class InteractiveMapActivity extends FragmentActivity {
         return filteredObservations;
     }
 
-    class GetObservationsTask extends AsyncTask<String, Void, String> {
-        protected String doInBackground(String... url) {
-            ApiManager.getObservationsFromNetwork(null);
-            return "";
+    class GetObservationsTask extends AsyncTask<LatLngBounds, Void, ArrayList<Observation>> {
+        protected ArrayList<Observation> doInBackground(LatLngBounds... latLngBounds) {
+            // this function must accept a variable number of arguments, but there should only be one.
+            assert(latLngBounds.length == 1);
+            return ApiManager.getObservationsFromNetwork(latLngBounds[0]);
         }
 
-        protected void onPostExecute(String result) {
-            Log.d("InteractiveMap", "in onPostExecute");
+        protected void onPostExecute(ArrayList<Observation> result) {
+            mObservations = result;
+            showObservations();
         }
     }
 }
