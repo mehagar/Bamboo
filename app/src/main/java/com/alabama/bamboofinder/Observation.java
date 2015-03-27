@@ -20,12 +20,14 @@ public class Observation {
 
     private static final String JSON_LATITUDE = "latitude";
     private static final String JSON_LONGITUDE = "longitude";
+    private static final String JSON_ID = "id";
 
     private Date mTimeStamp;
     private String mDescription;
     private boolean mValidated;
     private String mOwnerUserName;
     private Image mImage;
+    private String mId;
     private LatLng mLocation;
 
     public Observation(JSONObject obs) {
@@ -35,9 +37,18 @@ public class Observation {
             latitude = obs.getDouble(JSON_LATITUDE);
             longitude = obs.getDouble(JSON_LONGITUDE);
             mLocation = new LatLng(latitude, longitude);
+            mId = obs.getString(JSON_ID);
         } catch(JSONException e) {
-            Log.e(TAG, "Error parsing json in Observation constructor");
+            Log.e(TAG, "Error parsing json for observation");
         }
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 
     public LatLng getLocation() {

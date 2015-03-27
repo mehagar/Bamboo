@@ -52,9 +52,15 @@ public class ApiManager {
             Log.e(TAG, e.getMessage());
             response = "";
         }
+
+        ArrayList<Observation> observations = JSONDataToObservations(response.toString());
+        return observations;
+    }
+
+    private static ArrayList<Observation> JSONDataToObservations(String data) {
         ArrayList<Observation> observations = new ArrayList<Observation>();
         try {
-            JSONArray observationsData = new JSONArray(response.toString());
+            JSONArray observationsData = new JSONArray(data);
             for (int i = 0; i < observationsData.length(); ++i) {
                 JSONObject obs = observationsData.getJSONObject(i);
                 observations.add(new Observation(obs));
@@ -62,7 +68,6 @@ public class ApiManager {
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json observations : " + e.getMessage());
         }
-
         return observations;
     }
 

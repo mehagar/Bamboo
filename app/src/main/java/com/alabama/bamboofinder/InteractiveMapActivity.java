@@ -1,25 +1,30 @@
 package com.alabama.bamboofinder;
 
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class InteractiveMapActivity extends FragmentActivity {
+public class InteractiveMapActivity extends ActionBarActivity {
 
     private static final String TAG = "InteractiveMap";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ArrayList<Observation> mObservations;
+    private LatLng mLastPosition;
+    private HashMap<String, Marker> mMarkerIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +74,12 @@ public class InteractiveMapActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-
         // TODO: get the user's position and make it the starting point
+        mMap.setMyLocationEnabled(true);
+        mMarkerIds = new HashMap<String, Marker>();
+
+        mLastPosition = new LatLng(33.2, -87.5); // Tuscaloosa
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 14.0f));
 
         LatLngBounds curScreen = getScreenBoundingBox();
         new GetObservationsTask().execute(curScreen);
@@ -80,13 +88,17 @@ public class InteractiveMapActivity extends FragmentActivity {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
                 Log.d(TAG, "Camera was changed." + " Latitude : " + cameraPosition.target.latitude +
-                " Longitude : " + cameraPosition.target.longitude);
-                LatLngBounds curScreen = getScreenBoundingBox();
-                new GetObservationsTask().execute(curScreen);
+                        " Longitude : " + cameraPosition.target.longitude);
+                if(cameraPosition.target != mLastPosition) {
+                    LatLngBounds curScreen = getScreenBoundingBox();
+                    new GetObservationsTask().execute(curScreen);
+                    mLastPosition = cameraPosition.target;
+                }
             }
         });
 
         // TODO: set other listener methods for when a marker is clicked
+
     }
 
     private LatLngBounds getScreenBoundingBox() {
@@ -95,10 +107,12 @@ public class InteractiveMapActivity extends FragmentActivity {
     }
 
     private void showObservations() {
-        // clear all markers from the screen
-        mMap.clear();
         for(Observation o : mObservations) {
-            mMap.addMarker(new MarkerOptions().position(o.getLocation()).title("Dummy Title"));
+            // do not add a marker if one for this observation already exists
+            if(!mMarkerIds.containsKey(o.getId())) {
+                Marker m = mMap.addMarker(new MarkerOptions().position(o.getLocation()).title(o.getId()));
+                mMarkerIds.put(o.getId(), m);
+            }
         }
     }
 
@@ -115,7 +129,9 @@ public class InteractiveMapActivity extends FragmentActivity {
     class GetObservationsTask extends AsyncTask<LatLngBounds, Void, ArrayList<Observation>> {
         protected ArrayList<Observation> doInBackground(LatLngBounds... latLngBounds) {
             // this function must accept a variable number of arguments, but there should only be one.
-            assert(latLngBounds.length == 1);
+            if(latLngBounds.length != 1) {
+                Log.e(TAG, "GetObservationsTask has more than one argument");
+            }
             return ApiManager.getObservationsFromNetwork(latLngBounds[0]);
         }
 
