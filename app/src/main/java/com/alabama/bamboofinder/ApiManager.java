@@ -31,6 +31,11 @@ public class ApiManager {
     private static final String JSON_SWLNG = "swlng";
     private static final String JSON_NELAT = "nelat";
     private static final String JSON_NELNG = "nelng";
+    private static final String JSON_EXTRA = "extra";
+    private static final String JSON_PROJECT = "project_observations";
+    private static final String JSON_PROJECT_ID = "project_id";
+
+    private static final int PROJECT_ID = 3846; // The id of the BambooFinder project on iNaturalist.org
 
     private static final String baseUrl = "www.inaturalist.org";
 
@@ -43,6 +48,7 @@ public class ApiManager {
                 .appendQueryParameter(JSON_SWLNG, String.valueOf(bounds.southwest.longitude))
                 .appendQueryParameter(JSON_NELAT, String.valueOf(bounds.northeast.latitude))
                 .appendQueryParameter(JSON_NELNG, String.valueOf(bounds.northeast.longitude))
+                .appendQueryParameter(JSON_EXTRA, "projects")
                 .build();
 
         String response;
@@ -63,7 +69,14 @@ public class ApiManager {
             JSONArray observationsData = new JSONArray(data);
             for (int i = 0; i < observationsData.length(); ++i) {
                 JSONObject obs = observationsData.getJSONObject(i);
-                observations.add(new Observation(obs));
+                JSONArray projects = obs.getJSONArray(JSON_PROJECT);
+                for(int j = 0; j < projects.length(); ++j) {
+                    int id = projects.getJSONObject(j).getInt(JSON_PROJECT_ID);
+                    if(id == PROJECT_ID) {
+                        observations.add(new Observation(obs));
+                    }
+                }
+
             }
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json observations : " + e.getMessage());
