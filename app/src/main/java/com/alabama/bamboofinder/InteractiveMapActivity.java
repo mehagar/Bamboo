@@ -1,10 +1,14 @@
 package com.alabama.bamboofinder;
 
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -25,11 +29,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private ArrayList<Observation> mObservations;
     private LatLng mLastPosition;
     private HashMap<Marker, String> mMarkerIds;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interactive_map);
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
         setUpMapIfNeeded();
     }
 
@@ -37,6 +44,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     /**
@@ -74,7 +87,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        // TODO: get the user's position and make it the starting point
         mMap.setMyLocationEnabled(true);
         mMarkerIds = new HashMap<Marker, String>();
 
@@ -100,9 +112,32 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 return false; // default behavior: still show info window
             }
         });
+    }
 
-        mLastPosition = new LatLng(33.2109, -87.5461); // Tuscaloosa
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
+    private void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle connectionHint) {
+                        Location loc = LocationServices.FusedLocationApi.getLastLocation(
+                                mGoogleApiClient);
+                        mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int cause) {
+                        // left unimplemented
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult connectionResult) {
+                        Log.d(TAG, "Location connection failed" + connectionResult.toString());
+                    }
+                })
+                .addApi(LocationServices.API)
+                .build();
     }
 
     private LatLngBounds getScreenBoundingBox() {
