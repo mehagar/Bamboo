@@ -14,12 +14,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Michael H. on 3/22/2015.
@@ -32,17 +38,23 @@ public class ApiManager {
     private static final String JSON_NELAT = "nelat";
     private static final String JSON_NELNG = "nelng";
     private static final String JSON_EXTRA = "extra";
+    private static final String JSON_LATITUDE = "observation[latitude]";
+    private static final String JSON_LONGITUDE = "observation[longitude]";
+    private static final String JSON_DATE = "observation[observed_on_string]";
+    private static final String JSON_DESCRIPTION = "observation[description]";
     private static final String JSON_PROJECT = "project_observations";
     private static final String JSON_PROJECT_ID = "project_id";
 
     private static final int PROJECT_ID = 3846; // The id of the BambooFinder project on iNaturalist.org
 
-    private static final String baseUrl = "www.inaturalist.org";
+    private static final String BASE_URL = "www.inaturalist.org";
 
+    /* Gets observations from iNaturalist's api within a specified range */
     public static ArrayList<Observation> getObservationsFromNetwork(LatLngBounds bounds) {
         Uri.Builder builder = new Uri.Builder();
-        builder.scheme("http")
-                .authority(baseUrl)
+        // appendQueryParameter encodes all the values
+        builder.scheme("https")
+                .authority(BASE_URL)
                 .appendPath("observations.json")
                 .appendQueryParameter(JSON_SWLAT, String.valueOf(bounds.southwest.latitude))
                 .appendQueryParameter(JSON_SWLNG, String.valueOf(bounds.southwest.longitude))
@@ -55,7 +67,7 @@ public class ApiManager {
         try {
             response = sendGet(builder.toString());
         } catch(IOException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "HTTP GET Failed: " + e.getMessage());
             response = "";
         }
 
@@ -63,6 +75,31 @@ public class ApiManager {
         return observations;
     }
 
+    /* Uploads one observation to iNaturalist */
+    public static void uploadObservation(Observation o) {
+//        Uri.Builder baseBuilder = new Uri.Builder();
+//        baseBuilder.scheme("https")
+//                .authority(BASE_URL)
+//                .appendPath("observations.json")
+//                .build();
+
+        Uri.Builder paramsBuilder = new Uri.Builder();
+        paramsBuilder.appendQueryParameter(JSON_LATITUDE, String.valueOf(o.getLocation().latitude))
+                .appendQueryParameter(JSON_LONGITUDE, String.valueOf(o.getLocation().longitude))
+                .appendQueryParameter(JSON_DATE, o.getTimeStamp().toString()) // TODO: make sure this is the proper date format
+                .appendQueryParameter(JSON_DESCRIPTION, o.getDescription())
+                .build();
+        Log.d(TAG, paramsBuilder.toString());
+
+//        try {
+//            sendPost(baseBuilder.toString(), paramsBuilder.toString());
+//        } catch(IOException e) {
+//            Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
+//        }
+        // TODO: API documentation says to upload the photo separately, so make second post
+    }
+
+    /* Converts an JSON string to a list of observations */
     private static ArrayList<Observation> JSONDataToObservations(String data) {
         ArrayList<Observation> observations = new ArrayList<Observation>();
         try {
@@ -86,12 +123,9 @@ public class ApiManager {
 
     private static String sendGet(String url) throws IOException {
         URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
         con.setRequestMethod("GET");
-
-        int responseCode = con.getResponseCode();
-        Log.d(TAG, "Response code : " + responseCode);
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
@@ -106,5 +140,21 @@ public class ApiManager {
         return response.toString();
     }
 
+    private static void sendPost(String baseUrl, String paramsUrl) throws IOException {
+        // TODO: need to authenticate with token
+        URL obj = new URL(baseUrl);
 
+        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+        try {
+            con.setDoOutput(true);
+            con.setFixedLengthStreamingMode(paramsUrl.getBytes().length);
+
+            BufferedWriter out = new BufferedWriter(
+                    new OutputStreamWriter(con.getOutputStream()));
+            out.write(paramsUrl);
+            out.close();
+        } finally {
+            con.disconnect();
+        }
+    }
 }

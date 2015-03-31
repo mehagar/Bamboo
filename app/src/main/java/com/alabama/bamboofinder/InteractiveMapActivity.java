@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class InteractiveMapActivity extends ActionBarActivity {
@@ -93,8 +94,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                Log.d(TAG, "Camera was changed." + " Latitude : " + cameraPosition.target.latitude +
-                        " Longitude : " + cameraPosition.target.longitude);
                 if(cameraPosition.target != mLastPosition) {
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
