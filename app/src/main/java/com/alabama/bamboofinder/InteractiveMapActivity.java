@@ -177,6 +177,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 mMarkerIds.put(m, o.getId());
             }
         }
+        // This commented out code is being used for testing purposes, to test the HTTP POST
+        /*if(mObservations.size() > 0) {
+            mObservations.get(0).setTimeStamp(new Date());
+            mObservations.get(0).setDescription("This is the description.");
+            ApiManager.uploadObservation(mObservations.get(0));
+        }*/
     }
 
     private ArrayList<Observation> getFilteredObservations(SearchFilter sf) {

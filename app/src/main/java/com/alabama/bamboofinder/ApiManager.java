@@ -77,11 +77,11 @@ public class ApiManager {
 
     /* Uploads one observation to iNaturalist */
     public static void uploadObservation(Observation o) {
-//        Uri.Builder baseBuilder = new Uri.Builder();
-//        baseBuilder.scheme("https")
-//                .authority(BASE_URL)
-//                .appendPath("observations.json")
-//                .build();
+        Uri.Builder baseBuilder = new Uri.Builder();
+        baseBuilder.scheme("https")
+                .authority(BASE_URL)
+                .appendPath("observations.json")
+                .build();
 
         Uri.Builder paramsBuilder = new Uri.Builder();
         paramsBuilder.appendQueryParameter(JSON_LATITUDE, String.valueOf(o.getLocation().latitude))
@@ -89,7 +89,8 @@ public class ApiManager {
                 .appendQueryParameter(JSON_DATE, o.getTimeStamp().toString()) // TODO: make sure this is the proper date format
                 .appendQueryParameter(JSON_DESCRIPTION, o.getDescription())
                 .build();
-        Log.d(TAG, paramsBuilder.toString());
+        Log.d(TAG, "Base URL: " + baseBuilder.toString());
+        Log.d(TAG, "Params URL: " + paramsBuilder.toString());
 
 //        try {
 //            sendPost(baseBuilder.toString(), paramsBuilder.toString());
@@ -150,9 +151,11 @@ public class ApiManager {
             con.setFixedLengthStreamingMode(paramsUrl.getBytes().length);
 
             BufferedWriter out = new BufferedWriter(
-                    new OutputStreamWriter(con.getOutputStream()));
+                    new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
             out.write(paramsUrl);
             out.close();
+        } catch(IOException e) {
+            Log.e(TAG, "HTTP POST failed: " + e.getMessage());
         } finally {
             con.disconnect();
         }
