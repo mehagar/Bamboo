@@ -3,8 +3,12 @@ package com.alabama.bamboofinder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -51,6 +55,27 @@ public class InteractiveMapActivity extends ActionBarActivity {
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.interactive_map_activity_actions, menu);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_add:
+                // switch to search filter activity here
+                // StartActivityForResult(SearchFilterActivity)
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**

@@ -14,6 +14,7 @@
     <string name="MyObservations">My Observations</string>
     <string name="ViewMap">View Map</string>
     <string name="LearnMore">Learn More</string>
+    <string name="action_add">Add Observation</string>
 
     <string name="title_activity_interactive_map">BambooFinderMap</string>
 </resources>
