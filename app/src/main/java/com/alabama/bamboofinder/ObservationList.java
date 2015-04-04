@@ -17,10 +17,12 @@ public class ObservationList {
     // adds an observation to the observation list
 
     public void addObservation(Observation observation) {
+        mObservationList.add(observation);
     }
 
     // removes an observation from the observation list
 
     public void removeObservation(Observation observation) {
+        mObservationList.remove(observation); // validate that this is correct
     }
 }

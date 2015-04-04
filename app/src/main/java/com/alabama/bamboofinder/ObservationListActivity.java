@@ -4,9 +4,29 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.CheckBox;
+
+import java.util.List;
+import java.util.LinkedList;
+
+/*
+ * TODO:
+ *
+ * - This activity needs to be passed the list of the user's observations
+ * - This activity needs to be
+ *
+ */
 
 
 public class ObservationListActivity extends ActionBarActivity {
+
+    private Integer mMaxNumberOfObservations;
+    private ObservationList mSelectedObservations;  // changed from selectObservations
+
+    private Button mEditButton;     // changed from modifyButton
+    private Button mRemoveButton;
+    private CheckBox mMarkObservationCheckBox;  // changed from markObservationBox
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
