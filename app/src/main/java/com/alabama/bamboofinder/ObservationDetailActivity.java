@@ -4,7 +4,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+/**
+ * Created by Michael W. on 4/4/2015.
+ */
 
 public class ObservationDetailActivity extends ActionBarActivity {
 
@@ -12,6 +16,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_detail);
+
+        // When the user clicks on the observation's description TextView, the user will
+        // be able to edit the contents of the TextView.
+
+
     }
 
 

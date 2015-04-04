@@ -3,7 +3,9 @@
 
     <string name="app_name">BambooFinder</string>
     <string name="title_activity_test">TestActivity</string>
-    <string name="hello_world">Hello world!</string>
+
+    <string name="observation_description">Description for the observation.</string>
+
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="EmailHint">Email Address</string>
