@@ -55,8 +55,9 @@ public class ObservationListActivity extends ActionBarActivity {
 
         mArrayAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, mObservations);
-
         listView.setAdapter(mArrayAdapter);
+
+        // Selecting a list element
     }
 
     @Override

@@ -5,6 +5,8 @@
     <string name="title_activity_test">TestActivity</string>
 
     <string name="observation_description_hint">Enter description for observation</string>
+    <string name="edit_observation_button">Edit Observation</string>
+    <string name="remove_observation_button">Remove Observation</string>
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">LoginActivity</string>
