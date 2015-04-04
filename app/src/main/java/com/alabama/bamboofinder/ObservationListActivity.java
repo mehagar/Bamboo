@@ -1,11 +1,16 @@
 package com.alabama.bamboofinder;
 
+import android.app.ListActivity;
+import android.app.LoaderManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+//import android.widget.CheckBox;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -22,18 +27,41 @@ import java.util.LinkedList;
 public class ObservationListActivity extends ActionBarActivity {
 
     private Integer mMaxNumberOfObservations;
+
+    //private ObservationList mObservations;
+    private List<String> mObservations;
+
     private ObservationList mSelectedObservations;  // changed from selectObservations
 
     private Button mEditButton;     // changed from modifyButton
     private Button mRemoveButton;
-    private CheckBox mMarkObservationCheckBox;  // changed from markObservationBox
+    //private CheckBox mMarkObservationCheckBox;  // changed from markObservationBox
+
+    //private ArrayAdapter<Observation> mArrayAdapter;
+    private ArrayAdapter<String> mArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_list);
-    }
 
+        // Setup the list view and array adapter for obtaining data from observation list
+        //mObservations = new ObservationList();
+        mObservations = new LinkedList<String>();
+        mObservations.add("Observation 1");
+        mObservations.add("Observation 2");
+        mObservations.add("Observation 3");
+
+
+        ListView listView = (ListView)findViewById(R.id.observation_list);
+        //mArrayAdapter = new ArrayAdapter<Observation>(this,
+        //        android.R.layout.simple_list_item_1, mObservations.getObservationList());
+
+        mArrayAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, mObservations);
+
+        listView.setAdapter(mArrayAdapter);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

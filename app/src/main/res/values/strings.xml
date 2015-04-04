@@ -21,6 +21,4 @@
     <string name="title_activity_interactive_map">BambooFinderMap</string>
     <string name="title_activity_observation_detail">ObservationDetailActivity</string>
     <string name="title_activity_observation_list">ObservationListActivity</string>
-
-    <string name="hello_world">Hello world!</string>
 </resources>

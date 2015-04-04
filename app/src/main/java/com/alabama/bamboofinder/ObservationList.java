@@ -25,4 +25,10 @@ public class ObservationList {
     public void removeObservation(Observation observation) {
         mObservationList.remove(observation); // validate that this is correct
     }
+
+    // returns list of observations
+
+    public List<Observation> getObservationList() {
+        return mObservationList;
+    }
 }
