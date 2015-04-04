@@ -17,6 +17,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -149,7 +150,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
                     public void onConnected(Bundle connectionHint) {
                         Location loc = LocationServices.FusedLocationApi.getLastLocation(
                                 mGoogleApiClient);
-                        mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        if(loc != null) {
+                            mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        } else {
+                            mLastPosition = new LatLng(0.0, 0.0);
+                        }
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
                     }
 
@@ -177,7 +182,13 @@ public class InteractiveMapActivity extends ActionBarActivity {
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
             if(!mMarkerIds.containsValue(o.getId())) {
-                Marker m = mMap.addMarker(new MarkerOptions().position(o.getLocation()).title(o.getId()));
+                Marker m = mMap.addMarker(
+                        new MarkerOptions()
+                                .position(o.getLocation())
+                                .title(o.getId())
+                                .snippet(o.getSpeciesGuess())
+                                .icon(BitmapDescriptorFactory.defaultMarker(65)));
+                // TODO: set the picture on the marker
                 mMarkerIds.put(m, o.getId());
             }
         }

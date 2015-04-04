@@ -60,9 +60,9 @@ public class ApiManager {
                 .appendQueryParameter(JSON_SWLNG, String.valueOf(bounds.southwest.longitude))
                 .appendQueryParameter(JSON_NELAT, String.valueOf(bounds.northeast.latitude))
                 .appendQueryParameter(JSON_NELNG, String.valueOf(bounds.northeast.longitude))
-                .appendQueryParameter(JSON_EXTRA, "projects")
+                .appendQueryParameter(JSON_EXTRA, "projects,observation_photos")
                 .build();
-
+        Log.d(TAG, "get url was : " + builder.toString());
         String response;
         try {
             response = sendGet(builder.toString());
@@ -114,7 +114,6 @@ public class ApiManager {
                         observations.add(new Observation(obs));
                     }
                 }
-
             }
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json observations : " + e.getMessage());
