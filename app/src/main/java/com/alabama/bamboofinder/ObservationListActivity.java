@@ -1,14 +1,10 @@
 package com.alabama.bamboofinder;
-
-import android.app.ListActivity;
-import android.app.LoaderManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 //import android.widget.CheckBox;
 
@@ -19,7 +15,7 @@ import java.util.LinkedList;
  * TODO:
  *
  * - This activity needs to be passed the list of the user's observations
- * - This activity needs to be
+ * - This activity needs to present a list view of observations instead of strings
  *
  */
 
