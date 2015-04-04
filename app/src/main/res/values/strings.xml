@@ -4,7 +4,7 @@
     <string name="app_name">BambooFinder</string>
     <string name="title_activity_test">TestActivity</string>
 
-    <string name="observation_description">Enter description for observation</string>
+    <string name="observation_description_hint">Enter description for observation</string>
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">LoginActivity</string>
@@ -20,4 +20,7 @@
 
     <string name="title_activity_interactive_map">BambooFinderMap</string>
     <string name="title_activity_observation_detail">ObservationDetailActivity</string>
+    <string name="title_activity_observation_list">ObservationListActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>
