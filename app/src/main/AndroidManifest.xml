@@ -52,7 +52,9 @@
         </activity>
         <activity
             android:name=".ObservationDetailActivity"
-            android:label="@string/title_activity_observation_detail" >
+            android:exported="true"
+            android:label="@string/title_activity_observation_detail"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
