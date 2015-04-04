@@ -3,6 +3,7 @@ package com.alabama.bamboofinder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -61,7 +62,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.interactive_map_activity_actions, menu);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -69,9 +70,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
+            case R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
             case R.id.action_add:
-                // switch to search filter activity here
-                // StartActivityForResult(SearchFilterActivity)
+                // switch to ObservationDetailActivity here
+                // StartActivityForResult(ObservationDetailActivity)
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
