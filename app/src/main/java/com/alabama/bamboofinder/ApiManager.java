@@ -121,40 +121,41 @@ public class ApiManager {
         return observations;
     }
 
-    private static String sendGet(String url) throws IOException {
-        URL obj = new URL(url);
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+    private static String sendGet(String urlSpec) throws IOException {
+        URL url = new URL(urlSpec);
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        // HttpsURLConnection uses GET by default
+        try {
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream()));
 
-        con.setRequestMethod("GET");
-
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-
-        StringBuffer response = new StringBuffer();
-        String inputLine;
-        while((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+            StringBuffer response = new StringBuffer();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            return response.toString();
+        } finally {
+            connection.disconnect();
         }
-        in.close();
-
-        return response.toString();
     }
 
-    private static void sendPost(String baseUrl, String paramsUrl) throws IOException {
+    private static void sendPost(String baseUrl, String params) throws IOException {
         // TODO: need to authenticate with token
-        URL obj = new URL(baseUrl);
+        // e.g. String token = user.getToken();
+        URL url = new URL(baseUrl);
 
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
         try {
+            // setDoOutput sets POST as method
             con.setDoOutput(true);
-            con.setFixedLengthStreamingMode(paramsUrl.getBytes().length);
+            con.setFixedLengthStreamingMode(params.getBytes().length);
 
             BufferedWriter out = new BufferedWriter(
                     new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
-            out.write(paramsUrl);
+            out.write(params);
             out.close();
-        } catch(IOException e) {
-            Log.e(TAG, "HTTP POST failed: " + e.getMessage());
         } finally {
             con.disconnect();
         }
