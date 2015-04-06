@@ -37,18 +37,18 @@ public class Observation {
     private LatLng mLocation;
     private String mThumbnailURL;
 
-    public Observation(JSONObject obs) {
+    public Observation(JSONObject jsonObject) {
         double latitude;
         double longitude;
         try {
-            latitude = obs.getDouble(JSON_LATITUDE);
-            longitude = obs.getDouble(JSON_LONGITUDE);
+            latitude = jsonObject.getDouble(JSON_LATITUDE);
+            longitude = jsonObject.getDouble(JSON_LONGITUDE);
             mLocation = new LatLng(latitude, longitude);
-            mId = obs.getString(JSON_ID);
-            mSpeciesGuess = obs.getString(JSON_SPECIES_GUESS);
-            int numPhotos = obs.getInt(JSON_NUM_PHOTOS);
+            mId = jsonObject.getString(JSON_ID);
+            mSpeciesGuess = jsonObject.getString(JSON_SPECIES_GUESS);
+            int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
             if(numPhotos >= 1) {
-                JSONArray photos = obs.getJSONArray(JSON_PHOTOS);
+                JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
                 // just use the first photo as the thumbnail for a marker
                 mThumbnailURL = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
                 Log.d(TAG, "Got thumbnail url: " + mThumbnailURL);

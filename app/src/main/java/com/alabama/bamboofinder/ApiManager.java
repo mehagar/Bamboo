@@ -92,11 +92,11 @@ public class ApiManager {
         Log.d(TAG, "Base URL: " + baseBuilder.toString());
         Log.d(TAG, "Params URL: " + paramsBuilder.toString());
 
-//        try {
-//            sendPost(baseBuilder.toString(), paramsBuilder.toString());
-//        } catch(IOException e) {
-//            Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
-//        }
+        try {
+            sendPost(baseBuilder.toString(), paramsBuilder.toString());
+        } catch(IOException e) {
+            Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
+        }
         // TODO: API documentation says to upload the photo separately, so make second post
     }
 
