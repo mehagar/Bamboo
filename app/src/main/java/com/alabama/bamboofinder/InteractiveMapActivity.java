@@ -232,28 +232,25 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     class ImageInfoWindowAdapter implements InfoWindowAdapter {
+        private boolean mIsFirstTimeShowingWindow = true;
+
         @Override
-        public View getInfoContents(Marker marker) {
+        public View getInfoContents(final Marker marker) {
             View view = getLayoutInflater().inflate(R.layout.image_info_window,
                     null);
             Observation o = mMarkerObservationHashMap.get(marker);
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
 
-            if(o.getThumbnailURL() != "") {
-                Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).fit().into(imageView,
-                        new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                Log.d(TAG, "Success loading image");
-                            }
-
-                            @Override
-                            public void onError() {
-                                Log.d(TAG, "Failure loading image");
-                            }
-                        });
+            if(!o.getThumbnailURL().equals("")) {
+                // This prevents infinite recursion in getInfoContents, because the callback causes this function to be called again.
+                if(mIsFirstTimeShowingWindow) {
+                    Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView, new InfoWindowRefresher(marker));
+                    mIsFirstTimeShowingWindow = false;
+                } else {
+                    Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView);
+                }
             } else {
-                imageView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+                imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
 
             TextView textView = (TextView)view.findViewById(R.id.species_guess_textView);
@@ -265,6 +262,25 @@ public class InteractiveMapActivity extends ActionBarActivity {
         @Override
         public View getInfoWindow(Marker marker) {
             return null;
+        }
+    }
+
+    private class InfoWindowRefresher implements Callback {
+        private Marker mMarkerToRefresh;
+
+        private InfoWindowRefresher(Marker markerToRefresh) {
+            mMarkerToRefresh = markerToRefresh;
+        }
+
+        @Override
+        public void onSuccess() {
+            // Re show the info window when we have the image.
+            mMarkerToRefresh.showInfoWindow();
+        }
+
+        @Override
+        public void onError() {
+            Log.e(TAG, "Error loading image");
         }
     }
 }
