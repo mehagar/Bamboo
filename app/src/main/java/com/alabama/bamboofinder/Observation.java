@@ -52,6 +52,8 @@ public class Observation {
                 // just use the first photo as the thumbnail for a marker
                 mThumbnailURL = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
                 Log.d(TAG, "Got thumbnail url: " + mThumbnailURL);
+            } else {
+                mThumbnailURL = "";
             }
             // TODO: parse the time stamp from the "created_at" field in JSON
         } catch(JSONException e) {

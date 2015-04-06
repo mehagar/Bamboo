@@ -1,21 +1,25 @@
 package com.alabama.bamboofinder;
 
+import android.content.Context;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -23,9 +27,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 public class InteractiveMapActivity extends ActionBarActivity {
@@ -35,7 +40,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ArrayList<Observation> mObservations;
     private LatLng mLastPosition;
-    private HashMap<Marker, String> mMarkerIds;
+    private HashMap<Marker, Observation> mMarkerObservationHashMap;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -119,7 +124,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
      */
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        mMarkerIds = new HashMap<Marker, String>();
+        mMarkerObservationHashMap = new HashMap<Marker, Observation>();
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
@@ -132,15 +137,16 @@ public class InteractiveMapActivity extends ActionBarActivity {
             }
         });
 
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-                String id = mMarkerIds.get(marker);
-                Log.d(TAG, "Got id : " + id);
+            public void onInfoWindowClick(Marker marker) {
+                Observation o = mMarkerObservationHashMap.get(marker);
+                Log.d(TAG, "Got id : " + o.getId());
                 // Start ObservationDetailActivity here with id of observation
-                return false; // default behavior: still show info window
             }
         });
+
+        mMap.setInfoWindowAdapter(new ImageInfoWindowAdapter());
     }
 
     private void buildGoogleApiClient() {
@@ -181,7 +187,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations() {
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
-            if(!mMarkerIds.containsValue(o.getId())) {
+            if(!mMarkerObservationHashMap.containsValue(o)) {
                 Marker m = mMap.addMarker(
                         new MarkerOptions()
                                 .position(o.getLocation())
@@ -189,7 +195,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                                 .snippet(o.getSpeciesGuess())
                                 .icon(BitmapDescriptorFactory.defaultMarker(65)));
                 // TODO: set the picture on the marker
-                mMarkerIds.put(m, o.getId());
+                mMarkerObservationHashMap.put(m, o);
             }
         }
         // This commented out code is being used for testing purposes, to test the HTTP POST
@@ -222,6 +228,43 @@ public class InteractiveMapActivity extends ActionBarActivity {
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
             showObservations();
+        }
+    }
+
+    class ImageInfoWindowAdapter implements InfoWindowAdapter {
+        @Override
+        public View getInfoContents(Marker marker) {
+            View view = getLayoutInflater().inflate(R.layout.image_info_window,
+                    null);
+            Observation o = mMarkerObservationHashMap.get(marker);
+            ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
+
+            if(o.getThumbnailURL() != "") {
+                Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).fit().into(imageView,
+                        new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Success loading image");
+                            }
+
+                            @Override
+                            public void onError() {
+                                Log.d(TAG, "Failure loading image");
+                            }
+                        });
+            } else {
+                imageView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+            }
+
+            TextView textView = (TextView)view.findViewById(R.id.species_guess_textView);
+            textView.setText(o.getSpeciesGuess());
+
+            return view;
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
         }
     }
 }
