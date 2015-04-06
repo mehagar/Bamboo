@@ -3,6 +3,7 @@ package com.alabama.bamboofinder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -16,6 +17,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -61,7 +63,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.interactive_map_activity_actions, menu);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -69,9 +71,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
+            case R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
             case R.id.action_add:
-                // switch to search filter activity here
-                // StartActivityForResult(SearchFilterActivity)
+                // switch to ObservationDetailActivity here
+                // StartActivityForResult(ObservationDetailActivity)
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -145,7 +150,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
                     public void onConnected(Bundle connectionHint) {
                         Location loc = LocationServices.FusedLocationApi.getLastLocation(
                                 mGoogleApiClient);
-                        mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        if(loc != null) {
+                            mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        } else {
+                            mLastPosition = new LatLng(0.0, 0.0);
+                        }
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
                     }
 
@@ -173,7 +182,13 @@ public class InteractiveMapActivity extends ActionBarActivity {
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
             if(!mMarkerIds.containsValue(o.getId())) {
-                Marker m = mMap.addMarker(new MarkerOptions().position(o.getLocation()).title(o.getId()));
+                Marker m = mMap.addMarker(
+                        new MarkerOptions()
+                                .position(o.getLocation())
+                                .title(o.getId())
+                                .snippet(o.getSpeciesGuess())
+                                .icon(BitmapDescriptorFactory.defaultMarker(65)));
+                // TODO: set the picture on the marker
                 mMarkerIds.put(m, o.getId());
             }
         }
