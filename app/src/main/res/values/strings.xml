@@ -17,4 +17,11 @@
     <string name="action_add">Add Observation</string>
 
     <string name="title_activity_interactive_map">BambooFinderMap</string>
+    <string name="title_activity_observation_detail">ObservationDetailActivity</string>
+    <string name="SpeciesHint">Species Name...</string>
+    <string name="ObservationPicture">Observation Picture</string>
+    <string name="DescriptionText">Description...</string>
+    <string name="Save">Save</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Verify">Verify</string>
 </resources>
