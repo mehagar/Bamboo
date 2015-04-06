@@ -7,12 +7,15 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"/>
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
-
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <application
         android:allowBackup="true"
@@ -21,7 +24,12 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login" >
+            android:label="@string/title_activity_login"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".MainActivity"
@@ -49,6 +57,8 @@
         </activity>
         <activity
             android:exported="true"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
             android:name=".ObservationDetailActivity"
             android:label="@string/title_activity_observation_detail" >
         </activity>

@@ -66,11 +66,11 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/verifyButton"
+                android:id="@+id/validateButton"
                 android:layout_toRightOf="@+id/cancelButton"
                 android:layout_toLeftOf="@+id/saveButton"
                 android:layout_alignTop="@+id/saveButton"
-                android:text="@string/Verify"
+                android:text="@string/Validate"
                 android:visibility="invisible" />
 
         </RelativeLayout>
