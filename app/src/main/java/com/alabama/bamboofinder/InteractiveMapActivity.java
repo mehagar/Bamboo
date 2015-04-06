@@ -1,6 +1,7 @@
 package com.alabama.bamboofinder;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class InteractiveMapActivity extends ActionBarActivity {
-
     private static final String TAG = "InteractiveMap";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -45,6 +45,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interactive_map);
         buildGoogleApiClient();
@@ -54,14 +55,22 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume called");
         super.onResume();
         setUpMapIfNeeded();
     }
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "onStop called");
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d(TAG, "onRestart called");
+        super.onRestart();
     }
 
     @Override
@@ -80,8 +89,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.action_add:
-                // switch to ObservationDetailActivity here
-                // StartActivityForResult(ObservationDetailActivity)
+                Intent i = new Intent(this, ObservationDetailActivity.class);
+                startActivity(i);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -141,8 +150,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Observation o = mMarkerObservationHashMap.get(marker);
-                Log.d(TAG, "Got id : " + o.getId());
-                // Start ObservationDetailActivity here with id of observation
+                Intent i = new Intent(InteractiveMapActivity.this, ObservationDetailActivity.class);
+                Bundle args = new Bundle();
+                args.putString(ObservationDetailActivity.EXTRA_OBSERVATION_ID, o.getId());
+                startActivity(i, args);
             }
         });
 
@@ -232,7 +243,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     class ImageInfoWindowAdapter implements InfoWindowAdapter {
-        private boolean mIsFirstTimeShowingWindow = true;
 
         @Override
         public View getInfoContents(final Marker marker) {
@@ -242,13 +252,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
 
             if(!o.getThumbnailURL().equals("")) {
-                // This prevents infinite recursion in getInfoContents, because the callback causes this function to be called again.
-                if(mIsFirstTimeShowingWindow) {
-                    Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView, new InfoWindowRefresher(marker));
-                    mIsFirstTimeShowingWindow = false;
-                } else {
-                    Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView);
-                }
+                Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView, new InfoWindowRefresher(marker));
             } else {
                 imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
@@ -275,7 +279,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
         @Override
         public void onSuccess() {
             // Re show the info window when we have the image.
-            mMarkerToRefresh.showInfoWindow();
+            if(mMarkerToRefresh.isInfoWindowShown()) {
+                mMarkerToRefresh.hideInfoWindow();
+                mMarkerToRefresh.showInfoWindow();
+            }
         }
 
         @Override
