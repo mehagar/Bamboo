@@ -28,8 +28,8 @@ public class MainActivity extends ActionBarActivity {
         mObservationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent i = new Intent(MainActivity.this, <ActivityName>.class);
-                //startActivity(i);
+                Intent i = new Intent(MainActivity.this,ObservationListActivity.class);
+                startActivity(i);
             }
         });
 
