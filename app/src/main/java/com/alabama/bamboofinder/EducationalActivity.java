@@ -4,16 +4,40 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 
 public class EducationalActivity extends ActionBarActivity {
+
+    private LinearLayout mMainLayout;
+
+    private int[] mImages = {R.drawable.bamboo_pic_1, R.drawable.bamboo_pic_2, R.drawable.bamboo_pic_3};
+
+    private View mCell;
+    private TextView mImageText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_educational);
-    }
 
+        mMainLayout = (LinearLayout)findViewById(R.id.image_linear_layout);
+
+        for (int i = 0; i < mImages.length; i++) {
+            mCell = getLayoutInflater().inflate(R.layout.image_horizontal_cell, null);
+
+            final ImageView imageView = (ImageView)mCell.findViewById(R.id.image);
+            imageView.setTag("Image " + (i+1));
+
+            mImageText = (TextView)mCell.findViewById(R.id.image_cell_name);
+            mImageText.setText("Image " + (i+1));
+
+            mMainLayout.addView(mCell);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

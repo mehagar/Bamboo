@@ -44,8 +44,8 @@ public class MainActivity extends ActionBarActivity {
         mEducationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent i = new Intent(MainActivity.this, <ActivityName>.class);
-                //startActivity(i);
+                Intent i = new Intent(MainActivity.this, EducationalActivity.class);
+                startActivity(i);
             }
         });
 
