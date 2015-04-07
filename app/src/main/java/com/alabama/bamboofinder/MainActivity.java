@@ -1,18 +1,61 @@
 package com.alabama.bamboofinder;
 
-import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-
-//declare UI elements
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends ActionBarActivity {
+
+    private Button mMainLoginButton;
+    private Button mEducationButton;
+    private Button mMapButton;
+    private Button mObservationsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mObservationsButton = (Button) findViewById(R.id.MyObservationsButton);
+        mMapButton = (Button) findViewById(R.id.ViewMapButton);
+        mEducationButton = (Button) findViewById(R.id.LearnButton);
+        mMainLoginButton = (Button) findViewById(R.id.MainLoginButton);
+
+        mObservationsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent i = new Intent(MainActivity.this, <ActivityName>.class);
+                //startActivity(i);
+            }
+        });
+
+        mMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, InteractiveMapActivity.class);
+                startActivity(i);
+            }
+        });
+
+        mEducationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent i = new Intent(MainActivity.this, <ActivityName>.class);
+                //startActivity(i);
+            }
+        });
+
+        mMainLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
 

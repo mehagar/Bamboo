@@ -1,44 +1,51 @@
 package com.alabama.bamboofinder;
 
+import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 public class InteractiveMapActivity extends ActionBarActivity {
-
     private static final String TAG = "InteractiveMap";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ArrayList<Observation> mObservations;
     private LatLng mLastPosition;
-    private HashMap<Marker, String> mMarkerIds;
+    private HashMap<Marker, Observation> mMarkerObservationHashMap;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interactive_map);
         buildGoogleApiClient();
@@ -48,14 +55,22 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume called");
         super.onResume();
         setUpMapIfNeeded();
     }
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "onStop called");
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d(TAG, "onRestart called");
+        super.onRestart();
     }
 
     @Override
@@ -74,8 +89,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.action_add:
-                // switch to ObservationDetailActivity here
-                // StartActivityForResult(ObservationDetailActivity)
+                Intent i = new Intent(this, ObservationDetailActivity.class);
+                startActivity(i);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -118,7 +133,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
      */
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        mMarkerIds = new HashMap<Marker, String>();
+        mMarkerObservationHashMap = new HashMap<Marker, Observation>();
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
@@ -131,15 +146,18 @@ public class InteractiveMapActivity extends ActionBarActivity {
             }
         });
 
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-                String id = mMarkerIds.get(marker);
-                Log.d(TAG, "Got id : " + id);
-                // Start ObservationDetailActivity here with id of observation
-                return false; // default behavior: still show info window
+            public void onInfoWindowClick(Marker marker) {
+                Observation o = mMarkerObservationHashMap.get(marker);
+                Intent i = new Intent(InteractiveMapActivity.this, ObservationDetailActivity.class);
+                Bundle args = new Bundle();
+                args.putString(ObservationDetailActivity.EXTRA_OBSERVATION_ID, o.getId());
+                startActivity(i, args);
             }
         });
+
+        mMap.setInfoWindowAdapter(new ImageInfoWindowAdapter());
     }
 
     private void buildGoogleApiClient() {
@@ -149,7 +167,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
                     public void onConnected(Bundle connectionHint) {
                         Location loc = LocationServices.FusedLocationApi.getLastLocation(
                                 mGoogleApiClient);
-                        mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        if(loc != null) {
+                            mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        } else {
+                            mLastPosition = new LatLng(0.0, 0.0);
+                        }
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
                     }
 
@@ -176,9 +198,15 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations() {
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
-            if(!mMarkerIds.containsValue(o.getId())) {
-                Marker m = mMap.addMarker(new MarkerOptions().position(o.getLocation()).title(o.getId()));
-                mMarkerIds.put(m, o.getId());
+            if(!mMarkerObservationHashMap.containsValue(o)) {
+                Marker m = mMap.addMarker(
+                        new MarkerOptions()
+                                .position(o.getLocation())
+                                .title(o.getId())
+                                .snippet(o.getSpeciesGuess())
+                                .icon(BitmapDescriptorFactory.defaultMarker(65)));
+                // TODO: set the picture on the marker
+                mMarkerObservationHashMap.put(m, o);
             }
         }
         // This commented out code is being used for testing purposes, to test the HTTP POST
@@ -211,6 +239,55 @@ public class InteractiveMapActivity extends ActionBarActivity {
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
             showObservations();
+        }
+    }
+
+    class ImageInfoWindowAdapter implements InfoWindowAdapter {
+
+        @Override
+        public View getInfoContents(final Marker marker) {
+            View view = getLayoutInflater().inflate(R.layout.image_info_window,
+                    null);
+            Observation o = mMarkerObservationHashMap.get(marker);
+            ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
+
+            if(!o.getThumbnailURL().equals("")) {
+                Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView, new InfoWindowRefresher(marker));
+            } else {
+                imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
+            }
+
+            TextView textView = (TextView)view.findViewById(R.id.species_guess_textView);
+            textView.setText(o.getSpeciesGuess());
+
+            return view;
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+    }
+
+    private class InfoWindowRefresher implements Callback {
+        private Marker mMarkerToRefresh;
+
+        private InfoWindowRefresher(Marker markerToRefresh) {
+            mMarkerToRefresh = markerToRefresh;
+        }
+
+        @Override
+        public void onSuccess() {
+            // Re show the info window when we have the image.
+            if(mMarkerToRefresh.isInfoWindowShown()) {
+                mMarkerToRefresh.hideInfoWindow();
+                mMarkerToRefresh.showInfoWindow();
+            }
+        }
+
+        @Override
+        public void onError() {
+            Log.e(TAG, "Error loading image");
         }
     }
 }

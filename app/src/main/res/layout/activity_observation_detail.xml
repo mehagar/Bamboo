@@ -6,13 +6,74 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.alabama.bamboofinder.ObservationDetailActivity">
 
-    <EditText
-        android:id="@+id/observation_description_edit_text"
-        android:hint="@string/observation_description_hint"
-        android:layout_width="fill_parent"
+    <ScrollView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:lines="3"
-        android:maxLines="6"/>
+        android:id="@+id/scrollView" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/observationImage"
+                android:layout_gravity="center"
+                android:contentDescription="@string/ObservationPicture"
+                android:layout_alignParentEnd="false"
+                android:layout_alignParentStart="false"
+                android:layout_centerHorizontal="true" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/speciesEditText"
+                android:layout_gravity="center"
+                android:hint="@string/SpeciesHint"
+                android:layout_below="@+id/observationImage"
+                android:layout_marginTop="@dimen/abc_action_bar_default_height_material" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:id="@+id/descriptionEditText"
+                android:layout_marginTop="@dimen/abc_action_bar_default_height_material"
+                android:hint="@string/DescriptionText"
+                android:layout_below="@+id/speciesEditText"
+                android:autoText="false"
+                android:gravity="top" />
+
+            <Button
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveButton"
+                android:layout_gravity="right"
+                android:text="@string/Save"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="@dimen/abc_action_bar_default_height_material"
+                android:layout_below="@+id/descriptionEditText" />
+
+            <Button
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/cancelButton"
+                android:layout_alignTop="@+id/saveButton"
+                android:text="@string/Cancel" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/validateButton"
+                android:layout_toRightOf="@+id/cancelButton"
+                android:layout_toLeftOf="@+id/saveButton"
+                android:layout_alignTop="@+id/saveButton"
+                android:text="@string/Validate"
+                android:visibility="invisible" />
+
+        </RelativeLayout>
+    </ScrollView>
 
 </RelativeLayout>
