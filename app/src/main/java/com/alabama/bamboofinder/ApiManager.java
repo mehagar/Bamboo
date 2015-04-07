@@ -4,13 +4,18 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
+import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -67,7 +72,7 @@ public class ApiManager {
     }
 
     /* Uploads one observation to iNaturalist */
-    public static void uploadObservation(Observation o) {
+    public static void uploadObservation(Observation o, String photoFileName) throws IOException {
         Uri.Builder baseBuilder = new Uri.Builder();
         baseBuilder.scheme("https")
                 .authority(BASE_URL)
@@ -89,6 +94,27 @@ public class ApiManager {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
         // TODO: API documentation says to upload the photo separately, so make second post
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("image", new File(photoFileName));
+
+        Uri.Builder photoBuilder = new Uri.Builder();
+        photoBuilder.scheme("https")
+                .authority(BASE_URL)
+                .appendPath("observation_photos")
+                .build();
+
+        client.post(photoBuilder.toString(), params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Log.d(TAG, "Photo uploaded successfully");
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d(TAG, "Failed to upload photo");
+            }
+        });
     }
 
     /* Converts an JSON string to a list of observations */
