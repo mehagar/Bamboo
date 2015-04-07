@@ -61,6 +61,13 @@
             android:configChanges="orientation|keyboardHidden"
             android:name=".ObservationDetailActivity" >
         </activity>
+        <activity
+            android:label="@string/title_activity_observation_list"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            android:name=".ObservationListActivity" >
+        </activity>
     </application>
 
 </manifest>
