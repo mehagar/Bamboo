@@ -68,6 +68,5 @@
             android:text="@string/species_detail_button"
             android:id="@+id/species_detail_button"
             android:layout_gravity="center_horizontal" />
-
     </LinearLayout>
 </LinearLayout>
