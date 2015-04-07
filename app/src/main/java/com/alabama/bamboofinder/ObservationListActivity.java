@@ -1,12 +1,19 @@
 package com.alabama.bamboofinder;
+import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.TextView;
 //import android.widget.CheckBox;
+import android.widget.AdapterView.OnItemClickListener;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -20,7 +27,7 @@ import java.util.LinkedList;
  */
 
 
-public class ObservationListActivity extends ActionBarActivity {
+public class ObservationListActivity extends Activity {
 
     private Integer mMaxNumberOfObservations;
 
@@ -49,18 +56,24 @@ public class ObservationListActivity extends ActionBarActivity {
         mObservations.add("Observation 3");
 
 
-        ListView listView = (ListView)findViewById(R.id.observation_list);
+        ListView listView = (ListView) findViewById(R.id.observation_list);
         //mArrayAdapter = new ArrayAdapter<Observation>(this,
         //        android.R.layout.simple_list_item_1, mObservations.getObservationList());
 
-        mArrayAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, mObservations);
+        mArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mObservations);
         listView.setAdapter(mArrayAdapter);
 
         // Selecting a list element
+        listView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Start ObservationDetailActivity
+                Intent i = new Intent(getAct)
+            }
+        });
     }
 
-    @Override
+        @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_observation_list, menu);

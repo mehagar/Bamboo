@@ -21,6 +21,8 @@
                 android:id="@+id/observationImage"
                 android:layout_gravity="center"
                 android:contentDescription="@string/ObservationPicture"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentLeft="false"
                 android:layout_alignParentEnd="false"
                 android:layout_alignParentStart="false"
                 android:layout_centerHorizontal="true" />
