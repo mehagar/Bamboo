@@ -31,5 +31,23 @@
     <string name="Validate">Validate</string>
 
     <string name="species_detail_button">Species Information</string>
+    <string name="species_select">Select a species</string>
+    <string name="genus_select">Select a genus</string>
+    <string name="species_generate_detail">Generate information</string>
+    <string-array name="species">
+        <item>Species 1</item>
+        <item>Species 2</item>
+        <item>Species 3</item>
+        <item>Species 4</item>
+        <item>Species 5</item>
+    </string-array>
+
+    <string-array name="genus">
+        <item>Genus 1</item>
+        <item>Genus 2</item>
+        <item>Genus 3</item>
+        <item>Genus 4</item>
+        <item>Genus 5</item>
+    </string-array>
 
 </resources>

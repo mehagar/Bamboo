@@ -4,14 +4,29 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.Spinner;
 
 
 public class SpeciesDetailActivity extends ActionBarActivity {
+
+    //private Spinner mSpeciesSpinner;
+    //private Spinner mGenusSpinner;
+    private Button mGenerateInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_species_detail);
+
+        findViewById(R.id.species_generate_detail).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // generate an image based on the species and genus
+            }
+        });
     }
 
 

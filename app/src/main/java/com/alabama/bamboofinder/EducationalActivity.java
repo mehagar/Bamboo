@@ -32,6 +32,14 @@ public class EducationalActivity extends ActionBarActivity {
         mViewFlipper.setAutoStart(true);
         mViewFlipper.setFlipInterval(4000); // 4 seconds
         mViewFlipper.startFlipping();
+
+        findViewById(R.id.species_detail_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(EducationalActivity.this, SpeciesDetailActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
     @Override
