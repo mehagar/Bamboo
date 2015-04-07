@@ -27,4 +27,6 @@
     <string name="Save">Save</string>
     <string name="Cancel">Cancel</string>
     <string name="Validate">Validate</string>
+    <string name="title_activity_educational">EducationalActivity</string>
+    <string name="title_activity_species_detail">SpeciesDetailActivity</string>
 </resources>

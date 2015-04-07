@@ -8,11 +8,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false"/>
+        android:required="false" />
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
@@ -20,53 +20,63 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:theme="@style/AppTheme"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".LoginActivity"
-            android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/title_activity_login">
+            android:label="@string/title_activity_login"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity
-            android:name=".MainActivity" >
+        <activity android:name=".MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
+
         <activity
             android:name=".InteractiveMapActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:exported="true"
             android:label="@string/title_activity_interactive_map"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden">
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:label="@string/title_activity_observation_detail"
-            android:exported="true"
-            android:screenOrientation="portrait"
+            android:name=".ObservationDetailActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:name=".ObservationDetailActivity" >
+            android:exported="true"
+            android:label="@string/title_activity_observation_detail"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:label="@string/title_activity_observation_list"
-            android:exported="true"
-            android:screenOrientation="portrait"
+            android:name=".ObservationListActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:name=".ObservationListActivity" >
+            android:exported="true"
+            android:label="@string/title_activity_observation_list"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".EducationalActivity"
+            android:label="@string/title_activity_educational" >
+        </activity>
+        <activity
+            android:name=".SpeciesDetailActivity"
+            android:label="@string/title_activity_species_detail" >
         </activity>
     </application>
 
