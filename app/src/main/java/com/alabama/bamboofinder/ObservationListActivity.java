@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -27,7 +28,7 @@ import java.util.LinkedList;
  */
 
 
-public class ObservationListActivity extends Activity {
+public class ObservationListActivity extends ActionBarActivity {
 
     private Integer mMaxNumberOfObservations;
 
@@ -51,12 +52,11 @@ public class ObservationListActivity extends Activity {
         // Setup the list view and array adapter for obtaining data from observation list
         //mObservations = new ObservationList();
         mObservations = new LinkedList<String>();
-        mObservations.add("Observation 1");
-        mObservations.add("Observation 2");
-        mObservations.add("Observation 3");
+        for (int i = 1; i <= 100; i++) {
+            mObservations.add("Observation " + i);
+        }
 
-
-        ListView listView = (ListView) findViewById(R.id.observation_list);
+        final ListView listView = (ListView) findViewById(R.id.observation_list);
         //mArrayAdapter = new ArrayAdapter<Observation>(this,
         //        android.R.layout.simple_list_item_1, mObservations.getObservationList());
 
@@ -68,7 +68,11 @@ public class ObservationListActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Start ObservationDetailActivity
-                Intent i = new Intent(getAct)
+                //Observation observation = (Observation)listView.getAdapter().getItem(position);
+                String observation = (String)listView.getAdapter().getItem(position);
+                Intent i = new Intent(ObservationListActivity.this, ObservationDetailActivity.class);
+                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION_ID, observation.toString());
+                startActivity(i);
             }
         });
     }
