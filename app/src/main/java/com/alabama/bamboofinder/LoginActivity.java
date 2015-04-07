@@ -1,18 +1,49 @@
 package com.alabama.bamboofinder;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
-//declare UI elements
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.oauth.OAuthService;
+
 
 public class LoginActivity extends ActionBarActivity {
+
+    private Button mLoginButton;
+    private Button mCreateAccountButton;
+    private EditText mUsername;
+    private EditText mPassword;
+    private User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mLoginButton = (Button) findViewById(R.id.loginButton);
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        mCreateAccountButton = (Button) findViewById(R.id.newAccountButton);
+        mCreateAccountButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.inaturalist.org/signup"));
+                startActivity(browserIntent);
+            }
+        });
     }
 
 
@@ -37,19 +68,4 @@ public class LoginActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    /*private UserToken login(String username, String password) {
-
-        //Use iNaturalist API to login a user given the username and
-        //password parameters
-
-        return null; //change to UserToken type when implemented
-    }*/
-
-    /*private void createAccount() {
-
-        //display a pop up window for a user to create a new account
-        //using the iNaturalist API
-
-    }*/
 }
