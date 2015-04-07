@@ -1,14 +1,14 @@
 package com.alabama.bamboofinder;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
 
 public class EducationalActivity extends ActionBarActivity {
 
@@ -17,7 +17,8 @@ public class EducationalActivity extends ActionBarActivity {
     private int[] mImages = {R.drawable.bamboo_pic_1, R.drawable.bamboo_pic_2, R.drawable.bamboo_pic_3};
 
     private View mCell;
-    private TextView mImageText;
+
+    private Button mSpeciesDetailButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +32,20 @@ public class EducationalActivity extends ActionBarActivity {
 
             final ImageView imageView = (ImageView)mCell.findViewById(R.id.image);
             imageView.setTag("Image " + (i+1));
-
-            mImageText = (TextView)mCell.findViewById(R.id.image_cell_name);
-            mImageText.setText("Image " + (i+1));
+            imageView.setImageResource(mImages[i]);
 
             mMainLayout.addView(mCell);
         }
+
+        // Start species detail activity
+        mSpeciesDetailButton = (Button)findViewById(R.id.species_detail_button);
+        mSpeciesDetailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(EducationalActivity.this, SpeciesDetailActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
     @Override

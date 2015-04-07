@@ -74,14 +74,14 @@
             android:name=".EducationalActivity"
             android:configChanges="orientation|keyboardHidden"
             android:exported="true"
-            android:label="@string/title_activity_observation_list"
+            android:label="@string/title_activity_educational"
             android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".SpeciesDetailActivity"
             android:configChanges="orientation|keyboardHidden"
             android:exported="true"
-            android:label="@string/title_activity_observation_list"
+            android:label="@string/title_activity_species_detail"
             android:screenOrientation="portrait" >
         </activity>
     </application>

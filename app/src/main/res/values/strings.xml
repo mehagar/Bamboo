@@ -30,4 +30,6 @@
     <string name="Cancel">Cancel</string>
     <string name="Validate">Validate</string>
 
+    <string name="species_detail_button">Species Information</string>
+
 </resources>
