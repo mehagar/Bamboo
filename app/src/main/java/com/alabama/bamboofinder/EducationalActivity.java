@@ -1,51 +1,37 @@
 package com.alabama.bamboofinder;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ViewFlipper;
 
 public class EducationalActivity extends ActionBarActivity {
 
-    private LinearLayout mMainLayout;
-
-    private int[] mImages = {R.drawable.bamboo_pic_1, R.drawable.bamboo_pic_2, R.drawable.bamboo_pic_3};
-
-    private View mCell;
-
-    private Button mSpeciesDetailButton;
+    private ViewFlipper mViewFlipper;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_educational);
 
-        mMainLayout = (LinearLayout)findViewById(R.id.image_linear_layout);
+        mContext = this;
+        mViewFlipper = (ViewFlipper)this.findViewById(R.id.educational_view_flipper);
 
-        for (int i = 0; i < mImages.length; i++) {
-            mCell = getLayoutInflater().inflate(R.layout.image_horizontal_cell, null);
+        mViewFlipper.setInAnimation(this, android.R.anim.slide_in_left);
+        mViewFlipper.setOutAnimation(this, android.R.anim.slide_out_right);
 
-            final ImageView imageView = (ImageView)mCell.findViewById(R.id.image);
-            imageView.setTag("Image " + (i+1));
-            imageView.setImageResource(mImages[i]);
-
-            mMainLayout.addView(mCell);
-        }
-
-        // Start species detail activity
-        mSpeciesDetailButton = (Button)findViewById(R.id.species_detail_button);
-        mSpeciesDetailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(EducationalActivity.this, SpeciesDetailActivity.class);
-                startActivity(i);
-            }
-        });
+        mViewFlipper.setAutoStart(true);
+        mViewFlipper.setFlipInterval(4000); // 4 seconds
+        mViewFlipper.startFlipping();
     }
 
     @Override

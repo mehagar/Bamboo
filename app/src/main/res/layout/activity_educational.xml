@@ -9,17 +9,51 @@
     android:orientation="vertical"
     tools:context="com.alabama.bamboofinder.EducationalActivity">
 
-    <HorizontalScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:id="@+id/image_linear_layout"
+    <ViewFlipper
+        android:id="@+id/educational_view_flipper"
+        android:layout_width="fill_parent"
+        android:layout_height="320dp">
+
+        <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <ImageView
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-        </LinearLayout>
-    </HorizontalScrollView>
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bamboo_pic_1"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bamboo_pic_2"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bamboo_pic_3"/>
+        </RelativeLayout>
+    </ViewFlipper>
 
     <LinearLayout
         android:orientation="vertical"
@@ -36,5 +70,4 @@
             android:layout_gravity="center_horizontal" />
 
     </LinearLayout>
-
 </LinearLayout>
