@@ -1,11 +1,9 @@
 package com.alabama.bamboofinder;
 
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -33,14 +31,16 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InteractiveMapActivity extends ActionBarActivity {
     private static final String TAG = "InteractiveMap";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private ArrayList<Observation> mObservations;
+    private List<Observation> mObservations;
     private LatLng mLastPosition;
-    private HashMap<Marker, Observation> mMarkerObservationHashMap;
+    private Map<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -49,7 +49,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interactive_map);
         buildGoogleApiClient();
-        mGoogleApiClient.connect();
         setUpMapIfNeeded();
     }
 
@@ -77,7 +76,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.interactive_map_activity_actions, menu);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -85,9 +83,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
             case R.id.action_add:
                 Intent i = new Intent(this, ObservationDetailActivity.class);
                 startActivity(i);
@@ -133,7 +128,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
      */
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        mMarkerObservationHashMap = new HashMap<Marker, Observation>();
+        mMarkerObservationMap = new HashMap<Marker, Observation>();
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
@@ -149,7 +144,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Observation o = mMarkerObservationHashMap.get(marker);
+                Observation o = mMarkerObservationMap.get(marker);
                 Intent i = new Intent(InteractiveMapActivity.this, ObservationDetailActivity.class);
                 Bundle args = new Bundle();
                 args.putString(ObservationDetailActivity.EXTRA_OBSERVATION_ID, o.getId());
@@ -160,26 +155,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setInfoWindowAdapter(new ImageInfoWindowAdapter());
     }
 
+    // Builds and connects to the google Location Services api that can retrieve the last known location.
     private void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle connectionHint) {
-                        Location loc = LocationServices.FusedLocationApi.getLastLocation(
-                                mGoogleApiClient);
-                        if(loc != null) {
-                            mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
-                        } else {
-                            mLastPosition = new LatLng(0.0, 0.0);
-                        }
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int cause) {
-                        // left unimplemented
-                    }
-                })
+                .addConnectionCallbacks(new LocationConnectionCallbacks())
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -188,6 +167,26 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 })
                 .addApi(LocationServices.API)
                 .build();
+        mGoogleApiClient.connect();
+    }
+
+    class LocationConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
+        @Override
+        public void onConnected(Bundle connectionHint) {
+            Location loc = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+            if(loc != null) {
+                mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+            } else {
+                mLastPosition = new LatLng(0.0, 0.0);
+            }
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
+        }
+
+        @Override
+        public void onConnectionSuspended(int cause) {
+            // left unimplemented
+        }
     }
 
     private LatLngBounds getScreenBoundingBox() {
@@ -198,15 +197,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations() {
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
-            if(!mMarkerObservationHashMap.containsValue(o)) {
+            if(!mMarkerObservationMap.containsValue(o)) {
                 Marker m = mMap.addMarker(
                         new MarkerOptions()
                                 .position(o.getLocation())
                                 .title(o.getId())
                                 .snippet(o.getSpeciesGuess())
                                 .icon(BitmapDescriptorFactory.defaultMarker(65)));
-                // TODO: set the picture on the marker
-                mMarkerObservationHashMap.put(m, o);
+                mMarkerObservationMap.put(m, o);
             }
         }
         // This commented out code is being used for testing purposes, to test the HTTP POST
@@ -227,6 +225,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
         return filteredObservations;
     }
 
+    // This task retrieves observations from the network asynchronously.
+    // When it has finished, the map is updated to show any new observations.
     class GetObservationsTask extends AsyncTask<LatLngBounds, Void, ArrayList<Observation>> {
         protected ArrayList<Observation> doInBackground(LatLngBounds... latLngBounds) {
             // this function must accept a variable number of arguments, but there should only be one.
@@ -243,22 +243,24 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     class ImageInfoWindowAdapter implements InfoWindowAdapter {
-
         @Override
         public View getInfoContents(final Marker marker) {
-            View view = getLayoutInflater().inflate(R.layout.image_info_window,
-                    null);
-            Observation o = mMarkerObservationHashMap.get(marker);
-            ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
-
-            if(!o.getThumbnailURL().equals("")) {
-                Picasso.with(getApplicationContext()).load(o.getThumbnailURL()).into(imageView, new InfoWindowRefresher(marker));
-            } else {
-                imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
-            }
+            View view = getLayoutInflater().inflate(R.layout.image_info_window, null);
+            Observation o = mMarkerObservationMap.get(marker);
 
             TextView textView = (TextView)view.findViewById(R.id.species_guess_textView);
             textView.setText(o.getSpeciesGuess());
+
+            ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
+            if(!o.getThumbnailURL().equals("")) {
+                Picasso.with(getApplicationContext())
+                        .load(o.getThumbnailURL())
+                        .resize(50, 50)
+                        .centerCrop()
+                        .into(imageView, new InfoWindowRefresher(marker));
+            } else {
+                imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
+            }
 
             return view;
         }
@@ -269,6 +271,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
         }
     }
 
+    // These methods are called once the image for the info window has been loaded.
     private class InfoWindowRefresher implements Callback {
         private Marker mMarkerToRefresh;
 
@@ -278,7 +281,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         @Override
         public void onSuccess() {
-            // Re show the info window when we have the image.
+            // re-show the info window when we have the image.
+            // Since this is a callback, by the time it finishes, the info window will be shown, but empty.
+            // So hide and show the window to execute getInfoContents() again, but this time the image will be ready.
             if(mMarkerToRefresh.isInfoWindowShown()) {
                 mMarkerToRefresh.hideInfoWindow();
                 mMarkerToRefresh.showInfoWindow();

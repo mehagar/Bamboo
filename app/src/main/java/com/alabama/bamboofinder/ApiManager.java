@@ -1,27 +1,19 @@
 package com.alabama.bamboofinder;
 
-import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLngBounds;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -33,15 +25,15 @@ import javax.net.ssl.HttpsURLConnection;
 public class ApiManager {
     private static final String TAG = "ApiManager";
 
-    private static final String JSON_SWLAT = "swlat";
-    private static final String JSON_SWLNG = "swlng";
-    private static final String JSON_NELAT = "nelat";
-    private static final String JSON_NELNG = "nelng";
-    private static final String JSON_EXTRA = "extra";
-    private static final String JSON_LATITUDE = "observation[latitude]";
-    private static final String JSON_LONGITUDE = "observation[longitude]";
-    private static final String JSON_DATE = "observation[observed_on_string]";
-    private static final String JSON_DESCRIPTION = "observation[description]";
+    private static final String URL_SWLAT = "swlat";
+    private static final String URL_SWLNG = "swlng";
+    private static final String URL_NELAT = "nelat";
+    private static final String URL_NELNG = "nelng";
+    private static final String URL_EXTRA = "extra";
+    private static final String URL_LATITUDE = "observation[latitude]";
+    private static final String URL_LONGITUDE = "observation[longitude]";
+    private static final String URL_DATE = "observation[observed_on_string]";
+    private static final String URL_DESCRIPTION = "observation[description]";
     private static final String JSON_PROJECT = "project_observations";
     private static final String JSON_PROJECT_ID = "project_id";
 
@@ -52,17 +44,16 @@ public class ApiManager {
     /* Gets observations from iNaturalist's api within a specified range */
     public static ArrayList<Observation> getObservationsFromNetwork(LatLngBounds bounds) {
         Uri.Builder builder = new Uri.Builder();
-        // appendQueryParameter encodes all the values
+        // appendQueryParameter() encodes values
         builder.scheme("https")
                 .authority(BASE_URL)
                 .appendPath("observations.json")
-                .appendQueryParameter(JSON_SWLAT, String.valueOf(bounds.southwest.latitude))
-                .appendQueryParameter(JSON_SWLNG, String.valueOf(bounds.southwest.longitude))
-                .appendQueryParameter(JSON_NELAT, String.valueOf(bounds.northeast.latitude))
-                .appendQueryParameter(JSON_NELNG, String.valueOf(bounds.northeast.longitude))
-                .appendQueryParameter(JSON_EXTRA, "projects,observation_photos")
+                .appendQueryParameter(URL_SWLAT, String.valueOf(bounds.southwest.latitude))
+                .appendQueryParameter(URL_SWLNG, String.valueOf(bounds.southwest.longitude))
+                .appendQueryParameter(URL_NELAT, String.valueOf(bounds.northeast.latitude))
+                .appendQueryParameter(URL_NELNG, String.valueOf(bounds.northeast.longitude))
+                .appendQueryParameter(URL_EXTRA, "projects,observation_photos")
                 .build();
-        Log.d(TAG, "get url was : " + builder.toString());
         String response;
         try {
             response = sendGet(builder.toString());
@@ -84,10 +75,10 @@ public class ApiManager {
                 .build();
 
         Uri.Builder paramsBuilder = new Uri.Builder();
-        paramsBuilder.appendQueryParameter(JSON_LATITUDE, String.valueOf(o.getLocation().latitude))
-                .appendQueryParameter(JSON_LONGITUDE, String.valueOf(o.getLocation().longitude))
-                .appendQueryParameter(JSON_DATE, o.getTimeStamp().toString()) // TODO: make sure this is the proper date format
-                .appendQueryParameter(JSON_DESCRIPTION, o.getDescription())
+        paramsBuilder.appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
+                .appendQueryParameter(URL_LONGITUDE, String.valueOf(o.getLocation().longitude))
+                .appendQueryParameter(URL_DATE, o.getTimeStamp().toString()) // TODO: make sure this is the proper date format
+                .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
         Log.d(TAG, "Base URL: " + baseBuilder.toString());
         Log.d(TAG, "Params URL: " + paramsBuilder.toString());
