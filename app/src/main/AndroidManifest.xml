@@ -84,6 +84,14 @@
             android:label="@string/title_activity_species_detail"
             android:screenOrientation="portrait" >
         </activity>
+        <activity
+            android:name=".SearchFilterActivity"
+            android:label="@string/title_activity_search_filter"
+            android:parentActivityName=".InteractiveMapActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.alabama.bamboofinder.InteractiveMapActivity" />
+        </activity>
     </application>
 
 </manifest>

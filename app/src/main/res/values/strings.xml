@@ -15,6 +15,7 @@
     <string name="ViewMap">View Map</string>
     <string name="LearnMore">Learn More</string>
     <string name="action_add">Add Observation</string>
+    <string name="action_filter">Filter Results</string>
     <string name="new_picture">New Picture</string>
 
     <string name="title_activity_interactive_map">BambooFinderMap</string>
@@ -49,5 +50,6 @@
         <item>Genus 4</item>
         <item>Genus 5</item>
     </string-array>
+    <string name="title_activity_search_filter">Search Filter</string>
 
 </resources>

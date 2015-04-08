@@ -54,6 +54,7 @@ public class Observation {
                 mThumbnailURL = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
                 Log.d(TAG, "Got thumbnail url: " + mThumbnailURL);
             } else {
+                Log.e(TAG, "Observation being created without a photo");
                 mThumbnailURL = "";
             }
             // TODO: parse the time stamp from the "created_at" field in JSON
