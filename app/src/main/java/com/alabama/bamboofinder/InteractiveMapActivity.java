@@ -30,6 +30,7 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private LatLng mLastPosition;
     private Map<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
-    private SearchFilter mCurrentSearchFilter; // Might be null if search filter has not been applie or has been cleared.
+    private SearchFilter mSearchFilter; // Might be null if search filter has not been applie or has been cleared.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,9 +103,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "In onActivityResult");
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
                 // apply search filter here
+                // mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
+                // showObservations(mSearchFilter)
             }
         }
     }
@@ -211,6 +215,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     private void showObservations(SearchFilter sf) {
+        if(sf != null) {
+            mMap.clear();
+        }
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
             boolean meetsFilter = sf == null || sf.meetsCriteria(mLastPosition, o);
@@ -246,7 +253,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
-            showObservations(mCurrentSearchFilter);
+            SearchFilter sf = new SearchFilter(new Date(115, 1, 5), 1000);
+            mSearchFilter = sf;
+            showObservations(mSearchFilter);
         }
     }
 

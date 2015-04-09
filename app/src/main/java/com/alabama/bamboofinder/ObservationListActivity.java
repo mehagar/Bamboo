@@ -71,7 +71,7 @@ public class ObservationListActivity extends ActionBarActivity {
                 //Observation observation = (Observation)listView.getAdapter().getItem(position);
                 String observation = (String)listView.getAdapter().getItem(position);
                 Intent i = new Intent(ObservationListActivity.this, ObservationDetailActivity.class);
-                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, observation.toString());
+                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, observation);
                 startActivity(i);
             }
         });
