@@ -2,6 +2,7 @@ package com.alabama.bamboofinder;
 
 import android.content.Context;
 
+import java.util.Date;  // remove
 import java.util.LinkedList;
 import java.util.List;
 // import java.util.UUID;
@@ -24,6 +25,7 @@ public class ObservationList {
         for (int i = 1; i <= 100; i++) {
             Observation observation = new Observation();
             observation.setSpeciesGuess("Observation #" + i);
+            observation.setTimeStamp(new Date());
             mObservations.add(observation);
         }
     }
