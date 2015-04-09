@@ -41,10 +41,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private List<Observation> mObservations;
-    private LatLng mLastPosition;
+    private LatLng mLastMapPosition;
+    private LatLng mLastUserPosition;
     private Map<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
-    private SearchFilter mCurrentSearchFilter; // Might be null if search filter has not been applie or has been cleared.
+    private SearchFilter mSearchFilter; // Might be null if search filter has not been applie or has been cleared.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +90,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
         switch(item.getItemId()) {
             case R.id.action_add:
                 i = new Intent(this, ObservationDetailActivity.class);
+                i.putExtra(ObservationDetailActivity.EXTRA_USER_LATITUDE, mLastUserPosition.latitude);
+                i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
                 startActivity(i);
                 return true;
             case R.id.action_filter:
@@ -102,9 +105,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "In onActivityResult");
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
-
+                // apply search filter here
+                // mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
+                // showObservations(mSearchFilter)
             }
         }
     }
@@ -150,10 +156,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                if(cameraPosition.target != mLastPosition) {
+                if(cameraPosition.target != mLastMapPosition) {
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
-                    mLastPosition = cameraPosition.target;
+                    mLastMapPosition = cameraPosition.target;
                 }
             }
         });
@@ -163,7 +169,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
             public void onInfoWindowClick(Marker marker) {
                 Observation o = mMarkerObservationMap.get(marker);
                 Intent i = new Intent(InteractiveMapActivity.this, ObservationDetailActivity.class);
-                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION_ID, o.getId());
+                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, o);
                 startActivity(i);
             }
         });
@@ -192,11 +198,13 @@ public class InteractiveMapActivity extends ActionBarActivity {
             Location loc = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if(loc != null) {
-                mLastPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                mLastMapPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                mLastUserPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
             } else {
-                mLastPosition = new LatLng(0.0, 0.0);
+                mLastMapPosition = new LatLng(0.0, 0.0);
+                mLastUserPosition = null; // User must have gps enabled to submit observations
             }
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastPosition, 15.0f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastMapPosition, 15.0f));
         }
 
         @Override
@@ -211,9 +219,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     private void showObservations(SearchFilter sf) {
+        if(sf != null) {
+            mMap.clear();
+        }
         for(Observation o : mObservations) {
             // do not add a marker if one for this observation already exists
-            boolean meetsFilter = sf == null || sf.meetsCriteria(mLastPosition, o);
+            boolean meetsFilter = sf == null || sf.meetsCriteria(mLastMapPosition, o);
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsFilter && !alreadyShown) {
                 Marker m = mMap.addMarker(
@@ -246,7 +257,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
-            showObservations(mCurrentSearchFilter);
+            showObservations(mSearchFilter);
         }
     }
 

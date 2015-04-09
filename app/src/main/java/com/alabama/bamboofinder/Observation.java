@@ -1,7 +1,5 @@
 package com.alabama.bamboofinder;
 
-import android.location.Location;
-import android.media.Image;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -11,14 +9,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Created by Michael H. on 3/19/2015.
  */
 
-public class Observation {
+public class Observation implements Serializable {
     private static final String TAG = "observation";
 
     private static final String JSON_LATITUDE = "latitude";
@@ -28,23 +27,40 @@ public class Observation {
     private static final String JSON_THUMBNAIL_URL = "square_url";
     private static final String JSON_NUM_PHOTOS = "observation_photos_count";
     private static final String JSON_SPECIES_GUESS = "species_guess";
+    private static final String JSON_OBSERVED_DATE = "observed_on";
 
-    private Date mTimeStamp;
+    private Date mDateObserved;
     private String mSpeciesGuess;
     private String mDescription;
     private boolean mValidated;
     private String mOwnerUserName;
     private String mId;
-    private LatLng mLocation;
+    //private LatLng mLocation;
+    double mLatitude;
+    double mLongitude;
+
     private String mThumbnailURL;
 
+    public Observation() {
+        mDateObserved = null;
+        mSpeciesGuess = "";
+        mDescription = "";
+        mValidated = false;
+        mOwnerUserName = "";
+        mId = "";
+        //mLocation = null;
+        mLatitude = 0.0;
+        mLongitude = 0.0;
+        mThumbnailURL = "";
+    }
+
     public Observation(JSONObject jsonObject) {
-        double latitude;
-        double longitude;
+        //double latitude;
+        //double longitude;
         try {
-            latitude = jsonObject.getDouble(JSON_LATITUDE);
-            longitude = jsonObject.getDouble(JSON_LONGITUDE);
-            mLocation = new LatLng(latitude, longitude);
+            mLatitude = jsonObject.getDouble(JSON_LATITUDE);
+            mLongitude = jsonObject.getDouble(JSON_LONGITUDE);
+            //mLocation = new LatLng(latitude, longitude);
             mId = jsonObject.getString(JSON_ID);
             mSpeciesGuess = jsonObject.getString(JSON_SPECIES_GUESS);
             int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
@@ -58,8 +74,17 @@ public class Observation {
                 mThumbnailURL = "";
             }
             // TODO: parse the time stamp from the "created_at" field in JSON
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date dateObserved;
+            try {
+                dateObserved = formatter.parse(jsonObject.getString(JSON_OBSERVED_DATE));
+            } catch(ParseException pe) {
+                Log.e(TAG, "Could not parse date: " + pe.getMessage());
+                dateObserved = new Date();
+            }
+            mDateObserved = dateObserved;
         } catch(JSONException e) {
-            Log.e(TAG, "Error parsing json for observation");
+            Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
         }
     }
 
@@ -88,19 +113,19 @@ public class Observation {
     }
 
     public LatLng getLocation() {
-        return mLocation;
+        return new LatLng(mLatitude, mLongitude);
     }
 
     public void setLocation(LatLng location) {
-        this.mLocation = location;
+        this.mLatitude = location.latitude; this.mLongitude = location.longitude;
     }
 
     public Date getTimeStamp() {
-        return mTimeStamp;
+        return mDateObserved;
     }
 
     public void setTimeStamp(Date timeStamp) {
-        this.mTimeStamp = timeStamp;
+        this.mDateObserved = timeStamp;
     }
 
     public String getDescription() {
