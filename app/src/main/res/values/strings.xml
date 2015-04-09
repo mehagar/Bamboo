@@ -3,7 +3,6 @@
 
     <string name="app_name">BambooFinder</string>
     <string name="title_activity_test">TestActivity</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">Login</string>
     <string name="EmailHint">Email Address</string>
@@ -51,6 +50,9 @@
         <item>Genus 5</item>
     </string-array>
     <string name="title_activity_search_filter">Search Filter</string>
+    <string name="within_radius">Within radius (in meters)</string>
+    <string name="added_after">Added after:</string>
+    <string name="show_observations">Only show observations..</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
