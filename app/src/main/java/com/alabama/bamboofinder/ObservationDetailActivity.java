@@ -1,7 +1,10 @@
 package com.alabama.bamboofinder;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
@@ -13,6 +16,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class ObservationDetailActivity extends ActionBarActivity {
@@ -31,11 +38,25 @@ public class ObservationDetailActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_detail);
 
+        mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
+
         mCancelButton = (Button) findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //return to calling class with resultCode = RESULT_CANCELED
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+
+        mSaveButton = (Button) findViewById(R.id.saveButton);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = getIntent();
+                Observation observation = new Observation();
+                double latitude = intent.getDoubleExtra();
             }
         });
     }
@@ -77,7 +98,47 @@ public class ObservationDetailActivity extends ActionBarActivity {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
-                mImageView.setImageBitmap(bitmap);
+
+                //Retrieve last image taken
+                String[] projection = new String[]{
+                        MediaStore.Images.ImageColumns._ID,
+                        MediaStore.Images.ImageColumns.DATA,
+                        MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+                        MediaStore.Images.ImageColumns.DATE_TAKEN,
+                        MediaStore.Images.ImageColumns.MIME_TYPE
+                };
+                final Cursor cursor = getContentResolver()
+                        .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null,
+                                null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+                if (cursor.moveToFirst()) {
+                    String imageLocation = cursor.getString(1);
+                    File imageFile = new File(imageLocation);
+                    ExifInterface exifInterface = new ExifInterface(imageFile.getAbsolutePath());
+
+                    //check orientation and rotate if needed
+                    Matrix matrix = new Matrix();
+                    float rotate = 0;
+                    int orientation = exifInterface.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION,
+                            ExifInterface.ORIENTATION_NORMAL);
+                    switch (orientation) {
+                        case ExifInterface.ORIENTATION_ROTATE_270:
+                            rotate = 270;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_180:
+                            rotate = 180;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_90:
+                            rotate = 90;
+                            break;
+                    }
+                    matrix.postRotate(rotate);
+                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                            bitmap.getHeight(), matrix, true);
+
+
+                    mImageView.setImageBitmap(rotatedBitmap);
+                }
             }
             catch (Exception e) {
                 Log.e("Result Exception", e.toString());
