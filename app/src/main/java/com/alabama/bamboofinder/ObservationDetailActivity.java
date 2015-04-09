@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +26,8 @@ import java.util.Date;
 
 public class ObservationDetailActivity extends ActionBarActivity {
     public static final String EXTRA_OBSERVATION_ID = "observation_id";
+    private static final String EXTRA_USER_LATITUDE = "latitude";
+    private static final String EXTRA_USER_LONGITUDE = "longitude";
 
     private static final int CAMERA_REQUEST = 1888;
     private ImageView mImageView;
@@ -56,7 +60,23 @@ public class ObservationDetailActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent intent = getIntent();
                 Observation observation = new Observation();
-                double latitude = intent.getDoubleExtra();
+                double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
+                double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
+                LatLng location = new LatLng(latitude, longitude);
+
+                observation.setLocation(location);
+                observation.setSpeciesGuess(mSpeciesText.getText().toString());
+                observation.setDescription(mDescriptionText.getText().toString());
+                //set observation TimeStamp
+                //set observation username?
+
+                //if editing observation
+
+                    //update observation on iNaturalist
+
+                //if adding observation
+
+                    //POST API call
             }
         });
     }
