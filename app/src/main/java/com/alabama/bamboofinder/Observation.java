@@ -38,6 +38,17 @@ public class Observation {
     private LatLng mLocation;
     private String mThumbnailURL;
 
+    public Observation() {
+        mTimeStamp = null;
+        mSpeciesGuess = "";
+        mDescription = "";
+        mValidated = false;
+        mOwnerUserName = "";
+        mId = "";
+        mLocation = null;
+        mThumbnailURL = "";
+    }
+
     public Observation(JSONObject jsonObject) {
         double latitude;
         double longitude;
