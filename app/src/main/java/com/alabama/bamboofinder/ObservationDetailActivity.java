@@ -17,6 +17,8 @@ import android.widget.ImageView;
 
 public class ObservationDetailActivity extends ActionBarActivity {
     public static final String EXTRA_OBSERVATION = "observation";
+    public static final String EXTRA_USER_LATITUDE = "latitude";
+    public static final String EXTRA_USER_LONGITUDE = "longitude";
 
     private static final int CAMERA_REQUEST = 1888;
     private ImageView mImageView;
@@ -30,7 +32,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_detail);
-
         mCancelButton = (Button) findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
