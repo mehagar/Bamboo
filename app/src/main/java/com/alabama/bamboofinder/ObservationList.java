@@ -21,7 +21,11 @@ public class ObservationList {
         mObservations = new LinkedList<>();
 
         // populate the list with observations
-
+        for (int i = 1; i <= 100; i++) {
+            Observation observation = new Observation();
+            observation.setSpeciesGuess("Observation #" + i);
+            mObservations.add(observation);
+        }
     }
 
     public static ObservationList get(Context context) {
@@ -52,12 +56,4 @@ public class ObservationList {
         return mObservations;
     }
 
-    /*public Observation getObservation(UUID id) {
-        for (Crime crime : mCrimes) {
-            if (crime.getId().equals(id))
-                return crime;
-        }
-        return null;
-    }
-    */
 }

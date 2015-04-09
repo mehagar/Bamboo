@@ -32,8 +32,8 @@ public class ObservationListActivity extends ActionBarActivity {
 
     private Integer mMaxNumberOfObservations;
 
-    //private ObservationList mObservations;
-    private List<String> mObservations;
+    private List<Observation> mObservations;
+    //private List<String> mObservations;
 
     private ObservationList mSelectedObservations;  // changed from selectObservations
 
@@ -41,26 +41,19 @@ public class ObservationListActivity extends ActionBarActivity {
     private Button mRemoveButton;
     //private CheckBox mMarkObservationCheckBox;  // changed from markObservationBox
 
-    //private ArrayAdapter<Observation> mArrayAdapter;
-    private ArrayAdapter<String> mArrayAdapter;
+    private ArrayAdapter<Observation> mArrayAdapter;
+    //private ArrayAdapter<String> mArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_list);
-
+        mObservations = ObservationList.get(this).getObservations();
         // Setup the list view and array adapter for obtaining data from observation list
-        //mObservations = new ObservationList();
-        mObservations = new LinkedList<String>();
-        for (int i = 1; i <= 100; i++) {
-            mObservations.add("Observation " + i);
-        }
 
         final ListView listView = (ListView) findViewById(R.id.observation_list);
-        //mArrayAdapter = new ArrayAdapter<Observation>(this,
-        //        android.R.layout.simple_list_item_1, mObservations.getObservationList());
 
-        mArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mObservations);
+        mArrayAdapter = new ArrayAdapter<Observation>(this, android.R.layout.simple_list_item_1, mObservations);
         listView.setAdapter(mArrayAdapter);
 
         // Selecting a list element
@@ -68,10 +61,9 @@ public class ObservationListActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Start ObservationDetailActivity
-                //Observation observation = (Observation)listView.getAdapter().getItem(position);
-                String observation = (String)listView.getAdapter().getItem(position);
+                Observation observation = (Observation)listView.getAdapter().getItem(position);
                 Intent i = new Intent(ObservationListActivity.this, ObservationDetailActivity.class);
-                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION_ID, observation.toString());
+                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION_ID, observation.getSpeciesGuess());
                 startActivity(i);
             }
         });
