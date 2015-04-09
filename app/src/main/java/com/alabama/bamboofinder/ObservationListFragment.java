@@ -1,29 +1,67 @@
 package com.alabama.bamboofinder;
 
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Created by Michael Walker on 4/5/2015.
  */
 public class ObservationListFragment extends ListFragment {
 
-
-    public ObservationListFragment() {
-        // Required empty public constructor
-    }
-
+    private static final String TAG = "ObservationListFragment";
+    private List<Observation> mObservations;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_observation_list, container, false);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getActivity().setTitle(R.string.title_activity_observation_list);
+        mObservations = ObservationList.get(getActivity()).getObservations();
+
+        ObservationAdapter adapter = new ObservationAdapter(mObservations);
+        setListAdapter(adapter);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Observation observation = ((ObservationAdapter)getListAdapter()).getItem(position);
+    }
+
+    private class ObservationAdapter extends ArrayAdapter<Observation> {
+        public ObservationAdapter(List<Observation> observations) {
+            super(getActivity(), 0, observations);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // if we weren't given a view, inflate one
+            if (convertView == null) {
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_observation, null);
+            }
+
+            // configure the view for this crime
+            Observation observation = getItem(position);
+
+            TextView titleTextView = (TextView)convertView.findViewById(R.id.observation_list_item_titleTextView);
+            titleTextView.setText(observation.getSpeciesGuess());
+
+            TextView dateTextView = (TextView)convertView.findViewById(R.id.observation_list_item_dateTextView);
+            dateTextView.setText(observation.getTimeStamp().toString());
+
+            CheckBox selectedObservationCheckBox = (CheckBox)convertView.findViewById(R.id.observation_list_item_solvedCheckBox);
+            //solvedCheckBox.setChecked(.isSolved());
+
+            return convertView;
+        }
     }
 }

@@ -16,7 +16,7 @@ public class ObservationList {
 
     private List<Observation> mObservations;
 
-    public ObservationList(Context appContent) {
+    private ObservationList(Context appContent) {
         mAppContext = appContent;
         mObservations = new LinkedList<>();
 
