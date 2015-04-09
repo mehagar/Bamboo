@@ -104,7 +104,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
-
+                // apply search filter here
             }
         }
     }
@@ -163,7 +163,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
             public void onInfoWindowClick(Marker marker) {
                 Observation o = mMarkerObservationMap.get(marker);
                 Intent i = new Intent(InteractiveMapActivity.this, ObservationDetailActivity.class);
-                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION_ID, o.getId());
+                i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, o);
                 startActivity(i);
             }
         });

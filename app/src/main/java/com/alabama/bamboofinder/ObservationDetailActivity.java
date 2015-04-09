@@ -16,7 +16,7 @@ import android.widget.ImageView;
 
 
 public class ObservationDetailActivity extends ActionBarActivity {
-    public static final String EXTRA_OBSERVATION_ID = "observation_id";
+    public static final String EXTRA_OBSERVATION = "observation";
 
     private static final int CAMERA_REQUEST = 1888;
     private ImageView mImageView;
