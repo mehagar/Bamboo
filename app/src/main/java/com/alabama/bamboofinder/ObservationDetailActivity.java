@@ -25,9 +25,9 @@ import java.util.Date;
 
 
 public class ObservationDetailActivity extends ActionBarActivity {
-    public static final String EXTRA_OBSERVATION_ID = "observation_id";
-    private static final String EXTRA_USER_LATITUDE = "latitude";
-    private static final String EXTRA_USER_LONGITUDE = "longitude";
+    public static final String EXTRA_OBSERVATION = "observation";
+    public static final String EXTRA_USER_LATITUDE = "latitude";
+    public static final String EXTRA_USER_LONGITUDE = "longitude";
 
     private static final int CAMERA_REQUEST = 1888;
     private ImageView mImageView;

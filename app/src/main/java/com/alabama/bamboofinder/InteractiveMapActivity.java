@@ -201,7 +201,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 mLastMapPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
                 mLastUserPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
             } else {
-                mLastMapPosition = new LatLng(0.0, 0.0);
+                mLastMapPosition = new LatLng(33.2, -87.5);
                 mLastUserPosition = null; // User must have gps enabled to submit observations
             }
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastMapPosition, 15.0f));
