@@ -2,6 +2,7 @@ package com.alabama.bamboofinder;
 
 import android.content.Context;
 
+import java.util.Date;  // remove
 import java.util.LinkedList;
 import java.util.List;
 // import java.util.UUID;
@@ -16,12 +17,17 @@ public class ObservationList {
 
     private List<Observation> mObservations;
 
-    public ObservationList(Context appContent) {
+    private ObservationList(Context appContent) {
         mAppContext = appContent;
         mObservations = new LinkedList<>();
 
         // populate the list with observations
-
+        for (int i = 1; i <= 100; i++) {
+            Observation observation = new Observation();
+            observation.setSpeciesGuess("Observation #" + i);
+            observation.setTimeStamp(new Date());
+            mObservations.add(observation);
+        }
     }
 
     public static ObservationList get(Context context) {
@@ -52,12 +58,4 @@ public class ObservationList {
         return mObservations;
     }
 
-    /*public Observation getObservation(UUID id) {
-        for (Crime crime : mCrimes) {
-            if (crime.getId().equals(id))
-                return crime;
-        }
-        return null;
-    }
-    */
 }
