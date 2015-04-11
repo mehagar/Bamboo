@@ -1,16 +1,23 @@
 package com.alabama.bamboofinder;
 
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.model.Token;
+import org.json.JSONTokener;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Jeremy on 4/6/2015.
  */
-public class User {
+public class User extends AsyncTask<String, Void, User> {
 
     private static final String JSON_CREATED = "created_at";
     private static final String JSON_DESCRIPTION = "description";
@@ -20,6 +27,7 @@ public class User {
     private static final String JSON_NAME = "name";
     private static final String JSON_OBSERVATIONS_COUNT = "observations_count";
     private static final String JSON_URI = "uri";
+    private static final String BASE_URL = "www.inaturalist.org";
 
     private String mCreationDate;
     private String mDescription;
@@ -30,8 +38,20 @@ public class User {
     private int mObservationsCount;
     private String mUri;
     private ArrayList<Observation> mObservationList;
-    private Token mToken;
+    private String mToken;
     private boolean mAdmin;
+
+    public User() {
+        mCreationDate = null;
+        mDescription = null;
+        mEmail = null;
+        mID = -1;
+        mUsername = null;
+        mName = null;
+        mObservationsCount = -1;
+        mUri = null;
+        mObservationList = null;
+    }
 
     public User (JSONObject jsonObject) {
         try {
@@ -50,6 +70,73 @@ public class User {
         catch (JSONException e) {
             Log.e("UserJSON", "Error parsing json for user");
         }
+    }
+
+    public User doInBackground(String... token) {
+        if(token.length != 1) {
+            Log.e("Error Retrieving User", "Passed in more than one token");
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder(75);
+        sb.append("Bearer ")
+                .append(token[0]);
+        String auth = sb.toString().replaceAll("\"", "");
+
+        JSONObject object = null;
+        Uri.Builder userRequest = new Uri.Builder();
+        userRequest.scheme("https")
+                .authority(BASE_URL)
+                .appendPath("users")
+                .appendPath("edit.json")
+                .build();
+
+        URL url;
+        HttpsURLConnection connection;
+        try {
+            //URL url = new URL(userRequest.toString());
+            url = new URL("https://www.inaturalist.org/users/edit.json");
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", auth);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoInput(true);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String temp, response = "";
+            while ((temp = in.readLine()) != null)
+                response += temp;
+            in.close();
+
+            object = (JSONObject) new JSONTokener(response).nextValue();
+            connection.disconnect();
+        }
+        catch (Exception e) {
+
+            Log.e("Error Retrieving User", e.toString());
+        }
+
+        User user = new User(object);
+        return user;
+    }
+
+    public JSONObject convertToJSON() {
+        JSONObject json = new JSONObject();
+        try {
+            json.put(JSON_CREATED, getmCreationDate());
+            json.put(JSON_DESCRIPTION, getmDescription());
+            json.put(JSON_EMAIL, getmEmail());
+            json.put(JSON_ID, getmID());
+            json.put(JSON_LOGIN, getmUsername());
+            json.put(JSON_NAME, getmName());
+            json.put(JSON_OBSERVATIONS_COUNT, getmObservationsCount());
+            json.put(JSON_URI, getmUri());
+            json.put("observation_list", getmObservationList());
+        }
+        catch (Exception e) {
+            Log.e("JSON Conversion Error", e.toString());
+        }
+        return json;
     }
 
     // Getters and Setters
@@ -125,11 +212,11 @@ public class User {
         this.mObservationList = mObservationList;
     }
 
-    public Token getmToken() {
+    public String getmToken() {
         return mToken;
     }
 
-    public void setmToken(Token mToken) {
+    public void setmToken(String mToken) {
         this.mToken = mToken;
     }
 

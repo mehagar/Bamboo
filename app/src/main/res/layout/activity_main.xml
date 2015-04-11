@@ -52,4 +52,16 @@
         android:layout_alignStart="@+id/LearnButton"
         android:layout_alignRight="@+id/LearnButton"
         android:layout_alignEnd="@+id/LearnButton" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/loggedInText"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="30dp"
+        android:layout_marginTop="25dp" />
 </RelativeLayout>
