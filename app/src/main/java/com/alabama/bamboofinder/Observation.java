@@ -18,7 +18,7 @@ import java.util.Date;
  */
 
 public class Observation implements Serializable {
-    private static final String TAG = "observation";
+    private static final String TAG = "Observation";
 
     private static final String JSON_LATITUDE = "latitude";
     private static final String JSON_LONGITUDE = "longitude";
@@ -35,11 +35,9 @@ public class Observation implements Serializable {
     private boolean mValidated;
     private String mOwnerUserName;
     private String mId;
-    //private LatLng mLocation;
     double mLatitude;
     double mLongitude;
-
-    private String mThumbnailURL;
+    private String mThumbnailUrl;
 
     public Observation() {
         mDateObserved = null;
@@ -48,44 +46,49 @@ public class Observation implements Serializable {
         mValidated = false;
         mOwnerUserName = "";
         mId = "";
-        //mLocation = null;
         mLatitude = 0.0;
         mLongitude = 0.0;
-        mThumbnailURL = "";
+        mThumbnailUrl = "";
     }
 
     public Observation(JSONObject jsonObject) {
-        //double latitude;
-        //double longitude;
         try {
             mLatitude = jsonObject.getDouble(JSON_LATITUDE);
             mLongitude = jsonObject.getDouble(JSON_LONGITUDE);
-            //mLocation = new LatLng(latitude, longitude);
             mId = jsonObject.getString(JSON_ID);
             mSpeciesGuess = jsonObject.getString(JSON_SPECIES_GUESS);
-            int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
-            if(numPhotos >= 1) {
-                JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
-                // just use the first photo as the thumbnail for a marker
-                mThumbnailURL = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
-                Log.d(TAG, "Got thumbnail url: " + mThumbnailURL);
-            } else {
-                Log.e(TAG, "Observation being created without a photo");
-                mThumbnailURL = "";
-            }
-            // TODO: parse the time stamp from the "created_at" field in JSON
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            Date dateObserved;
-            try {
-                dateObserved = formatter.parse(jsonObject.getString(JSON_OBSERVED_DATE));
-            } catch(ParseException pe) {
-                Log.e(TAG, "Could not parse date: " + pe.getMessage());
-                dateObserved = new Date();
-            }
-            mDateObserved = dateObserved;
+            mThumbnailUrl = parseThumbnailUrl(jsonObject);
+            mDateObserved = parseDateFromString(jsonObject.getString(JSON_OBSERVED_DATE));
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
         }
+    }
+
+    private String parseThumbnailUrl(JSONObject jsonObject) throws JSONException {
+        String thumbnailUrl;
+        int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
+        if(numPhotos >= 1) {
+            JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
+            // just use the first photo as the thumbnail for a marker
+            thumbnailUrl = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
+            Log.d(TAG, "Got thumbnail url: " + thumbnailUrl);
+        } else {
+            Log.e(TAG, "Observation being created without a photo");
+            thumbnailUrl = "";
+        }
+        return thumbnailUrl;
+    }
+
+    private Date parseDateFromString(String dateString) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateObserved;
+        try {
+            dateObserved = formatter.parse(dateString);
+        } catch(ParseException pe) {
+            Log.e(TAG, "Could not parse date: " + pe.getMessage());
+            dateObserved = new Date();
+        }
+        return dateObserved;
     }
 
     public String getSpeciesGuess() {
@@ -96,12 +99,12 @@ public class Observation implements Serializable {
         mSpeciesGuess = speciesGuess;
     }
 
-    public String getThumbnailURL() {
-        return mThumbnailURL;
+    public String getThumbnailUrl() {
+        return mThumbnailUrl;
     }
 
-    public void setThumbnailURL(String thumbnailURL) {
-        mThumbnailURL = thumbnailURL;
+    public void setThumbnailUrl(String thumbnailUrl) {
+        mThumbnailUrl = thumbnailUrl;
     }
 
     public String getId() {

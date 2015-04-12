@@ -271,9 +271,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
             textView.setText(o.getSpeciesGuess());
 
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
-            if(!o.getThumbnailURL().equals("")) {
+            if(!o.getThumbnailUrl().equals("")) {
                 Picasso.with(getApplicationContext())
-                        .load(o.getThumbnailURL())
+                        .load(o.getThumbnailUrl())
                         .resize(50, 50)
                         .centerCrop()
                         .into(imageView, new InfoWindowRefresher(marker));
