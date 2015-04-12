@@ -81,7 +81,7 @@ public class ApiManager {
         Uri.Builder paramsBuilder = new Uri.Builder();
         paramsBuilder.appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
                 .appendQueryParameter(URL_LONGITUDE, String.valueOf(o.getLocation().longitude))
-                .appendQueryParameter(URL_DATE, o.getTimeStamp().toString()) // TODO: make sure this is the proper date format
+                .appendQueryParameter(URL_DATE, o.getTimeStamp().toString())
                 .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
         Log.d(TAG, "Base URL: " + baseBuilder.toString());
@@ -140,12 +140,11 @@ public class ApiManager {
     private static String sendGet(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        // HttpsURLConnection uses GET by default
         try {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(connection.getInputStream()));
 
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
