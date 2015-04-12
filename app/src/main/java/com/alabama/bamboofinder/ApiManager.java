@@ -67,8 +67,7 @@ public class ApiManager {
             response = "";
         }
 
-        ArrayList<Observation> observations = JSONDataToObservations(response.toString());
-        return observations;
+        return JSONDataToObservations(response);
     }
 
     /* Uploads one observation to iNaturalist */
@@ -93,7 +92,7 @@ public class ApiManager {
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
-        // TODO: API documentation says to upload the photo separately, so make second post
+
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("image", new File(photoFileName));

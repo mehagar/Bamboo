@@ -41,11 +41,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private List<Observation> mObservations;
-    private LatLng mLastMapPosition;
-    private LatLng mLastUserPosition;
+    private LatLng mLastMapPosition; // The location of the current center of the map.
+    private LatLng mLastUserPosition; // The physical location of the user.
     private Map<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
-    private SearchFilter mSearchFilter; // Might be null if search filter has not been applie or has been cleared.
+    private SearchFilter mSearchFilter; // Might be null if search filter has not been applied or has been cleared.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,7 +201,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 mLastMapPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
                 mLastUserPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
             } else {
-                mLastMapPosition = new LatLng(33.2, -87.5);
+                mLastMapPosition = new LatLng(33.2, -87.5); // default to Tuscaloosa
                 mLastUserPosition = null; // User must have gps enabled to submit observations
             }
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastMapPosition, 15.0f));
@@ -223,17 +223,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
             mMap.clear();
         }
         for(Observation o : mObservations) {
-            // do not add a marker if one for this observation already exists
-            boolean meetsFilter = sf == null || sf.meetsCriteria(mLastMapPosition, o);
+            // Only add a marker if it is not already show, and it meets the search criteria(if any)
+            boolean meetsCriteria = sf == null || sf.meetsCriteria(mLastMapPosition, o);
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
-            if(meetsFilter && !alreadyShown) {
-                Marker m = mMap.addMarker(
-                        new MarkerOptions()
-                                .position(o.getLocation())
-                                .title(o.getId())
-                                .snippet(o.getSpeciesGuess())
-                                .icon(BitmapDescriptorFactory.defaultMarker(65)));
-                mMarkerObservationMap.put(m, o);
+            if(meetsCriteria && !alreadyShown) {
+                addMarkerForObservation(o);
             }
         }
         // This commented out code is being used for testing purposes, to test the HTTP POST
@@ -242,6 +236,17 @@ public class InteractiveMapActivity extends ActionBarActivity {
             mObservations.get(0).setDescription("This is the description.");
             ApiManager.uploadObservation(mObservations.get(0));
         }*/
+    }
+
+    // Adds a marker to the google maps object for an observation.
+    private void addMarkerForObservation(Observation o) {
+        Marker m = mMap.addMarker(
+                new MarkerOptions()
+                        .position(o.getLocation())
+                        .title(o.getId())
+                        .snippet(o.getSpeciesGuess())
+                        .icon(BitmapDescriptorFactory.defaultMarker(65)));
+        mMarkerObservationMap.put(m, o);
     }
 
     // This task retrieves observations from the network asynchronously.
@@ -281,7 +286,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 Log.e(TAG, "Observation created without a picture");
                 imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
-
             return view;
         }
 
