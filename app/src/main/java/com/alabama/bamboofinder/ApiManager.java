@@ -71,7 +71,7 @@ public class ApiManager {
     }
 
     /* Uploads one observation to iNaturalist */
-    public static void uploadObservation(Observation o, String photoFileName) throws IOException {
+    public static void uploadObservation(Observation o, String photoFileName) {
         Uri.Builder baseBuilder = new Uri.Builder();
         baseBuilder.scheme("https")
                 .authority(BASE_URL)
@@ -95,7 +95,11 @@ public class ApiManager {
 
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        params.put("image", new File(photoFileName));
+        try {
+            params.put("image", new File(photoFileName));
+        } catch(IOException e) {
+            Log.e(TAG, "Could not create photo file from photoFileName");
+        }
 
         Uri.Builder photoBuilder = new Uri.Builder();
         photoBuilder.scheme("https")

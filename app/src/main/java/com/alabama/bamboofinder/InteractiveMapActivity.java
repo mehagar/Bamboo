@@ -208,20 +208,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mGoogleApiClient.connect();
     }
 
-    private void startLocationUpdates(LocationListener listener) {
-        LocationRequest locationRequest = createLocationRequest();
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, locationRequest, listener);
-    }
-
-    private LocationRequest createLocationRequest() {
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        return locationRequest;
-    }
-
     // Callbacks for when the user's Location is first connected, updated, etc.
     class LocationCallbacks implements GoogleApiClient.ConnectionCallbacks,
                                                     LocationListener{
@@ -252,6 +238,20 @@ public class InteractiveMapActivity extends ActionBarActivity {
         public void onConnectionSuspended(int cause) {
             // left unimplemented
         }
+    }
+
+    private void startLocationUpdates(LocationListener listener) {
+        LocationRequest locationRequest = createLocationRequest();
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, locationRequest, listener);
+    }
+
+    private LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return locationRequest;
     }
 
     private LatLngBounds getScreenBoundingBox() {
