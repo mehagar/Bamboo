@@ -30,6 +30,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +58,18 @@ public class InteractiveMapActivity extends ActionBarActivity {
         setContentView(R.layout.activity_interactive_map);
         buildGoogleApiClient();
         setUpMapIfNeeded();
+
+
+        try {
+            Log.d(TAG, "string got from main activity was: " + getIntent().getStringExtra("user"));
+            User user = new User(new JSONObject(getIntent().getStringExtra("user")));
+            // testing HTTP Post
+            Observation o = new Observation();
+            user.setmToken(getIntent().getStringExtra("token"));
+            new PostObservationsTask().execute(o, user, "");
+        } catch(JSONException e) {
+            Log.e(TAG, "Could not create user from intent: " + e.getMessage());
+        }
     }
 
     @Override
@@ -271,12 +286,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 addMarkerForObservation(o);
             }
         }
-        // This commented out code is being used for testing purposes, to test the HTTP POST
-        /*if(mObservations.size() > 0) {
-            mObservations.get(0).setTimeStamp(new Date());
-            mObservations.get(0).setDescription("This is the description.");
-            ApiManager.uploadObservation(mObservations.get(0));
-        }*/
     }
 
     // Adds a marker to the google maps object for an observation.
@@ -304,6 +313,15 @@ public class InteractiveMapActivity extends ActionBarActivity {
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
             showObservations(mSearchFilter);
+        }
+    }
+
+    class PostObservationsTask extends AsyncTask<Object, Void, Void> {
+        protected Void doInBackground(Object... objects) {
+            // observation, user, photo file name
+            Log.d(TAG, "in doInBackground");
+            ApiManager.uploadObservation((Observation)objects[0], (User)objects[1], (String)objects[2]);
+            return null;
         }
     }
 

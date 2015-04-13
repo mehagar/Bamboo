@@ -125,6 +125,7 @@ public class LoginActivity extends ActionBarActivity {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String response = in.readLine();
+                Log.d("LoginActivity", response);
                 String[] array_response = response.split(",");
                 String[] token_split = array_response[0].split(":");
                 token = token_split[1];

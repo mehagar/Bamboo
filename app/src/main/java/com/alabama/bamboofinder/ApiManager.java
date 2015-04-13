@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.app.Activity;
 import android.net.Uri;
 import android.util.Log;
 
@@ -71,7 +72,7 @@ public class ApiManager {
     }
 
     /* Uploads one observation to iNaturalist */
-    public static void uploadObservation(Observation o, String photoFileName) {
+    public static void uploadObservation(Observation o, User user, String photoFileName) {
         Uri.Builder baseBuilder = new Uri.Builder();
         baseBuilder.scheme("https")
                 .authority(BASE_URL)
@@ -88,12 +89,12 @@ public class ApiManager {
         Log.d(TAG, "Params URL: " + paramsBuilder.toString());
 
         try {
-            sendPost(baseBuilder.toString(), paramsBuilder.toString());
+            sendPost(baseBuilder.toString(), paramsBuilder.toString(), user.getmToken());
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
 
-        AsyncHttpClient client = new AsyncHttpClient();
+       /* AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         try {
             params.put("image", new File(photoFileName));
@@ -117,7 +118,7 @@ public class ApiManager {
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.d(TAG, "Failed to upload photo");
             }
-        });
+        });*/
     }
 
     /* Converts an JSON string to a list of observations */
@@ -160,21 +161,24 @@ public class ApiManager {
         }
     }
 
-    private static void sendPost(String baseUrl, String params) throws IOException {
+    private static void sendPost(String baseUrl, String params, String token) throws IOException {
         // TODO: need to authenticate with token
-        // e.g. String token = user.getToken();
         URL url = new URL(baseUrl);
 
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
         try {
             // setDoOutput sets POST as method
             con.setDoOutput(true);
+            con.setRequestProperty("Authorization", "Bearer " + token);
             con.setFixedLengthStreamingMode(params.getBytes().length);
 
             BufferedWriter out = new BufferedWriter(
                     new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
             out.write(params);
             out.close();
+            Log.d(TAG, "Response code: " + con.getResponseCode());
+        } catch(Exception e) {
+            Log.d(TAG, "Error sending post: " + e.getMessage());
         } finally {
             con.disconnect();
         }

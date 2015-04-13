@@ -40,15 +40,15 @@ public class Observation implements Serializable {
     private String mThumbnailUrl;
 
     public Observation() {
-        mDateObserved = null;
-        mSpeciesGuess = "";
-        mDescription = "";
+        mDateObserved = new Date();
+        mSpeciesGuess = "Default Species Guess";
+        mDescription = "Default Description";
         mValidated = false;
-        mOwnerUserName = "";
-        mId = "";
+        mOwnerUserName = "Default owner user name";
+        mId = "00000";
         mLatitude = 0.0;
         mLongitude = 0.0;
-        mThumbnailUrl = "";
+        mThumbnailUrl = "unassigned url";
     }
 
     public Observation(JSONObject jsonObject) {

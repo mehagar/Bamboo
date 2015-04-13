@@ -52,6 +52,8 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, InteractiveMapActivity.class);
                 i.putExtra("user", mUser.convertToJSON().toString());
+                i.putExtra("token", getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE).getString("token", "Empty Token")); // just testing...
+                Log.d("MainActivity", mUser.convertToJSON().toString());
                 startActivity(i);
             }
         });
