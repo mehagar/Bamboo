@@ -11,11 +11,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
@@ -60,7 +61,17 @@ public class InteractiveMapActivity extends ActionBarActivity {
     protected void onResume() {
         Log.d(TAG, "onResume called");
         super.onResume();
+
+        if(!mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
         setUpMapIfNeeded();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
     }
 
     @Override
@@ -113,6 +124,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 // showObservations(mSearchFilter)
             }
         }
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, new LocationCallbacks());
     }
 
     /**
@@ -180,7 +196,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     // Builds and connects to the google Location Services api that can retrieve the last known location.
     private void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new LocationConnectionCallbacks())
+                .addConnectionCallbacks(new LocationCallbacks())
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -192,7 +208,23 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mGoogleApiClient.connect();
     }
 
-    class LocationConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks {
+    private void startLocationUpdates(LocationListener listener) {
+        LocationRequest locationRequest = createLocationRequest();
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, locationRequest, listener);
+    }
+
+    private LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return locationRequest;
+    }
+
+    // Callbacks for when the user's Location is first connected, updated, etc.
+    class LocationCallbacks implements GoogleApiClient.ConnectionCallbacks,
+                                                    LocationListener{
         @Override
         public void onConnected(Bundle connectionHint) {
             Location loc = LocationServices.FusedLocationApi.getLastLocation(
@@ -205,6 +237,15 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 mLastUserPosition = null; // User must have gps enabled to submit observations
             }
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastMapPosition, 15.0f));
+
+            startLocationUpdates(this);
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            mLastUserPosition = new LatLng(location.getLatitude(),
+                                            location.getLongitude());
+            Log.d(TAG, "onLocationChanged called");
         }
 
         @Override
@@ -271,9 +312,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         public View getInfoContents(final Marker marker) {
             View view = getLayoutInflater().inflate(R.layout.image_info_window, null);
             Observation o = mMarkerObservationMap.get(marker);
-
-            TextView textView = (TextView)view.findViewById(R.id.species_guess_textView);
-            textView.setText(o.getSpeciesGuess());
 
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
             if(!o.getThumbnailUrl().equals("")) {
