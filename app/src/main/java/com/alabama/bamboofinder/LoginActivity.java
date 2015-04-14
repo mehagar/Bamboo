@@ -13,6 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -125,10 +128,9 @@ public class LoginActivity extends ActionBarActivity {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String response = in.readLine();
-                Log.d("LoginActivity", response);
-                String[] array_response = response.split(",");
-                String[] token_split = array_response[0].split(":");
-                token = token_split[1];
+
+                JSONObject responseObject = new JSONObject(response);
+                token = responseObject.getString("access_token");
 
                 connection.disconnect();
             }
