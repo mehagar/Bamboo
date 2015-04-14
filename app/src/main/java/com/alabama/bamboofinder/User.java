@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -78,10 +79,7 @@ public class User extends AsyncTask<String, Void, User> {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder(75);
-        sb.append("Bearer ")
-                .append(token[0]);
-        String auth = sb.toString().replaceAll("\"", "");
+        String auth = "Bearer " + token[0];
 
         JSONObject object = null;
         Uri.Builder userRequest = new Uri.Builder();
