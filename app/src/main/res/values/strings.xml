@@ -17,7 +17,7 @@
     <string name="action_filter">Filter Results</string>
     <string name="new_picture">New Picture</string>
 
-    <string name="title_activity_interactive_map">BambooFinderMap</string>
+    <string name="title_activity_interactive_map">Interactive Map</string>
     <string name="title_activity_observation_detail">Edit Observation</string>
     <string name="title_activity_observation_list">My Observations</string>
     <string name="title_activity_educational">EducationalActivity</string>

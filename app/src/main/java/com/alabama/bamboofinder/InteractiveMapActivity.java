@@ -59,6 +59,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
         buildGoogleApiClient();
         setUpMapIfNeeded();
 
+        getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
         try {
             Log.d(TAG, "string got from main activity was: " + getIntent().getStringExtra("user"));
