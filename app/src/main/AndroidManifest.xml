@@ -60,7 +60,11 @@
             android:configChanges="orientation|keyboardHidden"
             android:exported="true"
             android:label="@string/title_activity_observation_detail"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".ObservationListActivity"

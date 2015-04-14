@@ -16,6 +16,8 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = "MainActivity";
+
     private static final int LOGIN_REQUEST_CODE = 57;
 
     private static User mUser;
@@ -42,7 +44,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this,ObservationListActivity.class);
                 i.putExtra("user", mUser.convertToJSON().toString());
-                Log.i("User Extra", i.getStringExtra("user"));
+                Log.i(TAG, i.getStringExtra("user"));
                 startActivity(i);
             }
         });
@@ -53,7 +55,7 @@ public class MainActivity extends ActionBarActivity {
                 Intent i = new Intent(MainActivity.this, InteractiveMapActivity.class);
                 i.putExtra("user", mUser.convertToJSON().toString());
                 i.putExtra("token", getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE).getString("token", "Empty Token")); // just testing...
-                Log.d("MainActivity", mUser.convertToJSON().toString());
+                Log.d(TAG, mUser.convertToJSON().toString());
                 startActivity(i);
             }
         });
@@ -88,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
                 mUser = (User) userTask.get();
             }
             catch (Exception e) {
-
+                Log.e(TAG, "Failed to get user");
             }
             mLoggedInText.setText("Welcome, " + mUser.getmUsername() + "!");
         }

@@ -61,16 +61,16 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        try {
+        /*try {
             Log.d(TAG, "string got from main activity was: " + getIntent().getStringExtra("user"));
-            User user = new User(new JSONObject(getIntent().getStringExtra("user")));
+            User user = new User(new JSONObject(getIntent().getStringExtra("user"))); // Will fail here coming from search filter activity
             // testing HTTP Post
             Observation o = new Observation();
             user.setmToken(getIntent().getStringExtra("token"));
             new PostObservationsTask().execute(o, user, "");
         } catch(JSONException e) {
             Log.e(TAG, "Could not create user from intent: " + e.getMessage());
-        }
+        }*/
     }
 
     @Override
@@ -132,7 +132,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "In onActivityResult");
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
                 // apply search filter here
@@ -303,6 +302,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     // This task retrieves observations from the network asynchronously.
     // When it has finished, the map is updated to show any new observations.
     class GetObservationsTask extends AsyncTask<LatLngBounds, Void, ArrayList<Observation>> {
+        @Override
         protected ArrayList<Observation> doInBackground(LatLngBounds... latLngBounds) {
             // this function must accept a variable number of arguments, but there should only be one.
             if(latLngBounds.length != 1) {
@@ -310,19 +310,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
             }
             return ApiManager.getObservationsFromNetwork(latLngBounds[0]);
         }
-
+        @Override
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
             showObservations(mSearchFilter);
-        }
-    }
-
-    class PostObservationsTask extends AsyncTask<Object, Void, Void> {
-        protected Void doInBackground(Object... objects) {
-            // observation, user, photo file name
-            Log.d(TAG, "in doInBackground");
-            ApiManager.uploadObservation((Observation)objects[0], (User)objects[1], (String)objects[2]);
-            return null;
         }
     }
 
