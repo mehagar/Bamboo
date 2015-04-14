@@ -42,6 +42,8 @@ public class ObservationDetailActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_detail);
 
+        getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
+
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
 
         mCancelButton = (Button) findViewById(R.id.cancelButton);

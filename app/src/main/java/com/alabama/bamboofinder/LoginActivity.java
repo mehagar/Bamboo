@@ -42,6 +42,8 @@ public class LoginActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
+
         mUsername = (EditText) findViewById(R.id.EmailText);
         mPassword = (EditText) findViewById(R.id.PasswordText);
         token = "Empty Token";

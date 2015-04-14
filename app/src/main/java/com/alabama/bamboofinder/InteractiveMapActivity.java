@@ -63,7 +63,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         try {
             Log.d(TAG, "string got from main activity was: " + getIntent().getStringExtra("user"));
-            User user = new User(new JSONObject(getIntent().getStringExtra("user")));
+            User user = new User(new JSONObject(getIntent().getStringExtra("user"))); // Will fail here coming from search filter activity
             // testing HTTP Post
             Observation o = new Observation();
             user.setmToken(getIntent().getStringExtra("token"));
@@ -132,7 +132,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "In onActivityResult");
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
                 // apply search filter here
