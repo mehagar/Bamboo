@@ -153,7 +153,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
-                finish();
+                //finish();
+                Intent i = getCallingActivityIntent();
+                startActivity(i);
                 return true;
             case R.id.menu_item_new_picture:
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -162,6 +164,23 @@ public class ObservationDetailActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    Intent getCallingActivityIntent() {
+        Intent i;
+        switch(getCallingActivity().getClassName()) {
+            case "InteractiveMapActivity":
+                i = new Intent(this, InteractiveMapActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                break;
+            case "ObservationListActivity":
+                i = new Intent(this, ObservationListActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                break;
+            default:
+                i = null;
+        }
+        return i;
     }
 
     @Override
