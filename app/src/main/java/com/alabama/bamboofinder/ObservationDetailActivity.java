@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import java.util.Date;
 
 
 public class ObservationDetailActivity extends ActionBarActivity {
+    private static final String TAG = "ObservationDetail";
+
     public static final String EXTRA_OBSERVATION = "observation";
     public static final String EXTRA_USER_LATITUDE = "latitude";
     public static final String EXTRA_USER_LONGITUDE = "longitude";
@@ -165,6 +168,16 @@ public class ObservationDetailActivity extends ActionBarActivity {
             catch (Exception e) {
                 Log.e("Result Exception", e.toString());
             }
+        }
+    }
+
+    class PostObservationsTask extends AsyncTask<Object, Void, Void> {
+        @Override
+        protected Void doInBackground(Object... objects) {
+            // params are the observation, token, and photo file name
+            Log.d(TAG, "in doInBackground");
+            ApiManager.uploadObservation((Observation)objects[0], (String)objects[1], (String)objects[2]);
+            return null;
         }
     }
 }

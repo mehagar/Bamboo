@@ -72,7 +72,7 @@ public class ApiManager {
     }
 
     /* Uploads one observation to iNaturalist */
-    public static void uploadObservation(Observation o, User user, String photoFileName) {
+    public static void uploadObservation(Observation o, String token, String photoFileName) {
         Uri.Builder baseBuilder = new Uri.Builder();
         baseBuilder.scheme("https")
                 .authority(BASE_URL)
@@ -89,7 +89,7 @@ public class ApiManager {
         Log.d(TAG, "Params URL: " + paramsBuilder.toString());
 
         try {
-            sendPost(baseBuilder.toString(), paramsBuilder.toString(), user.getmToken());
+            sendPost(baseBuilder.toString(), paramsBuilder.toString(), token);
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
@@ -162,7 +162,6 @@ public class ApiManager {
     }
 
     private static void sendPost(String baseUrl, String params, String token) throws IOException {
-        // TODO: need to authenticate with token
         URL url = new URL(baseUrl);
 
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
