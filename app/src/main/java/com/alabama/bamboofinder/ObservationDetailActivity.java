@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -28,14 +29,20 @@ public class ObservationDetailActivity extends ActionBarActivity {
     public static final String EXTRA_OBSERVATION = "observation";
     public static final String EXTRA_USER_LATITUDE = "latitude";
     public static final String EXTRA_USER_LONGITUDE = "longitude";
+    public static final String BASE_URL = "www.inaturalist.org";
 
+    private static final int ADD_OBSERVATION = 0;
+    private static final int EDIT_OBSERVATION = 1;
     private static final int CAMERA_REQUEST = 1888;
+    private static int mMode;
     private ImageView mImageView;
     private EditText mSpeciesText;
     private EditText mDescriptionText;
     private Button mSaveButton;
     private Button mCancelButton;
     private Button mValidateButton;
+    private ApiManager api;
+    private Observation mObservation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +50,32 @@ public class ObservationDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_observation_detail);
 
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
+        mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
+        mImageView = (ImageView)findViewById(R.id.observationImage);
+
+        //Check if adding or editing
+        Intent i = getIntent();
+        double latitude = i.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
+        if(latitude == -1) {
+            mMode = EDIT_OBSERVATION;
+
+            mObservation = (Observation) i.getSerializableExtra(EXTRA_OBSERVATION);
+            if(!mObservation.getThumbnailUrl().equals("")) {
+                Picasso.with(getApplicationContext())
+                        .load(mObservation.getThumbnailUrl())
+                        .resize(864, 486)
+                        .centerCrop()
+                        .into(mImageView);
+            } else {
+                Log.e("ImageView Error", "Observation created without a picture");
+                mImageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
+            }
+            mSpeciesText.setText(mObservation.getSpeciesGuess());
+            mDescriptionText.setText(mObservation.getDescription());
+        }
+        else
+            mMode = ADD_OBSERVATION;
+
 
         mCancelButton = (Button) findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
@@ -59,16 +92,24 @@ public class ObservationDetailActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = getIntent();
-                Observation observation = new Observation();
-                double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
-                double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
-                LatLng location = new LatLng(latitude, longitude);
 
-                observation.setLocation(location);
-                observation.setSpeciesGuess(mSpeciesText.getText().toString());
-                observation.setDescription(mDescriptionText.getText().toString());
-                //set observation TimeStamp
-                //set observation username?
+                switch(mMode) {
+                    case(EDIT_OBSERVATION):
+                        //TODO update observation fields in the intent.
+                        break;
+                    case(ADD_OBSERVATION):
+                        mObservation = new Observation();
+                        double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
+                        double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
+                        LatLng location = new LatLng(latitude, longitude);
+                        mObservation.setLocation(location);
+                        mObservation.setSpeciesGuess(mSpeciesText.getText().toString());
+                        mObservation.setDescription(mDescriptionText.getText().toString());
+                        mObservation.setTimeStamp(new Date());
+
+                        
+                }
+
 
                 //if editing observation
 
@@ -97,7 +138,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.menu_item_new_picture:
-                mImageView = (ImageView)findViewById(R.id.observationImage);
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
 

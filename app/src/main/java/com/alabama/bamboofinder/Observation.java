@@ -33,7 +33,6 @@ public class Observation implements Serializable {
     private String mSpeciesGuess;
     private String mDescription;
     private boolean mValidated;
-    private String mOwnerUserName;
     private String mId;
     double mLatitude;
     double mLongitude;
@@ -44,7 +43,6 @@ public class Observation implements Serializable {
         mSpeciesGuess = "Default Species Guess";
         mDescription = "Default Description";
         mValidated = false;
-        mOwnerUserName = "Default owner user name";
         mId = "00000";
         mLatitude = 0.0;
         mLongitude = 0.0;
@@ -145,13 +143,5 @@ public class Observation implements Serializable {
 
     public void setValidated(boolean validated) {
         this.mValidated = validated;
-    }
-
-    public String getOwnerUserName() {
-        return mOwnerUserName;
-    }
-
-    public void setOwnerUserName(String ownerUserName) {
-        this.mOwnerUserName = ownerUserName;
     }
 }
