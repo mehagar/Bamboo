@@ -8,6 +8,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,7 +45,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_observation_detail);
-
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
@@ -101,19 +101,17 @@ public class ObservationDetailActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
+            case R.id.home:
+                finish();
+                return true;
             case R.id.menu_item_new_picture:
                 mImageView = (ImageView)findViewById(R.id.observationImage);
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
-
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
