@@ -1,6 +1,8 @@
 package com.alabama.bamboofinder;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -57,6 +59,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
         mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
         mImageView = (ImageView)findViewById(R.id.observationImage);
+        api = new ApiManager();
 
         //Check if adding or editing
         Intent i = getIntent();
@@ -112,7 +115,14 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         mObservation.setDescription(mDescriptionText.getText().toString());
                         mObservation.setTimeStamp(new Date());
 
-                        
+                        Log.i("ObservationDetail", mObservation.toString());
+                        SharedPreferences prefs = ObservationDetailActivity.this.getSharedPreferences(
+                                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+                        String token = prefs.getString("token", "Empty Token");
+                        AsyncTask postObservation = new PostObservationsTask().execute(
+                                mObservation, token, "");
+                        setResult(RESULT_OK);
+                        finish();
                 }
 
 
