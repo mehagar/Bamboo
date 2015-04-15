@@ -42,6 +42,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     public static final int FILTER_REQUEST = 1;
 
+    public static final String EXTRA_SEARCH_FILTER = "search_filter";
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private List<Observation> mObservations;
     private LatLng mLastMapPosition; // The location of the current center of the map.
@@ -133,9 +135,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
-                // apply search filter here
-                // mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
-                // showObservations(mSearchFilter)
+                mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
+                showObservations(mSearchFilter);
             }
         }
     }
@@ -186,7 +187,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                if(cameraPosition.target != mLastMapPosition) {
+                Log.d(TAG, "ON CHANGE LISTENER");
+                if(cameraPosition.target.latitude != mLastMapPosition.latitude ||
+                   cameraPosition.target.longitude != mLastMapPosition.longitude) {
+                    Log.d(TAG, "TARGET: " + cameraPosition.target.toString() + "LAST POSITION: " + mLastMapPosition.toString());
+                    Log.d(TAG, "In if in on change listener");
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
                     mLastMapPosition = cameraPosition.target;

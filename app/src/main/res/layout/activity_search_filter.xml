@@ -40,4 +40,13 @@
         android:datePickerMode="spinner"
         android:layout_marginTop="8dp"
         />
+    <Button
+        android:id="@+id/sf_ok_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <Button
+        android:id="@+id/sf_cancel_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
