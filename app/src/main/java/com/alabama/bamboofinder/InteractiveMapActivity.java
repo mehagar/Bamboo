@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.common.collect.HashBiMap;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -48,7 +49,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private List<Observation> mObservations;
     private LatLng mLastMapPosition; // The location of the current center of the map.
     private LatLng mLastUserPosition; // The physical location of the user.
-    private Map<Marker, Observation> mMarkerObservationMap;
+    private HashBiMap<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
     private SearchFilter mSearchFilter; // Might be null if search filter has not been applied or has been cleared.
 
@@ -137,6 +138,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
             if(resultCode == RESULT_OK) {
                 mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
                 showObservations(mSearchFilter);
+            } else if(resultCode == RESULT_CANCELED) {
+                mSearchFilter = null;
+                showObservations(mSearchFilter);
             }
         }
     }
@@ -182,7 +186,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
      */
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        mMarkerObservationMap = new HashMap<Marker, Observation>();
+        mMarkerObservationMap = HashBiMap.create();
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
@@ -278,15 +282,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     private void showObservations(SearchFilter sf) {
-        if(sf != null) {
-            mMap.clear();
-        }
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = sf == null || sf.meetsCriteria(mLastMapPosition, o);
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
                 addMarkerForObservation(o);
+            } else if(!meetsCriteria && alreadyShown) {
+                mMarkerObservationMap.inverse().get(o).remove();
             }
         }
     }
