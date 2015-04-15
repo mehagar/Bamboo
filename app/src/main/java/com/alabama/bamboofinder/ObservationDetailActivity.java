@@ -68,9 +68,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
             mMode = EDIT_OBSERVATION;
 
             mObservation = (Observation) i.getSerializableExtra(EXTRA_OBSERVATION);
-            if(!mObservation.getThumbnailUrl().equals("")) {
+            if(!mObservation.getMediumUrl().equals("")) {
                 Picasso.with(getApplicationContext())
-                        .load(mObservation.getThumbnailUrl())
+                        .load(mObservation.getMediumUrl())
                         .resize(864, 486)
                         .centerCrop()
                         .into(mImageView);

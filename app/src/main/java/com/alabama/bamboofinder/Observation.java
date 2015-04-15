@@ -37,7 +37,7 @@ public class Observation implements Serializable {
     private String mId;
     double mLatitude;
     double mLongitude;
-    private String mThumbnailUrl;  
+    private String mThumbnailUrl;
     private String mMediumUrl;
 
     public Observation() {
