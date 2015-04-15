@@ -25,6 +25,7 @@ public class Observation implements Serializable {
     private static final String JSON_ID = "id";
     private static final String JSON_PHOTOS = "photos";
     private static final String JSON_THUMBNAIL_URL = "square_url";
+    private static final String JSON_MEDIUM_URL = "medium_url";
     private static final String JSON_NUM_PHOTOS = "observation_photos_count";
     private static final String JSON_SPECIES_GUESS = "species_guess";
     private static final String JSON_OBSERVED_DATE = "observed_on";
@@ -36,7 +37,8 @@ public class Observation implements Serializable {
     private String mId;
     double mLatitude;
     double mLongitude;
-    private String mThumbnailUrl;
+    private String mThumbnailUrl;  
+    private String mMediumUrl;
 
     public Observation() {
         mDateObserved = new Date();
@@ -46,7 +48,8 @@ public class Observation implements Serializable {
         mId = "00000";
         mLatitude = 0.0;
         mLongitude = 0.0;
-        mThumbnailUrl = "unassigned url";
+        mThumbnailUrl = "unassigned thumbnail url";
+        mMediumUrl = "unassigned medium url";
     }
 
     public Observation(JSONObject jsonObject) {
@@ -55,20 +58,21 @@ public class Observation implements Serializable {
             mLongitude = jsonObject.getDouble(JSON_LONGITUDE);
             mId = jsonObject.getString(JSON_ID);
             mSpeciesGuess = jsonObject.getString(JSON_SPECIES_GUESS);
-            mThumbnailUrl = parseThumbnailUrl(jsonObject);
+            mThumbnailUrl = parsePhotoUrl(jsonObject, JSON_THUMBNAIL_URL);
+            mMediumUrl = parsePhotoUrl(jsonObject, JSON_MEDIUM_URL);
             mDateObserved = parseDateFromString(jsonObject.getString(JSON_OBSERVED_DATE));
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
         }
     }
 
-    private String parseThumbnailUrl(JSONObject jsonObject) throws JSONException {
+    private String parsePhotoUrl(JSONObject jsonObject, String photoKey) throws JSONException {
         String thumbnailUrl;
         int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
         if(numPhotos >= 1) {
             JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
             // just use the first photo as the thumbnail for a marker
-            thumbnailUrl = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
+            thumbnailUrl = photos.getJSONObject(0).getString(photoKey);
             Log.d(TAG, "Got thumbnail url: " + thumbnailUrl);
         } else {
             Log.e(TAG, "Observation being created without a photo");
@@ -103,6 +107,14 @@ public class Observation implements Serializable {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         mThumbnailUrl = thumbnailUrl;
+    }
+
+    public String getMediumUrl() {
+        return mMediumUrl;
+    }
+
+    public void setMediumUrl(String mediumUrl) {
+        mMediumUrl = mediumUrl;
     }
 
     public String getId() {
