@@ -246,7 +246,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         public void onLocationChanged(Location location) {
             mLastUserPosition = new LatLng(location.getLatitude(),
                                             location.getLongitude());
-            Log.d(TAG, "onLocationChanged called");
         }
 
         @Override
