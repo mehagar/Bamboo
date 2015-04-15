@@ -22,6 +22,8 @@ public class SpeciesDetailActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_species_detail);
 
+        getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
+
         mSpeciesSpinner = (Spinner)findViewById(R.id.species_spinner);
         mGenusSpinner = (Spinner)findViewById(R.id.genus_spinner);
 
@@ -43,28 +45,5 @@ public class SpeciesDetailActivity extends ActionBarActivity {
                 // generate an image based on the species and genus
             }
         });
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_species_detail, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -14,5 +14,7 @@ public class SearchFilterActivity extends ActionBarActivity {
         setContentView(R.layout.activity_search_filter);
 
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
+
+
     }
 }

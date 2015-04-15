@@ -154,48 +154,17 @@ public class ObservationDetailActivity extends ActionBarActivity {
         switch (id) {
             case R.id.home:
                 //finish();
-                /*Log.d(TAG, "in home case");
-                Intent i = getCallingActivityIntent();
-                startActivity(i);*/
                 return true;
             case R.id.menu_item_new_picture:
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
                 return true;
             case android.R.id.home:
-                /*Log.d(TAG, "in home case");
-                Intent i = getCallingActivityIntent();
-                startActivity(i);*/
+                finish();
                 return true;
             default:
-                Log.d(TAG, "in default case" + item.getItemId());
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    Intent getCallingActivityIntent() {
-        Intent i;
-        String parentActivityName;
-        if(getCallingActivity() != null) {
-            parentActivityName = getCallingActivity().getShortClassName();
-        } else {
-            parentActivityName = "";
-        }
-        Log.d(TAG, "calling activity class name: " + parentActivityName);
-        switch(parentActivityName) {
-            case ".InteractiveMapActivity":
-                i = new Intent(this, InteractiveMapActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                break;
-            case ".ObservationListActivity":
-                i = new Intent(this, ObservationListActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                break;
-            default:
-                Log.e(TAG, "Returning null intent");
-                i = null;
-        }
-        return i;
     }
 
     @Override
