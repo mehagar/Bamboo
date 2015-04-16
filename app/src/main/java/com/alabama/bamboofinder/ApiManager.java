@@ -126,7 +126,7 @@ public class ApiManager {
                 .appendQueryParameter(URL_PHOTO, o.getId())
                 .build();
 
-        client.post(photoBuilder.toString(), params, new AsyncHttpResponseHandler() {
+        /*client.post(photoBuilder.toString(), params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 Log.d(TAG, "Photo uploaded successfully");
@@ -136,7 +136,7 @@ public class ApiManager {
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.d(TAG, "Failed to upload photo");
             }
-        });
+        });*/
     }
 
     private static void uploadObservationToProject(String id, String token) {

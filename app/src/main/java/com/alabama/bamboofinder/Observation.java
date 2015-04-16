@@ -33,6 +33,7 @@ public class Observation implements Serializable {
     private static final String JSON_IDENTIFICATIONS = "identifications";
     private static final String JSON_USER = "user";
     private static final String JSON_LOGIN = "login";
+    private static final String JSON_USER_LOGIN = "user_login";
 
     private Date mDateObserved;
     private String mSpeciesGuess;
@@ -43,6 +44,7 @@ public class Observation implements Serializable {
     double mLongitude;
     private String mThumbnailUrl;
     private String mMediumUrl;
+    private String mUserLogin;
 
     public Observation() {
         mDateObserved = new Date();
@@ -54,6 +56,7 @@ public class Observation implements Serializable {
         mLongitude = 0.0;
         mThumbnailUrl = "unassigned thumbnail url";
         mMediumUrl = "unassigned medium url";
+        mUserLogin = "unassigned user login";
     }
 
     public Observation(JSONObject jsonObject) {
@@ -66,6 +69,7 @@ public class Observation implements Serializable {
             mMediumUrl = parsePhotoUrl(jsonObject, JSON_MEDIUM_URL);
             mDateObserved = parseDateFromString(jsonObject.getString(JSON_OBSERVED_DATE));
             mDescription = jsonObject.getString(JSON_DESCRIPTION);
+            mUserLogin = jsonObject.getString(JSON_USER_LOGIN);
             //mValidated = parseIsValidated(jsonObject);
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
@@ -197,5 +201,13 @@ public class Observation implements Serializable {
 
     public void setValidated(boolean validated) {
         this.mValidated = validated;
+    }
+
+    public String getUserLogin() {
+        return mUserLogin;
+    }
+
+    public void setUserLogin(String mUserLogin) {
+        this.mUserLogin = mUserLogin;
     }
 }
