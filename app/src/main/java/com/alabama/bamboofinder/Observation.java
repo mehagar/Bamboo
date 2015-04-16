@@ -67,18 +67,18 @@ public class Observation implements Serializable {
     }
 
     private String parsePhotoUrl(JSONObject jsonObject, String photoKey) throws JSONException {
-        String thumbnailUrl;
+        String photoUrl;
         int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
         if(numPhotos >= 1) {
             JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
             // just use the first photo as the thumbnail for a marker
-            thumbnailUrl = photos.getJSONObject(0).getString(photoKey);
-            Log.d(TAG, "Got thumbnail url: " + thumbnailUrl);
+            photoUrl = photos.getJSONObject(0).getString(photoKey);
+            Log.d(TAG, "Got thumbnail url: " + photoUrl);
         } else {
-            Log.e(TAG, "Observation being created without a photo");
-            thumbnailUrl = "";
+            Log.e(TAG, "Observation being created without a " + photoKey + " photo url");
+            photoUrl = "";
         }
-        return thumbnailUrl;
+        return photoUrl;
     }
 
     private Date parseDateFromString(String dateString) {

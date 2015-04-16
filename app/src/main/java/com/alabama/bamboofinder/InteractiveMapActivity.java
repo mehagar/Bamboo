@@ -179,8 +179,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
@@ -191,11 +190,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                Log.d(TAG, "ON CHANGE LISTENER");
                 if(cameraPosition.target.latitude != mLastMapPosition.latitude ||
                    cameraPosition.target.longitude != mLastMapPosition.longitude) {
-                    Log.d(TAG, "TARGET: " + cameraPosition.target.toString() + "LAST POSITION: " + mLastMapPosition.toString());
-                    Log.d(TAG, "In if in on change listener");
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
                     mLastMapPosition = cameraPosition.target;
@@ -330,12 +326,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
             Observation o = mMarkerObservationMap.get(marker);
 
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
-            if(!o.getThumbnailUrl().equals("")) {
+            if(o != null && !o.getThumbnailUrl().equals("")) {
                 Picasso.with(getApplicationContext())
                         .load(o.getThumbnailUrl())
                         .resize(50, 50)
                         .centerCrop()
                         .into(imageView, new InfoWindowRefresher(marker));
+            } else if(o == null) {
+                Log.e(TAG, "Marker created without an observation for it! (Or inconsistent map)");
             } else {
                 Log.e(TAG, "Observation created without a picture");
                 imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
