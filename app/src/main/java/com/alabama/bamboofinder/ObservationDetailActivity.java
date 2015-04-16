@@ -21,6 +21,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.Date;
 
@@ -60,6 +63,10 @@ public class ObservationDetailActivity extends ActionBarActivity {
         //Check if adding or editing
         Intent i = getIntent();
         double latitude = i.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
+        SharedPreferences prefs = this.getSharedPreferences(
+                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String prefUser = prefs.getString("user", "Empty user");
+
         if(latitude == -1) {
             mMode = EDIT_OBSERVATION;
 
@@ -74,6 +81,19 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 Log.e("ImageView Error", "Observation created without a picture");
                 mImageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
+
+            //check if logged in user made this observation
+            try {
+                User user = new User(new JSONObject(prefUser));
+                if(!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
+                    mSpeciesText.setKeyListener(null);
+                    mDescriptionText.setKeyListener(null);
+                }
+            }
+            catch (Exception e) {
+                Log.e("ObservationDetail", e.toString());
+            }
+
             mSpeciesText.setText(mObservation.getSpeciesGuess());
             mDescriptionText.setText(mObservation.getDescription());
         }
@@ -114,8 +134,8 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         SharedPreferences prefs = ObservationDetailActivity.this.getSharedPreferences(
                                 "com.alabama.bamboofinder", Context.MODE_PRIVATE);
                         String token = prefs.getString("token", "Empty Token");
-                        //AsyncTask postObservation = new PostObservationsTask().execute(
-                        //        mObservation, token, imageUri.toString());
+                        AsyncTask postObservation = new PostObservationsTask().execute(
+                                mObservation, token, imageUri.toString());
                         setResult(RESULT_OK);
                         finish();
                 }

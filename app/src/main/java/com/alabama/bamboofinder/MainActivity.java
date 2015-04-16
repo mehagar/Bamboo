@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -101,6 +102,12 @@ public class MainActivity extends ActionBarActivity {
         try {
             mUser = (User) userTask.get();
             mLoggedInText.setText("Welcome, " + mUser.getmUsername() + "!");
+
+            String prefUser = mUser.convertToJSON().toString();
+            SharedPreferences prefs = getSharedPreferences(
+                    "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
+            prefs.edit().putString("user", prefUser).apply();
+            Log.i("User prefs string", prefUser);
         }
         catch (Exception e) {
             Log.e(TAG, "Failed to get user");
