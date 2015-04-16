@@ -29,6 +29,10 @@ public class Observation implements Serializable {
     private static final String JSON_NUM_PHOTOS = "observation_photos_count";
     private static final String JSON_SPECIES_GUESS = "species_guess";
     private static final String JSON_OBSERVED_DATE = "observed_on";
+    private static final String JSON_DESCRIPTION = "description";
+    private static final String JSON_IDENTIFICATIONS = "identifications";
+    private static final String JSON_USER = "user";
+    private static final String JSON_LOGIN = "login";
 
     private Date mDateObserved;
     private String mSpeciesGuess;
@@ -61,6 +65,8 @@ public class Observation implements Serializable {
             mThumbnailUrl = parsePhotoUrl(jsonObject, JSON_THUMBNAIL_URL);
             mMediumUrl = parsePhotoUrl(jsonObject, JSON_MEDIUM_URL);
             mDateObserved = parseDateFromString(jsonObject.getString(JSON_OBSERVED_DATE));
+            mDescription = jsonObject.getString(JSON_DESCRIPTION);
+            //mValidated = parseIsValidated(jsonObject);
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
         }
@@ -73,7 +79,6 @@ public class Observation implements Serializable {
             JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
             // just use the first photo as the thumbnail for a marker
             photoUrl = photos.getJSONObject(0).getString(photoKey);
-            Log.d(TAG, "Got thumbnail url: " + photoUrl);
         } else {
             Log.e(TAG, "Observation being created without a " + photoKey + " photo url");
             photoUrl = "";
@@ -91,6 +96,25 @@ public class Observation implements Serializable {
             dateObserved = new Date();
         }
         return dateObserved;
+    }
+
+    private boolean parseIsValidated(JSONObject jsonObject) throws JSONException {
+        // based on the admin(s), check if any of them has personally validated an observation, based on its
+        // jsonObject["identifications"]["user"]["login"]
+        // identifications is an array
+        JSONArray identifications = jsonObject.getJSONArray(JSON_IDENTIFICATIONS);
+        for(int i = 0; i < identifications.length(); ++i) {
+            JSONObject identification = identifications.getJSONObject(i);
+            JSONObject user = identification.getJSONObject(JSON_USER);
+            String loginName = user.getString(JSON_LOGIN);
+            // if loginName is not a member of the project, do not count the validation.
+            // testing just one username. TODO: Should test against all members of the project.
+            if(loginName.equals("mehagar23")) {
+                Log.d(TAG, "Observation " + getSpeciesGuess() + " is validated");
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getSpeciesGuess() {

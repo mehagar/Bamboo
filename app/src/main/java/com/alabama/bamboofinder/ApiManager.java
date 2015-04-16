@@ -40,6 +40,9 @@ public class ApiManager {
     private static final String URL_LONGITUDE = "observation[longitude]";
     private static final String URL_DATE = "observation[observed_on_string]";
     private static final String URL_DESCRIPTION = "observation[description]";
+    private static final String URL_PHOTO = "observation_photo[observation_id]";
+    private static final String URL_PROJECT_OBSERVATION = "project_observation[observation_id]";
+    private static final String URL_PROJECT_ID = "project_observation[project_id]";
     private static final String JSON_PROJECT = "project_observations";
     private static final String JSON_PROJECT_ID = "project_id";
 
@@ -60,6 +63,7 @@ public class ApiManager {
                 .appendQueryParameter(URL_NELNG, String.valueOf(bounds.northeast.longitude))
                 .appendQueryParameter(URL_EXTRA, "projects,observation_photos")
                 .build();
+        Log.d(TAG, "URL is " + builder.toString());
         String response;
         try {
             response = sendGet(builder.toString());
@@ -73,6 +77,14 @@ public class ApiManager {
 
     /* Uploads one observation to iNaturalist */
     public static void uploadObservation(Observation o, String token, String photoFileName) {
+        // uploads the observation, but does not associate it with a picture or project.
+        uploadObservation(o, token);
+        // Uncomment these when they are working.
+        //uploadPictureForObservation(o, token, photoFileName);
+        //uploadObservationToProject(o.getId(), token);
+    }
+
+    private static void uploadObservation(Observation o, String token) {
         Uri.Builder baseBuilder = new Uri.Builder();
         baseBuilder.scheme("https")
                 .authority(BASE_URL)
@@ -93,8 +105,11 @@ public class ApiManager {
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
+    }
 
-       /* AsyncHttpClient client = new AsyncHttpClient();
+    private static void uploadPictureForObservation(Observation o, String token, String photoFileName) {
+        // TODO: will need to use the provided token to authenticate the photo.
+        AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         try {
             params.put("image", new File(photoFileName));
@@ -106,6 +121,7 @@ public class ApiManager {
         photoBuilder.scheme("https")
                 .authority(BASE_URL)
                 .appendPath("observation_photos")
+                .appendQueryParameter(URL_PHOTO, o.getId())
                 .build();
 
         client.post(photoBuilder.toString(), params, new AsyncHttpResponseHandler() {
@@ -118,7 +134,11 @@ public class ApiManager {
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Log.d(TAG, "Failed to upload photo");
             }
-        });*/
+        });
+    }
+
+    private static void uploadObservationToProject(String id, String token) {
+        // TODO: use sendPost() to upload observation to inaturalist project.
     }
 
     /* Converts an JSON string to a list of observations */
