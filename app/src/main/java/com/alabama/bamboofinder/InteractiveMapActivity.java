@@ -281,17 +281,31 @@ public class InteractiveMapActivity extends ActionBarActivity {
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = sf == null || sf.meetsCriteria(mLastMapPosition, o);
-            boolean alreadyShown = mMarkerObservationMap.containsValue(o);
+            boolean alreadyShown = mMarkerObservationMap.inverse().containsKey(o);
             if(meetsCriteria && !alreadyShown) {
+                Log.d(TAG, "CRITERIA: " + meetsCriteria + "ALREADY_SHOWN: " + alreadyShown);
                 addMarkerForObservation(o);
             } else if(!meetsCriteria && alreadyShown) {
+                Log.d(TAG, "Removing marker " + mMarkerObservationMap.inverse().get(o).getPosition().toString() + " from map");
+                Marker m = mMarkerObservationMap.inverse().get(o);
+                m.remove();
                 mMarkerObservationMap.inverse().get(o).remove();
             }
         }
     }
 
+    private boolean isObservationAlreadyShown(Observation o) {
+        for(Observation observation : mMarkerObservationMap.values()) {
+            if(observation.getId().equals(o.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Adds a marker to the google maps object for an observation.
     private void addMarkerForObservation(Observation o) {
+        Log.d(TAG, "Adding marker for observation " + o.getSpeciesGuess());
         Marker m = mMap.addMarker(
                 new MarkerOptions()
                         .position(o.getLocation())

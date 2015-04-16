@@ -117,6 +117,24 @@ public class Observation implements Serializable {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return mId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this) {
+            return true;
+        }
+        if(obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Observation other = (Observation) obj;
+        return mId.equals(other.getId());
+    }
+
+
     public String getSpeciesGuess() {
         return mSpeciesGuess;
     }
