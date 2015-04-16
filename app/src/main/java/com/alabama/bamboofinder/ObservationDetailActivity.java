@@ -10,7 +10,6 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,14 +19,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
-
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
 
 public class ObservationDetailActivity extends ActionBarActivity {
     private static final String TAG = "ObservationDetail";
@@ -36,10 +31,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
     public static final String EXTRA_USER_LATITUDE = "latitude";
     public static final String EXTRA_USER_LONGITUDE = "longitude";
     public static final String BASE_URL = "www.inaturalist.org";
-
     private static final int ADD_OBSERVATION = 0;
     private static final int EDIT_OBSERVATION = 1;
     private static final int CAMERA_REQUEST = 1888;
+
+    private static Uri imageUri;
     private static int mMode;
     private ImageView mImageView;
     private EditText mSpeciesText;
@@ -106,33 +102,23 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         //TODO update observation fields in the intent.
                         break;
                     case(ADD_OBSERVATION):
-                        mObservation = new Observation();
+                        Observation o = new Observation();
                         double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
                         double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
                         LatLng location = new LatLng(latitude, longitude);
-                        mObservation.setLocation(location);
-                        mObservation.setSpeciesGuess(mSpeciesText.getText().toString());
-                        mObservation.setDescription(mDescriptionText.getText().toString());
-                        mObservation.setTimeStamp(new Date());
+                        o.setLocation(location);
+                        o.setSpeciesGuess(mSpeciesText.getText().toString());
+                        o.setDescription(mDescriptionText.getText().toString());
+                        o.setTimeStamp(new Date());
 
-                        Log.i("ObservationDetail", mObservation.toString());
                         SharedPreferences prefs = ObservationDetailActivity.this.getSharedPreferences(
                                 "com.alabama.bamboofinder", Context.MODE_PRIVATE);
                         String token = prefs.getString("token", "Empty Token");
-                        AsyncTask postObservation = new PostObservationsTask().execute(
-                                mObservation, token, "");
+                        //AsyncTask postObservation = new PostObservationsTask().execute(
+                        //        mObservation, token, imageUri.toString());
                         setResult(RESULT_OK);
                         finish();
                 }
-
-
-                //if editing observation
-
-                    //update observation on iNaturalist
-
-                //if adding observation
-
-                    //POST API call
             }
         });
     }
@@ -170,7 +156,8 @@ public class ObservationDetailActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            Uri imageUri = data.getData();
+            imageUri = data.getData();
+            Log.i("Result Image URI", imageUri.toString());
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);

@@ -39,6 +39,13 @@ public class MainActivity extends ActionBarActivity {
         mLoggedInText = (TextView) findViewById(R.id.loggedInText);
         mUser = new User();
 
+        SharedPreferences prefs = this.getSharedPreferences(
+                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String token = prefs.getString("token", "Empty Token");
+        if(!token.contentEquals("Empty Token")) {
+            setUser(token);
+        }
+
         mObservationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,14 +92,18 @@ public class MainActivity extends ActionBarActivity {
                     "com.alabama.bamboofinder", Context.MODE_PRIVATE);
             String token = prefs.getString("token", "Empty Token");
 
-            AsyncTask userTask = new User().execute(token);
-            try {
-                mUser = (User) userTask.get();
-            }
-            catch (Exception e) {
-                Log.e(TAG, "Failed to get user");
-            }
+            setUser(token);
+        }
+    }
+
+    private void setUser(String token) {
+        AsyncTask userTask = new User().execute(token);
+        try {
+            mUser = (User) userTask.get();
             mLoggedInText.setText("Welcome, " + mUser.getmUsername() + "!");
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Failed to get user");
         }
     }
 }
