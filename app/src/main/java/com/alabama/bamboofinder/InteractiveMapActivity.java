@@ -29,14 +29,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.common.collect.HashBiMap;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class InteractiveMapActivity extends ActionBarActivity {
     private static final String TAG = "InteractiveMap";
@@ -62,17 +56,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         setUpMapIfNeeded();
 
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
-
-        /*try {
-            Log.d(TAG, "string got from main activity was: " + getIntent().getStringExtra("user"));
-            User user = new User(new JSONObject(getIntent().getStringExtra("user"))); // Will fail here coming from search filter activity
-            // testing HTTP Post
-            Observation o = new Observation();
-            user.setmToken(getIntent().getStringExtra("token"));
-            new PostObservationsTask().execute(o, user, "");
-        } catch(JSONException e) {
-            Log.e(TAG, "Could not create user from intent: " + e.getMessage());
-        }*/
     }
 
     @Override
@@ -280,7 +263,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations(SearchFilter sf) {
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
-            boolean meetsCriteria = sf == null || sf.meetsCriteria(mLastMapPosition, o);
+            boolean meetsCriteria = (sf == null || sf.meetsCriteria(mLastMapPosition, o));
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
                 Log.d(TAG, "CRITERIA: " + meetsCriteria + "ALREADY_SHOWN: " + alreadyShown);
@@ -292,15 +275,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 mMarkerObservationMap.inverse().remove(o);
             }
         }
-    }
-
-    private boolean isObservationAlreadyShown(Observation o) {
-        for(Observation observation : mMarkerObservationMap.values()) {
-            if(observation.getId().equals(o.getId())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Adds a marker to the google maps object for an observation.
