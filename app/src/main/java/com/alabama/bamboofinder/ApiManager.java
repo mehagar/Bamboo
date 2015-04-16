@@ -1,19 +1,13 @@
 package com.alabama.bamboofinder;
 
-import android.app.Activity;
 import android.net.Uri;
 import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-
-import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
-
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -77,7 +70,7 @@ public class ApiManager {
         return JSONDataToObservations(response);
     }
 
-    /* Uploads one observation to iNaturalist */
+    /* Uploads one observation to iNaturalist, with its photo stored on the device. */
     public static void uploadObservation(Observation o, String token, String photoFileName) {
         // uploads the observation, but does not associate it with a picture or project.
         uploadObservation(o, token);
