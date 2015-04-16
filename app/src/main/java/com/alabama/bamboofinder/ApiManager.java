@@ -56,7 +56,9 @@ public class ApiManager {
         // appendQueryParameter() encodes values
         builder.scheme("https")
                 .authority(BASE_URL)
-                .appendPath("observations.json")
+                .appendPath("observations")
+                .appendPath("project")
+                .appendPath(PROJECT_ID + ".json")
                 .appendQueryParameter(URL_SWLAT, String.valueOf(bounds.southwest.latitude))
                 .appendQueryParameter(URL_SWLNG, String.valueOf(bounds.southwest.longitude))
                 .appendQueryParameter(URL_NELAT, String.valueOf(bounds.northeast.latitude))
