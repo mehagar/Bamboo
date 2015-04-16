@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,6 +39,13 @@ public class MainActivity extends ActionBarActivity {
         mMainLoginButton = (Button) findViewById(R.id.MainLoginButton);
         mLoggedInText = (TextView) findViewById(R.id.loggedInText);
         mUser = new User();
+
+        SharedPreferences prefs = this.getSharedPreferences(
+                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String token = prefs.getString("token", "Empty Token");
+        if(!token.contentEquals("Empty Token")) {
+            setUser(token);
+        }
 
         mObservationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,14 +93,24 @@ public class MainActivity extends ActionBarActivity {
                     "com.alabama.bamboofinder", Context.MODE_PRIVATE);
             String token = prefs.getString("token", "Empty Token");
 
-            AsyncTask userTask = new User().execute(token);
-            try {
-                mUser = (User) userTask.get();
-            }
-            catch (Exception e) {
-                Log.e(TAG, "Failed to get user");
-            }
+            setUser(token);
+        }
+    }
+
+    private void setUser(String token) {
+        AsyncTask userTask = new User().execute(token);
+        try {
+            mUser = (User) userTask.get();
             mLoggedInText.setText("Welcome, " + mUser.getmUsername() + "!");
+
+            String prefUser = mUser.convertToJSON().toString();
+            SharedPreferences prefs = getSharedPreferences(
+                    "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
+            prefs.edit().putString("user", prefUser).apply();
+            Log.i("User prefs string", prefUser);
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Failed to get user");
         }
     }
 }
