@@ -281,7 +281,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = sf == null || sf.meetsCriteria(mLastMapPosition, o);
-            boolean alreadyShown = mMarkerObservationMap.inverse().containsKey(o);
+            boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
                 Log.d(TAG, "CRITERIA: " + meetsCriteria + "ALREADY_SHOWN: " + alreadyShown);
                 addMarkerForObservation(o);
@@ -289,7 +289,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 Log.d(TAG, "Removing marker " + mMarkerObservationMap.inverse().get(o).getPosition().toString() + " from map");
                 Marker m = mMarkerObservationMap.inverse().get(o);
                 m.remove();
-                mMarkerObservationMap.inverse().get(o).remove();
+                mMarkerObservationMap.inverse().remove(o);
             }
         }
     }
