@@ -29,7 +29,7 @@ public class SearchFilterActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Date selectedDate = new Date(datePicker.getCalendarView().getDate());
                 // create the search filter
-                SearchFilter searchFilter = new SearchFilter(selectedDate, 10000); // dummy radius, not sure if still going to use this
+                SearchFilter searchFilter = new SearchFilter(selectedDate);
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra(InteractiveMapActivity.EXTRA_SEARCH_FILTER, searchFilter);
                 setResult(RESULT_OK, resultIntent);

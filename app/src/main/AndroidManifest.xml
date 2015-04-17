@@ -46,10 +46,8 @@
         </activity>
         <activity
             android:name=".InteractiveMapActivity"
-            android:configChanges="orientation|keyboardHidden"
             android:exported="true"
             android:label="@string/title_activity_interactive_map"
-            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

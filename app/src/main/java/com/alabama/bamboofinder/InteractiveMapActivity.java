@@ -39,6 +39,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     public static final String EXTRA_SEARCH_FILTER = "search_filter";
 
+    private static final String STATE_FILTER = "search_filter";
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private List<Observation> mObservations;
     private LatLng mLastMapPosition; // The location of the current center of the map.
@@ -52,6 +54,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interactive_map);
+
+        if(savedInstanceState != null) {
+            mSearchFilter = (SearchFilter) savedInstanceState.getSerializable(STATE_FILTER);
+        }
+
         buildGoogleApiClient();
         setUpMapIfNeeded();
 
@@ -80,6 +87,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
         Log.d(TAG, "onStop called");
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putSerializable(STATE_FILTER, mSearchFilter);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -263,13 +276,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations(SearchFilter sf) {
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
-            boolean meetsCriteria = (sf == null || sf.meetsCriteria(mLastMapPosition, o));
+            boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
-                Log.d(TAG, "CRITERIA: " + meetsCriteria + "ALREADY_SHOWN: " + alreadyShown);
                 addMarkerForObservation(o);
             } else if(!meetsCriteria && alreadyShown) {
-                Log.d(TAG, "Removing marker " + mMarkerObservationMap.inverse().get(o).getPosition().toString() + " from map");
                 Marker m = mMarkerObservationMap.inverse().get(o);
                 m.remove();
                 mMarkerObservationMap.inverse().remove(o);
