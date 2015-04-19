@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = "MainActivity";
+
     private static final int LOGIN_REQUEST_CODE = 57;
 
     private static User mUser;
@@ -37,12 +40,19 @@ public class MainActivity extends ActionBarActivity {
         mLoggedInText = (TextView) findViewById(R.id.loggedInText);
         mUser = new User();
 
+        SharedPreferences prefs = this.getSharedPreferences(
+                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String token = prefs.getString("token", "Empty Token");
+        if(!token.contentEquals("Empty Token")) {
+            setUser(token);
+        }
+
         mObservationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this,ObservationListActivity.class);
                 i.putExtra("user", mUser.convertToJSON().toString());
-                Log.i("User Extra", i.getStringExtra("user"));
+                Log.i(TAG, i.getStringExtra("user"));
                 startActivity(i);
             }
         });
@@ -53,7 +63,7 @@ public class MainActivity extends ActionBarActivity {
                 Intent i = new Intent(MainActivity.this, InteractiveMapActivity.class);
                 i.putExtra("user", mUser.convertToJSON().toString());
                 i.putExtra("token", getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE).getString("token", "Empty Token")); // just testing...
-                Log.d("MainActivity", mUser.convertToJSON().toString());
+                Log.d(TAG, mUser.convertToJSON().toString());
                 startActivity(i);
             }
         });
@@ -83,36 +93,24 @@ public class MainActivity extends ActionBarActivity {
                     "com.alabama.bamboofinder", Context.MODE_PRIVATE);
             String token = prefs.getString("token", "Empty Token");
 
-            AsyncTask userTask = new User().execute(token);
-            try {
-                mUser = (User) userTask.get();
-            }
-            catch (Exception e) {
+            setUser(token);
+        }
+    }
 
-            }
+    private void setUser(String token) {
+        AsyncTask userTask = new User().execute(token);
+        try {
+            mUser = (User) userTask.get();
             mLoggedInText.setText("Welcome, " + mUser.getmUsername() + "!");
+
+            String prefUser = mUser.convertToJSON().toString();
+            SharedPreferences prefs = getSharedPreferences(
+                    "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
+            prefs.edit().putString("user", prefUser).apply();
+            Log.i("User prefs string", prefUser);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        catch (Exception e) {
+            Log.e(TAG, "Failed to get user");
         }
-
-        return super.onOptionsItemSelected(item);
     }
 }

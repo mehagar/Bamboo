@@ -11,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -27,27 +26,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.common.collect.HashBiMap;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class InteractiveMapActivity extends ActionBarActivity {
     private static final String TAG = "InteractiveMap";
 
     public static final int FILTER_REQUEST = 1;
+    public static final String EXTRA_SEARCH_FILTER = "search_filter";
+    private static final String STATE_FILTER = "search_filter";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private List<Observation> mObservations;
     private LatLng mLastMapPosition; // The location of the current center of the map.
     private LatLng mLastUserPosition; // The physical location of the user.
-    private Map<Marker, Observation> mMarkerObservationMap;
+    private HashBiMap<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
     private SearchFilter mSearchFilter; // Might be null if search filter has not been applied or has been cleared.
 
@@ -56,21 +52,15 @@ public class InteractiveMapActivity extends ActionBarActivity {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interactive_map);
+
+        if(savedInstanceState != null) {
+            mSearchFilter = (SearchFilter) savedInstanceState.getSerializable(STATE_FILTER);
+        }
+
         buildGoogleApiClient();
         setUpMapIfNeeded();
 
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
-
-        try {
-            Log.d(TAG, "string got from main activity was: " + getIntent().getStringExtra("user"));
-            User user = new User(new JSONObject(getIntent().getStringExtra("user")));
-            // testing HTTP Post
-            Observation o = new Observation();
-            user.setmToken(getIntent().getStringExtra("token"));
-            new PostObservationsTask().execute(o, user, "");
-        } catch(JSONException e) {
-            Log.e(TAG, "Could not create user from intent: " + e.getMessage());
-        }
     }
 
     @Override
@@ -95,6 +85,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
         Log.d(TAG, "onStop called");
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putSerializable(STATE_FILTER, mSearchFilter);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -132,12 +128,13 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "In onActivityResult");
         if(requestCode == FILTER_REQUEST) {
             if(resultCode == RESULT_OK) {
-                // apply search filter here
-                // mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
-                // showObservations(mSearchFilter)
+                mSearchFilter = (SearchFilter) data.getSerializableExtra(EXTRA_SEARCH_FILTER);
+                showObservations(mSearchFilter);
+            } else if(resultCode == RESULT_CANCELED) {
+                mSearchFilter = null;
+                showObservations(mSearchFilter);
             }
         }
     }
@@ -176,19 +173,19 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        mMarkerObservationMap = new HashMap<Marker, Observation>();
+        mMarkerObservationMap = HashBiMap.create();
 
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                if(cameraPosition.target != mLastMapPosition) {
+                if(cameraPosition.target.latitude != mLastMapPosition.latitude ||
+                   cameraPosition.target.longitude != mLastMapPosition.longitude) {
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
                     mLastMapPosition = cameraPosition.target;
@@ -209,6 +206,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setInfoWindowAdapter(new ImageInfoWindowAdapter());
     }
 
+    private LatLngBounds getScreenBoundingBox() {
+        return mMap.getProjection()
+                .getVisibleRegion().latLngBounds;
+    }
+
     // Builds and connects to the google Location Services api that can retrieve the last known location.
     private void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -216,7 +218,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult connectionResult) {
-                        Log.d(TAG, "Location connection failed" + connectionResult.toString());
+                        Log.e(TAG, "Location connection failed" + connectionResult.toString());
                     }
                 })
                 .addApi(LocationServices.API)
@@ -247,7 +249,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         public void onLocationChanged(Location location) {
             mLastUserPosition = new LatLng(location.getLatitude(),
                                             location.getLongitude());
-            Log.d(TAG, "onLocationChanged called");
         }
 
         @Override
@@ -270,21 +271,20 @@ public class InteractiveMapActivity extends ActionBarActivity {
         return locationRequest;
     }
 
-    private LatLngBounds getScreenBoundingBox() {
-        return mMap.getProjection()
-                .getVisibleRegion().latLngBounds;
-    }
-
     private void showObservations(SearchFilter sf) {
-        if(sf != null) {
-            mMap.clear();
-        }
+        Observation testObservation = new Observation();
+        testObservation.setLocation(new LatLng(33.2, -87.5));
+        mObservations.add(testObservation);
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
-            boolean meetsCriteria = sf == null || sf.meetsCriteria(mLastMapPosition, o);
+            boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
                 addMarkerForObservation(o);
+            } else if(!meetsCriteria && alreadyShown) {
+                Marker m = mMarkerObservationMap.inverse().get(o);
+                m.remove();
+                mMarkerObservationMap.inverse().remove(o);
             }
         }
     }
@@ -303,6 +303,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     // This task retrieves observations from the network asynchronously.
     // When it has finished, the map is updated to show any new observations.
     class GetObservationsTask extends AsyncTask<LatLngBounds, Void, ArrayList<Observation>> {
+        @Override
         protected ArrayList<Observation> doInBackground(LatLngBounds... latLngBounds) {
             // this function must accept a variable number of arguments, but there should only be one.
             if(latLngBounds.length != 1) {
@@ -310,19 +311,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
             }
             return ApiManager.getObservationsFromNetwork(latLngBounds[0]);
         }
-
+        @Override
         protected void onPostExecute(ArrayList<Observation> result) {
             mObservations = result;
             showObservations(mSearchFilter);
-        }
-    }
-
-    class PostObservationsTask extends AsyncTask<Object, Void, Void> {
-        protected Void doInBackground(Object... objects) {
-            // observation, user, photo file name
-            Log.d(TAG, "in doInBackground");
-            ApiManager.uploadObservation((Observation)objects[0], (User)objects[1], (String)objects[2]);
-            return null;
         }
     }
 
@@ -333,14 +325,16 @@ public class InteractiveMapActivity extends ActionBarActivity {
             Observation o = mMarkerObservationMap.get(marker);
 
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
-            if(!o.getThumbnailUrl().equals("")) {
+            if(o != null && o.getThumbnailUrl() != null) {
                 Picasso.with(getApplicationContext())
                         .load(o.getThumbnailUrl())
                         .resize(50, 50)
                         .centerCrop()
                         .into(imageView, new InfoWindowRefresher(marker));
+            } else if(o == null) {
+                Log.e(TAG, "Marker created without an observation for it! (Or inconsistent map)");
             } else {
-                Log.e(TAG, "Observation created without a picture");
+                Log.e(TAG, "Observation created without a picture!");
                 imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
             return view;

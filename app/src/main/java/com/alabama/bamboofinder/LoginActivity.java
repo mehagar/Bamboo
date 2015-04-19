@@ -13,6 +13,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -41,6 +44,8 @@ public class LoginActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
         mUsername = (EditText) findViewById(R.id.EmailText);
         mPassword = (EditText) findViewById(R.id.PasswordText);
@@ -85,29 +90,6 @@ public class LoginActivity extends ActionBarActivity {
         });
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_login, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     class GetRequestToken extends AsyncTask<String, Void, String> {
         protected String doInBackground(String... tokenRequest) {
             if(tokenRequest.length != 1) {
@@ -125,10 +107,9 @@ public class LoginActivity extends ActionBarActivity {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String response = in.readLine();
-                Log.d("LoginActivity", response);
-                String[] array_response = response.split(",");
-                String[] token_split = array_response[0].split(":");
-                token = token_split[1];
+
+                JSONObject responseObject = new JSONObject(response);
+                token = responseObject.getString("access_token");
 
                 connection.disconnect();
             }

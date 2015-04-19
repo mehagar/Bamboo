@@ -16,19 +16,13 @@ public class SearchFilter implements Serializable {
     private static final String TAG = "SearchFilter";
 
     Date mEarliestDate;
-    int mRadius;
 
-    public SearchFilter(Date date, int radius) {
+    public SearchFilter(Date date) {
         mEarliestDate = date;
-        mRadius = radius;
     }
 
     // Returns true if all criteria are met, false otherwise.
-    public boolean meetsCriteria(LatLng coordinates, Observation o) {
-        if(SphericalUtil.computeDistanceBetween(o.getLocation(), coordinates) > mRadius) {
-            Log.d(TAG, "Observation was too far away");
-            return false;
-        }
+    public boolean meetsCriteria(Observation o) {
         if(o.getTimeStamp().before(mEarliestDate)) {
             Log.d(TAG, "Observation was too old: " + o.getTimeStamp() + " was before " + mEarliestDate);
             return false;

@@ -25,30 +25,38 @@ public class Observation implements Serializable {
     private static final String JSON_ID = "id";
     private static final String JSON_PHOTOS = "photos";
     private static final String JSON_THUMBNAIL_URL = "square_url";
+    private static final String JSON_MEDIUM_URL = "medium_url";
     private static final String JSON_NUM_PHOTOS = "observation_photos_count";
     private static final String JSON_SPECIES_GUESS = "species_guess";
     private static final String JSON_OBSERVED_DATE = "observed_on";
+    private static final String JSON_DESCRIPTION = "description";
+    private static final String JSON_IDENTIFICATIONS = "identifications";
+    private static final String JSON_USER = "user";
+    private static final String JSON_LOGIN = "login";
+    private static final String JSON_USER_LOGIN = "user_login";
 
     private Date mDateObserved;
     private String mSpeciesGuess;
     private String mDescription;
     private boolean mValidated;
-    private String mOwnerUserName;
     private String mId;
     double mLatitude;
     double mLongitude;
     private String mThumbnailUrl;
+    private String mMediumUrl;
+    private String mUserLogin;
 
     public Observation() {
         mDateObserved = new Date();
         mSpeciesGuess = "Default Species Guess";
         mDescription = "Default Description";
         mValidated = false;
-        mOwnerUserName = "Default owner user name";
         mId = "00000";
         mLatitude = 0.0;
         mLongitude = 0.0;
-        mThumbnailUrl = "unassigned url";
+        mThumbnailUrl = "unassigned thumbnail url";
+        mMediumUrl = "unassigned medium url";
+        mUserLogin = "unassigned user login";
     }
 
     public Observation(JSONObject jsonObject) {
@@ -57,26 +65,29 @@ public class Observation implements Serializable {
             mLongitude = jsonObject.getDouble(JSON_LONGITUDE);
             mId = jsonObject.getString(JSON_ID);
             mSpeciesGuess = jsonObject.getString(JSON_SPECIES_GUESS);
-            mThumbnailUrl = parseThumbnailUrl(jsonObject);
+            mThumbnailUrl = parsePhotoUrl(jsonObject, JSON_THUMBNAIL_URL);
+            mMediumUrl = parsePhotoUrl(jsonObject, JSON_MEDIUM_URL);
             mDateObserved = parseDateFromString(jsonObject.getString(JSON_OBSERVED_DATE));
+            mDescription = jsonObject.getString(JSON_DESCRIPTION);
+            mUserLogin = jsonObject.getString(JSON_USER_LOGIN);
+            //mValidated = parseIsValidated(jsonObject);
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
         }
     }
 
-    private String parseThumbnailUrl(JSONObject jsonObject) throws JSONException {
-        String thumbnailUrl;
+    private String parsePhotoUrl(JSONObject jsonObject, String photoKey) throws JSONException {
+        String photoUrl;
         int numPhotos = jsonObject.getInt(JSON_NUM_PHOTOS);
         if(numPhotos >= 1) {
             JSONArray photos = jsonObject.getJSONArray(JSON_PHOTOS);
             // just use the first photo as the thumbnail for a marker
-            thumbnailUrl = photos.getJSONObject(0).getString(JSON_THUMBNAIL_URL);
-            Log.d(TAG, "Got thumbnail url: " + thumbnailUrl);
+            photoUrl = photos.getJSONObject(0).getString(photoKey);
         } else {
-            Log.e(TAG, "Observation being created without a photo");
-            thumbnailUrl = "";
+            Log.e(TAG, "Observation being created without a " + photoKey + " photo url");
+            photoUrl = "";
         }
-        return thumbnailUrl;
+        return photoUrl;
     }
 
     private Date parseDateFromString(String dateString) {
@@ -90,6 +101,43 @@ public class Observation implements Serializable {
         }
         return dateObserved;
     }
+
+    private boolean parseIsValidated(JSONObject jsonObject) throws JSONException {
+        // based on the admin(s), check if any of them has personally validated an observation, based on its
+        // jsonObject["identifications"]["user"]["login"]
+        // identifications is an array
+        JSONArray identifications = jsonObject.getJSONArray(JSON_IDENTIFICATIONS);
+        for(int i = 0; i < identifications.length(); ++i) {
+            JSONObject identification = identifications.getJSONObject(i);
+            JSONObject user = identification.getJSONObject(JSON_USER);
+            String loginName = user.getString(JSON_LOGIN);
+            // if loginName is not a member of the project, do not count the validation.
+            // testing just one username. TODO: Should test against all members of the project.
+            if(loginName.equals("mehagar23")) {
+                Log.d(TAG, "Observation " + getSpeciesGuess() + " is validated");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this) {
+            return true;
+        }
+        if(obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Observation other = (Observation) obj;
+        return mId.equals(other.getId());
+    }
+
 
     public String getSpeciesGuess() {
         return mSpeciesGuess;
@@ -105,6 +153,14 @@ public class Observation implements Serializable {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         mThumbnailUrl = thumbnailUrl;
+    }
+
+    public String getMediumUrl() {
+        return mMediumUrl;
+    }
+
+    public void setMediumUrl(String mediumUrl) {
+        mMediumUrl = mediumUrl;
     }
 
     public String getId() {
@@ -147,11 +203,11 @@ public class Observation implements Serializable {
         this.mValidated = validated;
     }
 
-    public String getOwnerUserName() {
-        return mOwnerUserName;
+    public String getUserLogin() {
+        return mUserLogin;
     }
 
-    public void setOwnerUserName(String ownerUserName) {
-        this.mOwnerUserName = ownerUserName;
+    public void setUserLogin(String mUserLogin) {
+        this.mUserLogin = mUserLogin;
     }
 }
