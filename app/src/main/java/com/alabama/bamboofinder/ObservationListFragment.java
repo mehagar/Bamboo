@@ -1,5 +1,7 @@
 package com.alabama.bamboofinder;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
@@ -32,6 +34,8 @@ public class ObservationListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Observation observation = ((ObservationAdapter)getListAdapter()).getItem(position);
+        Intent i = new Intent(getActivity(), ObservationDetailActivity.class);
+        startActivity(i);
     }
 
     private class ObservationAdapter extends ArrayAdapter<Observation> {
