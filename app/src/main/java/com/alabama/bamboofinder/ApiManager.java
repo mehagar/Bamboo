@@ -6,7 +6,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
-
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -76,13 +75,13 @@ public class ApiManager {
 
     /* Uploads one observation to iNaturalist, with its photo stored on the device. */
     public static void uploadObservation(Observation o, String token, InputStream photoFile) {
-        // uploads the observation, but does not associate it with a picture or project.
         uploadObservation(o, token);
         // Uncomment these when they are working.
         //uploadPictureForObservation(o, token, photoFile);
         //uploadObservationToProject(o, token);
     }
 
+    // uploads the observation, but does not associate it with a picture or project.
     private static void uploadObservation(Observation o, String token) {
         Uri.Builder paramsBuilder = new Uri.Builder();
         paramsBuilder.appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
@@ -90,8 +89,6 @@ public class ApiManager {
                 .appendQueryParameter(URL_DATE, o.getTimeStamp().toString())
                 .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
-        Log.d(TAG, "Base URL: " + getBaseUrl());
-        Log.d(TAG, "Params URL: " + paramsBuilder.toString());
 
         try {
             // we can only know the inaturalist observation id by looking at the response from uploading it.
@@ -117,6 +114,8 @@ public class ApiManager {
     }
 
     private static void uploadPictureForObservation(Observation o, String token, InputStream photoFile) {
+        // TODO: This is not quite working - getting error response code of 404, but image was shown on iNaturalist.
+        // Warning : calling this function may cause your iNaturalist account to be suspended.
         SyncHttpClient client = new SyncHttpClient();
         RequestParams params = new RequestParams();
 

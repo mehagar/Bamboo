@@ -57,6 +57,15 @@ public class ObservationDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_observation_detail);
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
+        /*// Testing code
+        Observation o = new Observation();
+        SharedPreferences prefs1 = ObservationDetailActivity.this.getSharedPreferences(
+                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String token = prefs1.getString("token", "Empty Token");
+        InputStream photoFile = getResources().openRawResource(R.raw.download);
+        new PostObservationsTask().execute(o, token, photoFile);
+        // end testing code*/
+
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
         mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
         mImageView = (ImageView)findViewById(R.id.observationImage);

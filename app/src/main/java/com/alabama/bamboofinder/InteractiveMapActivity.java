@@ -36,9 +36,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private static final String TAG = "InteractiveMap";
 
     public static final int FILTER_REQUEST = 1;
-
     public static final String EXTRA_SEARCH_FILTER = "search_filter";
-
     private static final String STATE_FILTER = "search_filter";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -208,6 +206,11 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setInfoWindowAdapter(new ImageInfoWindowAdapter());
     }
 
+    private LatLngBounds getScreenBoundingBox() {
+        return mMap.getProjection()
+                .getVisibleRegion().latLngBounds;
+    }
+
     // Builds and connects to the google Location Services api that can retrieve the last known location.
     private void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -215,7 +218,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult connectionResult) {
-                        Log.d(TAG, "Location connection failed" + connectionResult.toString());
+                        Log.e(TAG, "Location connection failed" + connectionResult.toString());
                     }
                 })
                 .addApi(LocationServices.API)
@@ -268,12 +271,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
         return locationRequest;
     }
 
-    private LatLngBounds getScreenBoundingBox() {
-        return mMap.getProjection()
-                .getVisibleRegion().latLngBounds;
-    }
-
     private void showObservations(SearchFilter sf) {
+        Observation testObservation = new Observation();
+        testObservation.setLocation(new LatLng(33.2, -87.5));
+        mObservations.add(testObservation);
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));
@@ -290,7 +291,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     // Adds a marker to the google maps object for an observation.
     private void addMarkerForObservation(Observation o) {
-        Log.d(TAG, "Adding marker for observation " + o.getSpeciesGuess());
         Marker m = mMap.addMarker(
                 new MarkerOptions()
                         .position(o.getLocation())
@@ -325,7 +325,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
             Observation o = mMarkerObservationMap.get(marker);
 
             ImageView imageView = (ImageView)view.findViewById(R.id.thumbnail_imageView);
-            if(o != null && !o.getThumbnailUrl().equals("")) {
+            if(o != null && o.getThumbnailUrl() != null) {
                 Picasso.with(getApplicationContext())
                         .load(o.getThumbnailUrl())
                         .resize(50, 50)
@@ -334,7 +334,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
             } else if(o == null) {
                 Log.e(TAG, "Marker created without an observation for it! (Or inconsistent map)");
             } else {
-                Log.e(TAG, "Observation created without a picture");
+                Log.e(TAG, "Observation created without a picture!");
                 imageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
             return view;
