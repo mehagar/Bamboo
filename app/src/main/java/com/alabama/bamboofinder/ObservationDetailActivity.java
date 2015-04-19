@@ -22,9 +22,11 @@ import android.widget.ImageView;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
 
 public class ObservationDetailActivity extends ActionBarActivity {
@@ -234,7 +236,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         protected Void doInBackground(Object... objects) {
             // params are the observation, token, and photo file name
             Log.d(TAG, "in doInBackground");
-            ApiManager.uploadObservation((Observation)objects[0], (String)objects[1], (String)objects[2]);
+            ApiManager.uploadObservation((Observation)objects[0], (String)objects[1], (InputStream)objects[2]);
             return null;
         }
     }
