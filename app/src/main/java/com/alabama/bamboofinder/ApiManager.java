@@ -78,7 +78,7 @@ public class ApiManager {
     public static void uploadObservation(Observation o, String token, InputStream photoFile) {
         uploadObservation(o, token);
         // Uncomment these when they are working.
-        //uploadPictureForObservation(o, token, photoFile);
+        uploadPictureForObservation(o, token, photoFile);
         uploadObservationToProject(o, token);
     }
 
@@ -122,12 +122,12 @@ public class ApiManager {
         RequestParams params = new RequestParams();
 
         params.put("file", photoFile);
+        params.put(URL_PHOTO, o.getId());
 
         Uri.Builder photoBuilder = new Uri.Builder();
         photoBuilder.scheme("https")
                 .authority(BASE_URL)
                 .appendPath("observation_photos.json")
-                .appendQueryParameter(URL_PHOTO, o.getId())
                 .build();
         Log.d(TAG, "Url to post photo was: " + photoBuilder.toString());
 
@@ -152,8 +152,6 @@ public class ApiManager {
                 .appendQueryParameter(URL_PROJECT_OBSERVATION, o.getId())
                 .appendQueryParameter(URL_PROJECT_ID, PROJECT_ID)
                 .build();
-        Log.d(TAG, "base url for project observation was: " + getBaseProjectUrl());
-        Log.d(TAG, "params url for project observation was: " + projectBuilder.toString());
         try {
             sendPost(getBaseProjectUrl(), projectBuilder.toString(), token);
         } catch(IOException e) {
