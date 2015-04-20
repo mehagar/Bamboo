@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
+
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,21 +79,22 @@ public class ApiManager {
         uploadObservation(o, token);
         // Uncomment these when they are working.
         //uploadPictureForObservation(o, token, photoFile);
-        //uploadObservationToProject(o, token);
+        uploadObservationToProject(o, token);
     }
 
     // uploads the observation, but does not associate it with a picture or project.
     private static void uploadObservation(Observation o, String token) {
         Uri.Builder paramsBuilder = new Uri.Builder();
-        paramsBuilder.appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
+        paramsBuilder
+                .appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
                 .appendQueryParameter(URL_LONGITUDE, String.valueOf(o.getLocation().longitude))
                 .appendQueryParameter(URL_DATE, o.getTimeStamp().toString())
                 .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
-
+        //Log.d(TAG, "params string was: " + paramsBuilder.toString());
         try {
             // we can only know the inaturalist observation id by looking at the response from uploading it.
-            String response = sendPost(getBaseUrl(), paramsBuilder.toString(), token);
+            String response = sendPost(getBaseObservationsUrl(), paramsBuilder.toString(), token);
             String observationId = getObservationIdFromJSON(new JSONArray(response));
             o.setId(observationId);
         } catch(Exception e) {
@@ -100,7 +102,7 @@ public class ApiManager {
         }
     }
 
-    private static String getBaseUrl() {
+    private static String getBaseObservationsUrl() {
         Uri.Builder baseBuilder = new Uri.Builder();
         baseBuilder.scheme("https")
                 .authority(BASE_URL)
@@ -124,13 +126,12 @@ public class ApiManager {
         Uri.Builder photoBuilder = new Uri.Builder();
         photoBuilder.scheme("https")
                 .authority(BASE_URL)
-                .appendPath("observation_photos")
+                .appendPath("observation_photos.json")
                 .appendQueryParameter(URL_PHOTO, o.getId())
                 .build();
         Log.d(TAG, "Url to post photo was: " + photoBuilder.toString());
 
         client.addHeader("Authorization", "Bearer " + token);
-        Log.d(TAG, client.toString());
         client.post(photoBuilder.toString(), params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -147,17 +148,26 @@ public class ApiManager {
 
     private static void uploadObservationToProject(Observation o, String token) {
         Uri.Builder projectBuilder = new Uri.Builder();
-        projectBuilder.scheme("https")
-                .authority(BASE_URL)
-                .appendPath("project_observations")
+        projectBuilder
                 .appendQueryParameter(URL_PROJECT_OBSERVATION, o.getId())
                 .appendQueryParameter(URL_PROJECT_ID, PROJECT_ID)
                 .build();
+        Log.d(TAG, "base url for project observation was: " + getBaseProjectUrl());
+        Log.d(TAG, "params url for project observation was: " + projectBuilder.toString());
         try {
-            sendPost(getBaseUrl(), projectBuilder.toString(), token);
+            sendPost(getBaseProjectUrl(), projectBuilder.toString(), token);
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
+    }
+
+    private static String getBaseProjectUrl() {
+        Uri.Builder baseBuilder = new Uri.Builder();
+        baseBuilder.scheme("https")
+                .authority(BASE_URL)
+                .appendPath("project_observations.json")
+                .build();
+        return baseBuilder.toString();
     }
 
     /* Converts an JSON string to a list of observations */
@@ -203,13 +213,16 @@ public class ApiManager {
             con.setDoOutput(true);
             con.setDoInput(true);
             con.setRequestProperty("Authorization", "Bearer " + token);
-            con.setFixedLengthStreamingMode(params.getBytes().length);
 
             writeParamsToConnection(con.getOutputStream(), params);
-            response = readResponseFromConnection(con.getInputStream());
             Log.d(TAG, "Response code: " + con.getResponseCode());
+            try {
+                response = readResponseFromConnection(con.getInputStream());
+            } catch(IOException io) {
+                Log.e(TAG, "Could not read response");
+            }
         } catch(Exception e) {
-            Log.d(TAG, "Error sending post: " + e.getMessage());
+            Log.e(TAG, "Error sending post: " + e.getMessage());
         } finally {
             con.disconnect();
         }
@@ -220,7 +233,6 @@ public class ApiManager {
         StringBuilder response = new StringBuilder();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(is));
-
         String inputLine;
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -232,8 +244,9 @@ public class ApiManager {
     private static void writeParamsToConnection(OutputStream os, String params) throws Exception {
         BufferedWriter out = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8"));
-
-        out.write(params);
+        // Chopping off the first character is necessary because Uri.Builder adds a "?", which isn't needed.
+        Log.d(TAG, "writing params: " + params.substring(1));
+        out.write(params.substring(1));
         out.close();
     }
 }
