@@ -47,6 +47,8 @@ public class ApiManager {
     private static final String PROJECT_ID = "3846"; // The id of the BambooFinder project on iNaturalist.org
 
     private static final String BASE_URL = "www.inaturalist.org";
+    private static final String BASE_OBSERVATIONS_URL = "https://" + BASE_URL + "/observations.json";
+    private static final String BASE_PROJECT_OBSERVATION_URL = "https://" + BASE_URL + "/project_observations.json";
 
     /* Gets observations from iNaturalist's api within a specified range */
     public static ArrayList<Observation> getObservationsFromNetwork(LatLngBounds bounds) {
@@ -77,7 +79,6 @@ public class ApiManager {
     /* Uploads one observation to iNaturalist, with its photo stored on the device. */
     public static void uploadObservation(Observation o, String token, InputStream photoFile) {
         uploadObservation(o, token);
-        // Uncomment these when they are working.
         uploadPictureForObservation(o, token, photoFile);
         uploadObservationToProject(o, token);
     }
@@ -91,10 +92,9 @@ public class ApiManager {
                 .appendQueryParameter(URL_DATE, o.getTimeStamp().toString())
                 .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
-        //Log.d(TAG, "params string was: " + paramsBuilder.toString());
         try {
             // we can only know the inaturalist observation id by looking at the response from uploading it.
-            String response = sendPost(getBaseObservationsUrl(), paramsBuilder.toString(), token);
+            String response = sendPost(BASE_OBSERVATIONS_URL, paramsBuilder.toString(), token);
             String observationId = getObservationIdFromJSON(new JSONArray(response));
             o.setId(observationId);
         } catch(Exception e) {
@@ -102,22 +102,11 @@ public class ApiManager {
         }
     }
 
-    private static String getBaseObservationsUrl() {
-        Uri.Builder baseBuilder = new Uri.Builder();
-        baseBuilder.scheme("https")
-                .authority(BASE_URL)
-                .appendPath("observations.json")
-                .build();
-        return baseBuilder.toString();
-    }
-
     private static String getObservationIdFromJSON(JSONArray jsonArray) throws JSONException {
         return jsonArray.getJSONObject(0).getString(JSON_OBSERVATION_ID);
     }
 
     private static void uploadPictureForObservation(Observation o, String token, InputStream photoFile) {
-        // TODO: This is not quite working - getting error response code of 404, but image was shown on iNaturalist.
-        // Warning : calling this function may cause your iNaturalist account to be suspended.
         SyncHttpClient client = new SyncHttpClient();
         RequestParams params = new RequestParams();
 
@@ -153,19 +142,10 @@ public class ApiManager {
                 .appendQueryParameter(URL_PROJECT_ID, PROJECT_ID)
                 .build();
         try {
-            sendPost(getBaseProjectUrl(), projectBuilder.toString(), token);
+            sendPost(BASE_PROJECT_OBSERVATION_URL, projectBuilder.toString(), token);
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
-    }
-
-    private static String getBaseProjectUrl() {
-        Uri.Builder baseBuilder = new Uri.Builder();
-        baseBuilder.scheme("https")
-                .authority(BASE_URL)
-                .appendPath("project_observations.json")
-                .build();
-        return baseBuilder.toString();
     }
 
     /* Converts an JSON string to a list of observations */
