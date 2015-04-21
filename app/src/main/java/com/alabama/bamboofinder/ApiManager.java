@@ -100,6 +100,27 @@ public class ApiManager {
         return response.toString();
     }
 
+    /* Converts an JSON string to a list of observations */
+    private static ArrayList<Observation> JSONDataToObservations(String data) {
+        ArrayList<Observation> observations = new ArrayList<Observation>();
+        try {
+            JSONArray observationsData = new JSONArray(data);
+            for (int i = 0; i < observationsData.length(); ++i) {
+                JSONObject obs = observationsData.getJSONObject(i);
+                JSONArray projects = obs.getJSONArray(JSON_PROJECT);
+                for(int j = 0; j < projects.length(); ++j) {
+                    String id = projects.getJSONObject(j).getString(JSON_PROJECT_ID);
+                    if(id.equals(PROJECT_ID)) {
+                        observations.add(new Observation(obs));
+                    }
+                }
+            }
+        } catch(JSONException e) {
+            Log.e(TAG, "Error parsing json observations : " + e.getMessage());
+        }
+        return observations;
+    }
+
     /* Uploads one observation to iNaturalist, with its photo stored on the device. */
     public static void uploadObservation(Observation o, String token, InputStream photoFile) {
         Log.d(TAG, "token: " + token);
@@ -174,29 +195,6 @@ public class ApiManager {
         }
     }
 
-    /* Converts an JSON string to a list of observations */
-    private static ArrayList<Observation> JSONDataToObservations(String data) {
-        ArrayList<Observation> observations = new ArrayList<Observation>();
-        try {
-            JSONArray observationsData = new JSONArray(data);
-            for (int i = 0; i < observationsData.length(); ++i) {
-                JSONObject obs = observationsData.getJSONObject(i);
-                JSONArray projects = obs.getJSONArray(JSON_PROJECT);
-                for(int j = 0; j < projects.length(); ++j) {
-                    String id = projects.getJSONObject(j).getString(JSON_PROJECT_ID);
-                    if(id.equals(PROJECT_ID)) {
-                        observations.add(new Observation(obs));
-                    }
-                }
-            }
-        } catch(JSONException e) {
-            Log.e(TAG, "Error parsing json observations : " + e.getMessage());
-        }
-        return observations;
-    }
-
-
-
     private static String sendPost(String baseUrl, String params, String token) throws IOException {
         URL url = new URL(baseUrl);
 
@@ -222,8 +220,6 @@ public class ApiManager {
         }
         return response;
     }
-
-
 
     private static void writeParamsToConnection(OutputStream os, String params) throws Exception {
         BufferedWriter out = new BufferedWriter(
