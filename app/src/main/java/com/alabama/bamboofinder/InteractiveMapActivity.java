@@ -1,9 +1,12 @@
 package com.alabama.bamboofinder;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -69,6 +72,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
         super.onResume();
 
         if(!mGoogleApiClient.isConnected()) {
+            Log.d(TAG, "Reconnected google api client");
             mGoogleApiClient.connect();
         }
         setUpMapIfNeeded();
@@ -113,9 +117,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
         switch(item.getItemId()) {
             case R.id.action_add:
                 i = new Intent(this, ObservationDetailActivity.class);
-                i.putExtra(ObservationDetailActivity.EXTRA_USER_LATITUDE, mLastUserPosition.latitude);
-                i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
-                startActivity(i);
+                if(mLastUserPosition != null) {
+                    i.putExtra(ObservationDetailActivity.EXTRA_USER_LATITUDE, mLastUserPosition.latitude);
+                    i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
+                    startActivity(i);
+                } else {
+                    // Show a dialog saying that gps must be enabled to add an observation
+                    showNoGPSAlertDialog();
+                }
                 return true;
             case R.id.action_filter:
                 i = new Intent(this, SearchFilterActivity.class);
@@ -124,6 +133,26 @@ public class InteractiveMapActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showNoGPSAlertDialog() {
+        new AlertDialog.Builder(this)
+                .setMessage("GPS must be enabled to add an observation")
+                .setPositiveButton("Enable GPS", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     @Override
@@ -247,13 +276,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         @Override
         public void onLocationChanged(Location location) {
+            Log.d(TAG, "onLocationChanged called");
             mLastUserPosition = new LatLng(location.getLatitude(),
                                             location.getLongitude());
         }
 
         @Override
         public void onConnectionSuspended(int cause) {
-            // left unimplemented
+            Log.d(TAG, "onConnectionSuspended called");
         }
     }
 
@@ -272,9 +302,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     private void showObservations(SearchFilter sf) {
-        Observation testObservation = new Observation();
-        testObservation.setLocation(new LatLng(33.2, -87.5));
-        mObservations.add(testObservation);
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));
