@@ -1,6 +1,8 @@
 package com.alabama.bamboofinder;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -68,6 +70,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         String prefUser = prefs.getString("user", "Empty user");
 
         if(latitude == -1) {
+            //Latitude was not passed in Intent, so user is editing an observation
             mMode = EDIT_OBSERVATION;
 
             mObservation = (Observation) i.getSerializableExtra(EXTRA_OBSERVATION);
@@ -88,6 +91,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 if(!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
                     mSpeciesText.setKeyListener(null);
                     mDescriptionText.setKeyListener(null);
+                    mSaveButton.setVisibility(View.INVISIBLE);
                 }
             }
             catch (Exception e) {
@@ -119,9 +123,17 @@ public class ObservationDetailActivity extends ActionBarActivity {
 
                 switch(mMode) {
                     case(EDIT_OBSERVATION):
+                        if(imageUri == null) {
+                            ShowAlert();
+                            break;
+                        }
                         //TODO update observation fields in the intent.
                         break;
                     case(ADD_OBSERVATION):
+                        if(imageUri == null) {
+                            ShowAlert();
+                            break;
+                        }
                         Observation o = new Observation();
                         double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
                         double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
@@ -142,7 +154,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -218,8 +229,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                     matrix.postRotate(rotate);
                     Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                             bitmap.getHeight(), matrix, true);
-
-
                     mImageView.setImageBitmap(rotatedBitmap);
                 }
             }
@@ -227,6 +236,20 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 Log.e("Result Exception", e.toString());
             }
         }
+    }
+
+    private void ShowAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("No photo!")
+                .setMessage("You must take a photo first.")
+                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     class PostObservationsTask extends AsyncTask<Object, Void, Void> {
