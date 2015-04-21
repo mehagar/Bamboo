@@ -7,13 +7,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,15 +23,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -47,6 +54,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
 
     private static Uri imageUri;
     private static int mMode;
+    private static File imagePath;
     private ImageView mImageView;
     private EditText mSpeciesText;
     private EditText mDescriptionText;
@@ -62,7 +70,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_observation_detail);
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        // Testing code
+        /* // Testing code
         Observation o = new Observation();
         o.setLocation(new LatLng(33.0, -87.0));
         o.setDescription("New description");
@@ -71,11 +79,13 @@ public class ObservationDetailActivity extends ActionBarActivity {
         String token = prefs1.getString("token", "Empty Token");
         InputStream photoFile = getResources().openRawResource(R.raw.download);
         new PostObservationsTask().execute(o, token, photoFile);
-        // end testing code
+        // end testing code */
 
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
         mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
         mImageView = (ImageView)findViewById(R.id.observationImage);
+        mCancelButton = (Button) findViewById(R.id.cancelButton);
+        mSaveButton = (Button) findViewById(R.id.saveButton);
         api = new ApiManager();
 
         //Check if adding or editing
@@ -127,8 +137,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
         else
             mMode = ADD_OBSERVATION;
 
-
-        mCancelButton = (Button) findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,7 +145,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
             }
         });
 
-        mSaveButton = (Button) findViewById(R.id.saveButton);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -148,7 +155,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
 
                 switch(mMode) {
                     case(EDIT_OBSERVATION):
-                        if(imageUri == null) {
+                        if(imagePath == null) {
                             ShowAlert();
                             break;
                         }
@@ -161,11 +168,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
                                 .appendQueryParameter(ApiManager.URL_DESCRIPTION, mDescriptionText.getText().toString())
                                 //add any additional fields here
                                 .build();
-                        new UpdateObservationTask().execute(mObservation, token, imageUri.toString(),
+                        new UpdateObservationTask().execute(mObservation, token, new File(imageUri.toString()),
                                 putObservation.toString());
                         break;
                     case(ADD_OBSERVATION):
-                        if(imageUri == null) {
+                        if(imagePath == null) {
                             ShowAlert();
                             break;
                         }
@@ -177,8 +184,14 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         o.setSpeciesGuess(mSpeciesText.getText().toString());
                         o.setDescription(mDescriptionText.getText().toString());
                         o.setTimeStamp(new Date());
-                        AsyncTask postObservation = new PostObservationsTask().execute(
-                                mObservation, token, imageUri.toString());
+                        try {
+                            AsyncTask postObservation = new PostObservationsTask().execute(
+                                    o, token, new FileInputStream(imagePath));
+                            Log.i("Image Path", imagePath.toString());
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, e.toString());
+                        }
                         setResult(RESULT_OK);
                         finish();
                 }
@@ -204,8 +217,20 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 //finish();
                 return true;
             case R.id.menu_item_new_picture:
+                //File photoFile = null;
+                try {
+                    imagePath = createImageFile();
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                }
+
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                if(imagePath != null) {
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                            Uri.fromFile(imagePath));
+
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                }
                 return true;
             case android.R.id.home:
                 finish();
@@ -218,10 +243,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            imageUri = data.getData();
-            Log.i("Result Image URI", imageUri.toString());
+            //imageUri = data.getData();
+            //Log.i("Result Image URI", imageUri.toString());
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                //Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                Bitmap bitmap = BitmapFactory.decodeFile(imagePath.toString());
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
 
                 //Retrieve last image taken
@@ -281,6 +307,23 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        //imagePath = "file:" + image.getAbsolutePath();
+        return image;
     }
 
     class PostObservationsTask extends AsyncTask<Object, Void, Void> {
