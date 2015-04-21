@@ -76,8 +76,33 @@ public class ApiManager {
         return JSONDataToObservations(response);
     }
 
+    private static String sendGet(String urlSpec) throws IOException {
+        URL url = new URL(urlSpec);
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        String response = "";
+        try {
+            response = readResponseFromConnection(connection.getInputStream());
+        } finally {
+            connection.disconnect();
+        }
+        return response;
+    }
+
+    private static String readResponseFromConnection(InputStream is) throws IOException {
+        StringBuilder response = new StringBuilder();
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(is));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        return response.toString();
+    }
+
     /* Uploads one observation to iNaturalist, with its photo stored on the device. */
     public static void uploadObservation(Observation o, String token, InputStream photoFile) {
+        Log.d(TAG, "token: " + token);
         uploadObservation(o, token);
         uploadPictureForObservation(o, token, photoFile);
         uploadObservationToProject(o, token);
@@ -97,6 +122,7 @@ public class ApiManager {
             String response = sendPost(BASE_OBSERVATIONS_URL, paramsBuilder.toString(), token);
             String observationId = getObservationIdFromJSON(new JSONArray(response));
             o.setId(observationId);
+            Log.d(TAG, "observationId: " + observationId);
         } catch(Exception e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
@@ -169,17 +195,7 @@ public class ApiManager {
         return observations;
     }
 
-    private static String sendGet(String urlSpec) throws IOException {
-        URL url = new URL(urlSpec);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        String response = "";
-        try {
-            response = readResponseFromConnection(connection.getInputStream());
-        } finally {
-            connection.disconnect();
-        }
-        return response;
-    }
+
 
     private static String sendPost(String baseUrl, String params, String token) throws IOException {
         URL url = new URL(baseUrl);
@@ -207,17 +223,7 @@ public class ApiManager {
         return response;
     }
 
-    private static String readResponseFromConnection(InputStream is) throws IOException {
-        StringBuilder response = new StringBuilder();
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(is));
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        return response.toString();
-    }
+
 
     private static void writeParamsToConnection(OutputStream os, String params) throws Exception {
         BufferedWriter out = new BufferedWriter(
