@@ -25,6 +25,9 @@
     <string name="title_activity_educational">EducationalActivity</string>
     <string name="title_activity_species_detail">SpeciesDetailActivity</string>
 
+
+    <string name="new_observation">New Observation</string>
+
     <string name="SpeciesHint">Species Name...</string>
     <string name="ObservationPicture">Observation Picture</string>
     <string name="DescriptionText">Description...</string>

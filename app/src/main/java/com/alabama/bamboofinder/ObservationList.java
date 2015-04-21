@@ -20,14 +20,6 @@ public class ObservationList {
     private ObservationList(Context appContent) {
         mAppContext = appContent;
         mObservations = new LinkedList<>();
-
-        // populate the list with observations
-        for (int i = 1; i <= 100; i++) {
-            Observation observation = new Observation();
-            observation.setSpeciesGuess("Observation #" + i);
-            observation.setTimeStamp(new Date());
-            mObservations.add(observation);
-        }
     }
 
     public static ObservationList get(Context context) {

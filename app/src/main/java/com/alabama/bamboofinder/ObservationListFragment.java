@@ -1,15 +1,21 @@
 package com.alabama.bamboofinder;
 
 import android.content.Intent;
-import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
@@ -21,9 +27,14 @@ public class ObservationListFragment extends ListFragment {
     private static final String TAG = "ObservationListFragment";
     private List<Observation> mObservations;
 
+    private LatLng mLastUserPosition;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true); // let the FragmentManager know that ObservationListFragment
+        // needs to receive options menu callbacks
+
         getActivity().setTitle(R.string.title_activity_observation_list);
         mObservations = ObservationList.get(getActivity()).getObservations();
 
@@ -32,10 +43,39 @@ public class ObservationListFragment extends ListFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        ((ObservationAdapter)getListAdapter()).notifyDataSetChanged(); // update the list view
+    }
+
+    @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Observation observation = ((ObservationAdapter)getListAdapter()).getItem(position);
         Intent i = new Intent(getActivity(), ObservationDetailActivity.class);
+        i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, observation);
+        // needs an extra passed
         startActivity(i);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_fragment_observation_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.menu_item_new_observation:
+                Observation observation = new Observation();
+                ObservationList.get(getActivity()).addObservation(observation);
+                Intent i = new Intent(getActivity(), InteractiveMapActivity.class);
+                //i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
+                startActivity(i);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private class ObservationAdapter extends ArrayAdapter<Observation> {
