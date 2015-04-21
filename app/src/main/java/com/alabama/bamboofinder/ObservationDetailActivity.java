@@ -62,7 +62,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_observation_detail);
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        /* // Testing code
+        // Testing code
         Observation o = new Observation();
         o.setLocation(new LatLng(33.0, -87.0));
         o.setDescription("New description");
@@ -71,7 +71,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         String token = prefs1.getString("token", "Empty Token");
         InputStream photoFile = getResources().openRawResource(R.raw.download);
         new PostObservationsTask().execute(o, token, photoFile);
-        // end testing code */
+        // end testing code
 
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
         mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
