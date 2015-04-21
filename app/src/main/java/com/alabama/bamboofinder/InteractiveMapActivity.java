@@ -302,9 +302,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     private void showObservations(SearchFilter sf) {
-        Observation testObservation = new Observation();
-        testObservation.setLocation(new LatLng(33.2, -87.5));
-        mObservations.add(testObservation);
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));
