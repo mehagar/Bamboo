@@ -1,6 +1,8 @@
 package com.alabama.bamboofinder;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -21,13 +23,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Date;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class ObservationDetailActivity extends ActionBarActivity {
     private static final String TAG = "ObservationDetail";
@@ -57,14 +62,16 @@ public class ObservationDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_observation_detail);
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        /*// Testing code
+        // Testing code
         Observation o = new Observation();
+        o.setLocation(new LatLng(33.0, -87.0));
+        o.setDescription("New description");
         SharedPreferences prefs1 = ObservationDetailActivity.this.getSharedPreferences(
                 "com.alabama.bamboofinder", Context.MODE_PRIVATE);
         String token = prefs1.getString("token", "Empty Token");
         InputStream photoFile = getResources().openRawResource(R.raw.download);
         new PostObservationsTask().execute(o, token, photoFile);
-        // end testing code*/
+        // end testing code
 
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
         mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
@@ -79,6 +86,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         String prefUser = prefs.getString("user", "Empty user");
 
         if(latitude == -1) {
+            //Latitude was not passed in Intent, so user is editing an observation
             mMode = EDIT_OBSERVATION;
 
             mObservation = (Observation) i.getSerializableExtra(EXTRA_OBSERVATION);
@@ -95,10 +103,18 @@ public class ObservationDetailActivity extends ActionBarActivity {
 
             //check if logged in user made this observation
             try {
-                User user = new User(new JSONObject(prefUser));
-                if(!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
+                if(prefUser.contentEquals("Empty user")) {
                     mSpeciesText.setKeyListener(null);
                     mDescriptionText.setKeyListener(null);
+                    mSaveButton.setVisibility(View.INVISIBLE);
+                }
+                else {
+                    User user = new User(new JSONObject(prefUser));
+                    if (!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
+                        mSpeciesText.setKeyListener(null);
+                        mDescriptionText.setKeyListener(null);
+                        mSaveButton.setVisibility(View.INVISIBLE);
+                    }
                 }
             }
             catch (Exception e) {
@@ -116,7 +132,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //return to calling class with resultCode = RESULT_CANCELED
                 setResult(RESULT_CANCELED);
                 finish();
             }
@@ -127,12 +142,33 @@ public class ObservationDetailActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = getIntent();
+                SharedPreferences prefs = ObservationDetailActivity.this.getSharedPreferences(
+                        "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+                String token = prefs.getString("token", "Empty Token");
 
                 switch(mMode) {
                     case(EDIT_OBSERVATION):
-                        //TODO update observation fields in the intent.
+                        if(imageUri == null) {
+                            ShowAlert();
+                            break;
+                        }
+
+                        Uri.Builder putObservation = new Uri.Builder();
+                        putObservation.scheme("https")
+                                .authority(BASE_URL)
+                                .appendPath("observations")
+                                .appendPath(mObservation.getId())
+                                .appendQueryParameter(ApiManager.URL_DESCRIPTION, mDescriptionText.getText().toString())
+                                //add any additional fields here
+                                .build();
+                        new UpdateObservationTask().execute(mObservation, token, imageUri.toString(),
+                                putObservation.toString());
                         break;
                     case(ADD_OBSERVATION):
+                        if(imageUri == null) {
+                            ShowAlert();
+                            break;
+                        }
                         Observation o = new Observation();
                         double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
                         double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
@@ -141,10 +177,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         o.setSpeciesGuess(mSpeciesText.getText().toString());
                         o.setDescription(mDescriptionText.getText().toString());
                         o.setTimeStamp(new Date());
-
-                        SharedPreferences prefs = ObservationDetailActivity.this.getSharedPreferences(
-                                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
-                        String token = prefs.getString("token", "Empty Token");
                         AsyncTask postObservation = new PostObservationsTask().execute(
                                 mObservation, token, imageUri.toString());
                         setResult(RESULT_OK);
@@ -153,7 +185,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -229,8 +260,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                     matrix.postRotate(rotate);
                     Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                             bitmap.getHeight(), matrix, true);
-
-
                     mImageView.setImageBitmap(rotatedBitmap);
                 }
             }
@@ -240,12 +269,51 @@ public class ObservationDetailActivity extends ActionBarActivity {
         }
     }
 
+    private void ShowAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("No photo!")
+                .setMessage("You must take a photo first.")
+                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
     class PostObservationsTask extends AsyncTask<Object, Void, Void> {
         @Override
         protected Void doInBackground(Object... objects) {
             // params are the observation, token, and photo file name
             Log.d(TAG, "in doInBackground");
             ApiManager.uploadObservation((Observation)objects[0], (String)objects[1], (InputStream)objects[2]);
+            return null;
+        }
+    }
+
+    class UpdateObservationTask extends  AsyncTask<Object, Void, Void> {
+        @Override
+        protected Void doInBackground(Object... objects) {
+            // params are the observation, token, photo file name, and api url
+            try {
+                URL url = new URL((String)objects[3]);
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setRequestMethod("PUT");
+                //connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String response = in.readLine();
+
+                Log.i("PUT responseCode", String.valueOf(connection.getResponseCode()));
+
+                connection.disconnect();
+            }
+            catch (Exception e) {
+                Log.e("Token request failed", e.toString());
+            }
             return null;
         }
     }

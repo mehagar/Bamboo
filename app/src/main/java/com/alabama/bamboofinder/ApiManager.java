@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
+
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +36,7 @@ public class ApiManager {
     private static final String URL_LATITUDE = "observation[latitude]";
     private static final String URL_LONGITUDE = "observation[longitude]";
     private static final String URL_DATE = "observation[observed_on_string]";
-    private static final String URL_DESCRIPTION = "observation[description]";
+    public static final String URL_DESCRIPTION = "observation[description]";
     private static final String URL_PHOTO = "observation_photo[observation_id]";
     private static final String URL_PROJECT_OBSERVATION = "project_observation[observation_id]";
     private static final String URL_PROJECT_ID = "project_observation[project_id]";
@@ -46,6 +47,8 @@ public class ApiManager {
     private static final String PROJECT_ID = "3846"; // The id of the BambooFinder project on iNaturalist.org
 
     private static final String BASE_URL = "www.inaturalist.org";
+    private static final String BASE_OBSERVATIONS_URL = "https://" + BASE_URL + "/observations.json";
+    private static final String BASE_PROJECT_OBSERVATION_URL = "https://" + BASE_URL + "/project_observations.json";
 
     /* Gets observations from iNaturalist's api within a specified range */
     public static ArrayList<Observation> getObservationsFromNetwork(LatLngBounds bounds) {
@@ -76,23 +79,22 @@ public class ApiManager {
     /* Uploads one observation to iNaturalist, with its photo stored on the device. */
     public static void uploadObservation(Observation o, String token, InputStream photoFile) {
         uploadObservation(o, token);
-        // Uncomment these when they are working.
-        //uploadPictureForObservation(o, token, photoFile);
-        //uploadObservationToProject(o, token);
+        uploadPictureForObservation(o, token, photoFile);
+        uploadObservationToProject(o, token);
     }
 
     // uploads the observation, but does not associate it with a picture or project.
     private static void uploadObservation(Observation o, String token) {
         Uri.Builder paramsBuilder = new Uri.Builder();
-        paramsBuilder.appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
+        paramsBuilder
+                .appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
                 .appendQueryParameter(URL_LONGITUDE, String.valueOf(o.getLocation().longitude))
                 .appendQueryParameter(URL_DATE, o.getTimeStamp().toString())
                 .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
-
         try {
             // we can only know the inaturalist observation id by looking at the response from uploading it.
-            String response = sendPost(getBaseUrl(), paramsBuilder.toString(), token);
+            String response = sendPost(BASE_OBSERVATIONS_URL, paramsBuilder.toString(), token);
             String observationId = getObservationIdFromJSON(new JSONArray(response));
             o.setId(observationId);
         } catch(Exception e) {
@@ -100,37 +102,25 @@ public class ApiManager {
         }
     }
 
-    private static String getBaseUrl() {
-        Uri.Builder baseBuilder = new Uri.Builder();
-        baseBuilder.scheme("https")
-                .authority(BASE_URL)
-                .appendPath("observations.json")
-                .build();
-        return baseBuilder.toString();
-    }
-
     private static String getObservationIdFromJSON(JSONArray jsonArray) throws JSONException {
         return jsonArray.getJSONObject(0).getString(JSON_OBSERVATION_ID);
     }
 
     private static void uploadPictureForObservation(Observation o, String token, InputStream photoFile) {
-        // TODO: This is not quite working - getting error response code of 404, but image was shown on iNaturalist.
-        // Warning : calling this function may cause your iNaturalist account to be suspended.
         SyncHttpClient client = new SyncHttpClient();
         RequestParams params = new RequestParams();
 
         params.put("file", photoFile);
+        params.put(URL_PHOTO, o.getId());
 
         Uri.Builder photoBuilder = new Uri.Builder();
         photoBuilder.scheme("https")
                 .authority(BASE_URL)
-                .appendPath("observation_photos")
-                .appendQueryParameter(URL_PHOTO, o.getId())
+                .appendPath("observation_photos.json")
                 .build();
         Log.d(TAG, "Url to post photo was: " + photoBuilder.toString());
 
         client.addHeader("Authorization", "Bearer " + token);
-        Log.d(TAG, client.toString());
         client.post(photoBuilder.toString(), params, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -147,14 +137,12 @@ public class ApiManager {
 
     private static void uploadObservationToProject(Observation o, String token) {
         Uri.Builder projectBuilder = new Uri.Builder();
-        projectBuilder.scheme("https")
-                .authority(BASE_URL)
-                .appendPath("project_observations")
+        projectBuilder
                 .appendQueryParameter(URL_PROJECT_OBSERVATION, o.getId())
                 .appendQueryParameter(URL_PROJECT_ID, PROJECT_ID)
                 .build();
         try {
-            sendPost(getBaseUrl(), projectBuilder.toString(), token);
+            sendPost(BASE_PROJECT_OBSERVATION_URL, projectBuilder.toString(), token);
         } catch(IOException e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
@@ -203,13 +191,16 @@ public class ApiManager {
             con.setDoOutput(true);
             con.setDoInput(true);
             con.setRequestProperty("Authorization", "Bearer " + token);
-            con.setFixedLengthStreamingMode(params.getBytes().length);
 
             writeParamsToConnection(con.getOutputStream(), params);
-            response = readResponseFromConnection(con.getInputStream());
             Log.d(TAG, "Response code: " + con.getResponseCode());
+            try {
+                response = readResponseFromConnection(con.getInputStream());
+            } catch(IOException io) {
+                Log.e(TAG, "Could not read response");
+            }
         } catch(Exception e) {
-            Log.d(TAG, "Error sending post: " + e.getMessage());
+            Log.e(TAG, "Error sending post: " + e.getMessage());
         } finally {
             con.disconnect();
         }
@@ -220,7 +211,6 @@ public class ApiManager {
         StringBuilder response = new StringBuilder();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(is));
-
         String inputLine;
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -232,8 +222,9 @@ public class ApiManager {
     private static void writeParamsToConnection(OutputStream os, String params) throws Exception {
         BufferedWriter out = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8"));
-
-        out.write(params);
+        // Chopping off the first character is necessary because Uri.Builder adds a "?", which isn't needed.
+        Log.d(TAG, "writing params: " + params.substring(1));
+        out.write(params.substring(1));
         out.close();
     }
 }
