@@ -30,21 +30,19 @@ public class Observation implements Serializable {
     private static final String JSON_SPECIES_GUESS = "species_guess";
     private static final String JSON_OBSERVED_DATE = "observed_on";
     private static final String JSON_DESCRIPTION = "description";
-    private static final String JSON_IDENTIFICATIONS = "identifications";
-    private static final String JSON_USER = "user";
-    private static final String JSON_LOGIN = "login";
     private static final String JSON_USER_LOGIN = "user_login";
 
     private Date mDateObserved;
     private String mSpeciesGuess;
     private String mDescription;
     private String mId;
-    double mLatitude;
-    double mLongitude;
+    private double mLatitude;
+    private double mLongitude;
     private String mThumbnailUrl;
     private String mMediumUrl;
     private String mUserLogin;
 
+    // This should be deleted once the app has finished testing.
     public Observation() {
         mDateObserved = new Date();
         mSpeciesGuess = "Default Species Guess";
