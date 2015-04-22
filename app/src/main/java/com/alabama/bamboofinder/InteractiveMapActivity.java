@@ -31,6 +31,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.common.collect.HashBiMap;
 import com.squareup.picasso.Callback;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private static final String TAG = "InteractiveMap";
 
     public static final int FILTER_REQUEST = 1;
+    public static final int DETAIL_REQUEST = 2;
     public static final String EXTRA_SEARCH_FILTER = "search_filter";
     private static final String STATE_FILTER = "search_filter";
 
@@ -120,7 +123,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 if(mLastUserPosition != null) {
                     i.putExtra(ObservationDetailActivity.EXTRA_USER_LATITUDE, mLastUserPosition.latitude);
                     i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
-                    startActivity(i);
+                    startActivityForResult(i, DETAIL_REQUEST);
                 } else {
                     showNoGPSAlertDialog();
                 }
@@ -165,6 +168,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 showObservations(mSearchFilter);
             } else if(resultCode == RESULT_CANCELED) {
                 mSearchFilter = null;
+                showObservations(mSearchFilter);
+            }
+        } else if(requestCode == DETAIL_REQUEST) {
+            if(resultCode == RESULT_OK) {
+                mMap.clear();
+                mMarkerObservationMap.clear();
                 showObservations(mSearchFilter);
             }
         }
