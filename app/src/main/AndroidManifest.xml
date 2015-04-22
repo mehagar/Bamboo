@@ -83,9 +83,9 @@
             android:label="@string/title_activity_educational"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+            <!-- enable the search dialog to send searches to SearchableActivity -->
+            <meta-data android:name="android.app.default_searchable"
+                android:value=".SearchableActivity"/>
         </activity>
         <activity
             android:name=".SpeciesDetailActivity"
