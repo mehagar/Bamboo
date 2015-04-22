@@ -227,4 +227,8 @@ public class ApiManager {
         out.write(params.substring(1));
         out.close();
     }
+
+    public static String callSendGet(String urlSpec) throws IOException {
+        return sendGet(urlSpec);
+    }
 }

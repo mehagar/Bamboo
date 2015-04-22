@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Michael Walker on 4/9/2015.
@@ -56,10 +57,10 @@ public class ObservationListFragment extends ListFragment {
                 jsonObject = new JSONObject(user);
                 String username = jsonObject.getString("login");
 
-                Uri.Builder getObservations = new Uri.Builder();
-                getObservations.scheme("https").authority("www.inaturalist.org").appendPath(username).build();
+                Uri.Builder getObservationsURL = new Uri.Builder();
+                getObservationsURL.scheme("https").authority("www.inaturalist.org").appendPath(username).build();
 
-                new updateObservationList().execute(username);
+                new getObservationList().execute(username, getObservationsURL.toString());
             }
             catch (Exception e) {
                 Log.e(TAG, "Error converting to JSON Object");
@@ -136,12 +137,16 @@ public class ObservationListFragment extends ListFragment {
         }
     }
 
-    private class updateObservationList extends AsyncTask<Object, Void, Void> {
+    private class getObservationList extends AsyncTask<Object, Void, Void> {
         @Override
         protected Void doInBackground(Object... objects) {
-            // build url sendGet -> response
-            // jsondatato...
-            //
+            try {
+                String url = ApiManager.callSendGet((String)objects[1]);
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Error in API call to receive observations.");
+            }
+            return null;
         }
     }
 }
