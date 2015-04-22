@@ -147,6 +147,7 @@ public class ObservationListFragment extends ListFragment {
         @Override
         protected Void doInBackground(Object... objects) {
             try {
+                // need to update because of error
                 String jsonObjects = ApiManager.callSendGet(objects[1].toString());
                 Log.d(TAG, jsonObjects);
                 mObservations = ApiManager.callJSONDataToObservations(jsonObjects);
