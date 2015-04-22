@@ -1,9 +1,12 @@
 package com.alabama.bamboofinder;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -28,6 +31,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.common.collect.HashBiMap;
 import com.squareup.picasso.Callback;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +41,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private static final String TAG = "InteractiveMap";
 
     public static final int FILTER_REQUEST = 1;
+    public static final int DETAIL_REQUEST = 2;
     public static final String EXTRA_SEARCH_FILTER = "search_filter";
     private static final String STATE_FILTER = "search_filter";
 
@@ -69,6 +75,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
         super.onResume();
 
         if(!mGoogleApiClient.isConnected()) {
+            Log.d(TAG, "Reconnected google api client");
             mGoogleApiClient.connect();
         }
         setUpMapIfNeeded();
@@ -113,17 +120,44 @@ public class InteractiveMapActivity extends ActionBarActivity {
         switch(item.getItemId()) {
             case R.id.action_add:
                 i = new Intent(this, ObservationDetailActivity.class);
-                i.putExtra(ObservationDetailActivity.EXTRA_USER_LATITUDE, mLastUserPosition.latitude);
-                i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
-                startActivity(i);
+                if(mLastUserPosition != null) {
+                    i.putExtra(ObservationDetailActivity.EXTRA_USER_LATITUDE, mLastUserPosition.latitude);
+                    i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
+                    startActivityForResult(i, DETAIL_REQUEST);
+                } else {
+                    showNoGPSAlertDialog();
+                }
                 return true;
             case R.id.action_filter:
                 i = new Intent(this, SearchFilterActivity.class);
+                if(mSearchFilter != null) {
+                    i.putExtra(EXTRA_SEARCH_FILTER, mSearchFilter);
+                }
                 startActivityForResult(i, FILTER_REQUEST);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showNoGPSAlertDialog() {
+        new AlertDialog.Builder(this)
+                .setMessage("GPS must be enabled to add an observation")
+                .setPositiveButton("Enable GPS", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     @Override
@@ -134,6 +168,12 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 showObservations(mSearchFilter);
             } else if(resultCode == RESULT_CANCELED) {
                 mSearchFilter = null;
+                showObservations(mSearchFilter);
+            }
+        } else if(requestCode == DETAIL_REQUEST) {
+            if(resultCode == RESULT_OK) {
+                mMap.clear();
+                mMarkerObservationMap.clear();
                 showObservations(mSearchFilter);
             }
         }
@@ -184,8 +224,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                if(cameraPosition.target.latitude != mLastMapPosition.latitude ||
-                   cameraPosition.target.longitude != mLastMapPosition.longitude) {
+                if (cameraPosition.target.latitude != mLastMapPosition.latitude ||
+                        cameraPosition.target.longitude != mLastMapPosition.longitude) {
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
                     mLastMapPosition = cameraPosition.target;
@@ -253,7 +293,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         @Override
         public void onConnectionSuspended(int cause) {
-            // left unimplemented
+            Log.d(TAG, "onConnectionSuspended called");
         }
     }
 
@@ -272,9 +312,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
     }
 
     private void showObservations(SearchFilter sf) {
-        Observation testObservation = new Observation();
-        testObservation.setLocation(new LatLng(33.2, -87.5));
-        mObservations.add(testObservation);
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
             boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));

@@ -28,29 +28,25 @@ public class Observation implements Serializable {
     private static final String JSON_MEDIUM_URL = "medium_url";
     private static final String JSON_NUM_PHOTOS = "observation_photos_count";
     private static final String JSON_SPECIES_GUESS = "species_guess";
-    private static final String JSON_OBSERVED_DATE = "observed_on";
+    private static final String JSON_OBSERVED_DATE = "observed_on_string";
     private static final String JSON_DESCRIPTION = "description";
-    private static final String JSON_IDENTIFICATIONS = "identifications";
-    private static final String JSON_USER = "user";
-    private static final String JSON_LOGIN = "login";
     private static final String JSON_USER_LOGIN = "user_login";
 
     private Date mDateObserved;
     private String mSpeciesGuess;
     private String mDescription;
-    private boolean mValidated;
     private String mId;
-    double mLatitude;
-    double mLongitude;
+    private double mLatitude;
+    private double mLongitude;
     private String mThumbnailUrl;
     private String mMediumUrl;
     private String mUserLogin;
 
+    // This should be deleted once the app has finished testing.
     public Observation() {
         mDateObserved = new Date();
         mSpeciesGuess = "Default Species Guess";
         mDescription = "Default Description";
-        mValidated = false;
         mId = "00000";
         mLatitude = 0.0;
         mLongitude = 0.0;
@@ -70,7 +66,6 @@ public class Observation implements Serializable {
             mDateObserved = parseDateFromString(jsonObject.getString(JSON_OBSERVED_DATE));
             mDescription = jsonObject.getString(JSON_DESCRIPTION);
             mUserLogin = jsonObject.getString(JSON_USER_LOGIN);
-            //mValidated = parseIsValidated(jsonObject);
         } catch(JSONException e) {
             Log.e(TAG, "Error parsing json for observation: " + e.getMessage());
         }
@@ -102,25 +97,6 @@ public class Observation implements Serializable {
         return dateObserved;
     }
 
-    private boolean parseIsValidated(JSONObject jsonObject) throws JSONException {
-        // based on the admin(s), check if any of them has personally validated an observation, based on its
-        // jsonObject["identifications"]["user"]["login"]
-        // identifications is an array
-        JSONArray identifications = jsonObject.getJSONArray(JSON_IDENTIFICATIONS);
-        for(int i = 0; i < identifications.length(); ++i) {
-            JSONObject identification = identifications.getJSONObject(i);
-            JSONObject user = identification.getJSONObject(JSON_USER);
-            String loginName = user.getString(JSON_LOGIN);
-            // if loginName is not a member of the project, do not count the validation.
-            // testing just one username. TODO: Should test against all members of the project.
-            if(loginName.equals("mehagar23")) {
-                Log.d(TAG, "Observation " + getSpeciesGuess() + " is validated");
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public int hashCode() {
         return mId.hashCode();
@@ -137,7 +113,6 @@ public class Observation implements Serializable {
         Observation other = (Observation) obj;
         return mId.equals(other.getId());
     }
-
 
     public String getSpeciesGuess() {
         return mSpeciesGuess;
@@ -193,14 +168,6 @@ public class Observation implements Serializable {
 
     public void setDescription(String description) {
         this.mDescription = description;
-    }
-
-    public boolean isValidated() {
-        return mValidated;
-    }
-
-    public void setValidated(boolean validated) {
-        this.mValidated = validated;
     }
 
     public String getUserLogin() {

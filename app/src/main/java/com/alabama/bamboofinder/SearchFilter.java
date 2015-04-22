@@ -16,18 +16,37 @@ public class SearchFilter implements Serializable {
     private static final String TAG = "SearchFilter";
 
     Date mEarliestDate;
+    boolean mMustBeBefore;
+    boolean mOwnObservations;
 
-    public SearchFilter(Date date) {
+    public SearchFilter(boolean ownObservations, boolean afterDate, Date date) {
+        mOwnObservations = ownObservations;
+        mMustBeBefore = afterDate;
         mEarliestDate = date;
     }
 
     // Returns true if all criteria are met, false otherwise.
     public boolean meetsCriteria(Observation o) {
-        if(o.getTimeStamp().before(mEarliestDate)) {
+        if(mMustBeBefore && o.getTimeStamp().before(mEarliestDate)) {
             Log.d(TAG, "Observation was too old: " + o.getTimeStamp() + " was before " + mEarliestDate);
+            return false;
+        } else if(mOwnObservations && !o.getUserLogin().equals("michael23")) {
+            Log.d(TAG, "Observation by user " + o.getUserLogin() + " not one of the users'");
             return false;
         }
         Log.d(TAG, "Observation met filter");
         return true;
+    }
+
+    public Date getEarliestDate() {
+        return mEarliestDate;
+    }
+
+    public boolean isMustBeBefore() {
+        return mMustBeBefore;
+    }
+
+    public boolean isOwnObservations() {
+        return mOwnObservations;
     }
 }

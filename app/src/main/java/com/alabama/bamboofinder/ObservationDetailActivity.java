@@ -7,13 +7,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,12 +26,14 @@ import android.widget.ImageView;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -41,12 +45,13 @@ public class ObservationDetailActivity extends ActionBarActivity {
     public static final String EXTRA_USER_LATITUDE = "latitude";
     public static final String EXTRA_USER_LONGITUDE = "longitude";
     public static final String BASE_URL = "www.inaturalist.org";
+
     private static final int ADD_OBSERVATION = 0;
     private static final int EDIT_OBSERVATION = 1;
     private static final int CAMERA_REQUEST = 1888;
-
     private static Uri imageUri;
     private static int mMode;
+    private static File imagePath;
     private ImageView mImageView;
     private EditText mSpeciesText;
     private EditText mDescriptionText;
@@ -62,20 +67,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_observation_detail);
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        // Testing code
-        Observation o = new Observation();
-        o.setLocation(new LatLng(33.0, -87.0));
-        o.setDescription("New description");
-        SharedPreferences prefs1 = ObservationDetailActivity.this.getSharedPreferences(
-                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
-        String token = prefs1.getString("token", "Empty Token");
-        InputStream photoFile = getResources().openRawResource(R.raw.download);
-        new PostObservationsTask().execute(o, token, photoFile);
-        // end testing code
-
         mDescriptionText = (EditText) findViewById(R.id.descriptionEditText);
         mSpeciesText = (EditText) findViewById(R.id.speciesEditText);
         mImageView = (ImageView)findViewById(R.id.observationImage);
+        mCancelButton = (Button) findViewById(R.id.cancelButton);
+        mSaveButton = (Button) findViewById(R.id.saveButton);
         api = new ApiManager();
 
         //Check if adding or editing
@@ -127,8 +123,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
         else
             mMode = ADD_OBSERVATION;
 
-
-        mCancelButton = (Button) findViewById(R.id.cancelButton);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,7 +131,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
             }
         });
 
-        mSaveButton = (Button) findViewById(R.id.saveButton);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -148,7 +141,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
 
                 switch(mMode) {
                     case(EDIT_OBSERVATION):
-                        if(imageUri == null) {
+                        if(mImageView.getDrawable() == null) {
                             ShowAlert();
                             break;
                         }
@@ -158,14 +151,16 @@ public class ObservationDetailActivity extends ActionBarActivity {
                                 .authority(BASE_URL)
                                 .appendPath("observations")
                                 .appendPath(mObservation.getId())
+                                .appendQueryParameter("ignore_photos", "1")
                                 .appendQueryParameter(ApiManager.URL_DESCRIPTION, mDescriptionText.getText().toString())
                                 //add any additional fields here
                                 .build();
-                        new UpdateObservationTask().execute(mObservation, token, imageUri.toString(),
-                                putObservation.toString());
+                            new UpdateObservationTask().execute(mObservation, token, putObservation.toString());
+                        setResult(RESULT_OK);
+                        finish();
                         break;
                     case(ADD_OBSERVATION):
-                        if(imageUri == null) {
+                        if(imagePath == null) {
                             ShowAlert();
                             break;
                         }
@@ -177,8 +172,14 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         o.setSpeciesGuess(mSpeciesText.getText().toString());
                         o.setDescription(mDescriptionText.getText().toString());
                         o.setTimeStamp(new Date());
-                        AsyncTask postObservation = new PostObservationsTask().execute(
-                                mObservation, token, imageUri.toString());
+                        try {
+                            AsyncTask postObservation = new PostObservationsTask().execute(
+                                    o, token, new FileInputStream(imagePath));
+                            Log.i("Image Path", imagePath.toString());
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, e.toString());
+                        }
                         setResult(RESULT_OK);
                         finish();
                 }
@@ -190,6 +191,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_observation_detail, menu);
+        if(mMode == EDIT_OBSERVATION) {
+            MenuItem item = menu.findItem(R.id.menu_item_new_picture);
+            item.setVisible(false);
+            this.invalidateOptionsMenu();
+        }
         return true;
     }
 
@@ -201,11 +207,23 @@ public class ObservationDetailActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
-                //finish();
+                finish();
                 return true;
             case R.id.menu_item_new_picture:
+                //File photoFile = null;
+                try {
+                    imagePath = createImageFile();
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                }
+
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                if(imagePath != null) {
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                            Uri.fromFile(imagePath));
+
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                }
                 return true;
             case android.R.id.home:
                 finish();
@@ -218,10 +236,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            imageUri = data.getData();
-            Log.i("Result Image URI", imageUri.toString());
+            //imageUri = data.getData();
+            //Log.i("Result Image URI", imageUri.toString());
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                //Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                Bitmap bitmap = BitmapFactory.decodeFile(imagePath.toString());
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
 
                 //Retrieve last image taken
@@ -283,6 +302,23 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 .show();
     }
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        //imagePath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
     class PostObservationsTask extends AsyncTask<Object, Void, Void> {
         @Override
         protected Void doInBackground(Object... objects) {
@@ -296,13 +332,14 @@ public class ObservationDetailActivity extends ActionBarActivity {
     class UpdateObservationTask extends  AsyncTask<Object, Void, Void> {
         @Override
         protected Void doInBackground(Object... objects) {
-            // params are the observation, token, photo file name, and api url
+            // params are the observation, token, and api url
             try {
-                URL url = new URL((String)objects[3]);
+                URL url = new URL((String)objects[2]);
+                Log.i("PUT URL", url.toString());
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 connection.setDoOutput(true);
                 connection.setRequestMethod("PUT");
-                //connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Authorization", "Bearer " + (String)objects[1]);
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String response = in.readLine();
