@@ -122,12 +122,14 @@ public class InteractiveMapActivity extends ActionBarActivity {
                     i.putExtra(ObservationDetailActivity.EXTRA_USER_LONGITUDE, mLastUserPosition.longitude);
                     startActivity(i);
                 } else {
-                    // Show a dialog saying that gps must be enabled to add an observation
                     showNoGPSAlertDialog();
                 }
                 return true;
             case R.id.action_filter:
                 i = new Intent(this, SearchFilterActivity.class);
+                if(mSearchFilter != null) {
+                    i.putExtra(EXTRA_SEARCH_FILTER, mSearchFilter);
+                }
                 startActivityForResult(i, FILTER_REQUEST);
                 return true;
             default:
@@ -213,8 +215,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                if(cameraPosition.target.latitude != mLastMapPosition.latitude ||
-                   cameraPosition.target.longitude != mLastMapPosition.longitude) {
+                if (cameraPosition.target.latitude != mLastMapPosition.latitude ||
+                        cameraPosition.target.longitude != mLastMapPosition.longitude) {
                     LatLngBounds curScreen = getScreenBoundingBox();
                     new GetObservationsTask().execute(curScreen);
                     mLastMapPosition = cameraPosition.target;
@@ -276,7 +278,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(TAG, "onLocationChanged called");
             mLastUserPosition = new LatLng(location.getLatitude(),
                                             location.getLongitude());
         }

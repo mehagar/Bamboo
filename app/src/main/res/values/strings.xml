@@ -57,9 +57,10 @@
     <string name="title_activity_search_filter">Search Filter</string>
     <string name="within_radius">Within radius (in meters)</string>
     <string name="added_after">Added after:</string>
-    <string name="show_observations">Only show observations..</string>
+    <string name="show_observations">Only show observations:</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="own_observations">Only shown own observations</string>
 
 </resources>
