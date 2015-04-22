@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,8 +35,9 @@ import java.util.Objects;
 public class ObservationListFragment extends ListFragment {
 
     private static final String TAG = "ObservationListFragment";
-    private static List<Observation> mObservations;
-    private ApiManager api;
+    private static List<Observation> mObservations = new ArrayList<Observation>();
+    private static final String BASE_URL = "www.inaturalist.org";
+
 
     // 1. Shared preferences (
     // 2. Get users string from preferences
@@ -50,24 +52,28 @@ public class ObservationListFragment extends ListFragment {
 
         SharedPreferences prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
         String user = prefs.getString("user", "Empty User");
-        String token = prefs.getString("token", "Empty Token");
+
         if (!user.contentEquals("Empty User")) {
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(user);
-                String username = jsonObject.getString("login");
+                String username = jsonObject.getString("login") + ".json";
 
                 Uri.Builder getObservationsURL = new Uri.Builder();
-                getObservationsURL.scheme("https").authority("www.inaturalist.org").appendPath(username).build();
+                getObservationsURL.scheme("https")
+                        .authority(BASE_URL)
+                        .appendPath("observations")
+                        .appendPath(username)
+                        .build();
 
-                new getObservationList().execute(username, getObservationsURL.toString());
+                new getObservationList().execute(username, getObservationsURL);
             }
             catch (Exception e) {
                 Log.e(TAG, "Error converting to JSON Object");
             }
         }
 
-        mObservations = ObservationList.get(getActivity()).getObservations();
+        //mObservations = ObservationList.get(getActivity()).getObservations();
 
         ObservationAdapter adapter = new ObservationAdapter(mObservations);
         setListAdapter(adapter);
@@ -141,8 +147,9 @@ public class ObservationListFragment extends ListFragment {
         @Override
         protected Void doInBackground(Object... objects) {
             try {
-                String url = ApiManager.callSendGet((String)objects[1]);
-                
+                String jsonObjects = ApiManager.callSendGet(objects[1].toString());
+                Log.d(TAG, jsonObjects);
+                mObservations = ApiManager.callJSONDataToObservations(jsonObjects);
             } catch (Exception e) {
                 Log.e(TAG, "Error in API call to receive observations.");
             }

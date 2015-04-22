@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Objects;
+
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -230,5 +232,9 @@ public class ApiManager {
 
     public static String callSendGet(String urlSpec) throws IOException {
         return sendGet(urlSpec);
+    }
+
+    public static ArrayList<Observation> callJSONDataToObservations(String data) {
+        return JSONDataToObservations(data);
     }
 }
