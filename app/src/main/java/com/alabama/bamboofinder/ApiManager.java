@@ -19,7 +19,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -37,6 +40,7 @@ public class ApiManager {
     private static final String URL_LONGITUDE = "observation[longitude]";
     private static final String URL_DATE = "observation[observed_on_string]";
     public static final String URL_DESCRIPTION = "observation[description]";
+    private static final String URL_SPECIES_GUESS = "observation[species_guess]";
     private static final String URL_PHOTO = "observation_photo[observation_id]";
     private static final String URL_PROJECT_OBSERVATION = "project_observation[observation_id]";
     private static final String URL_PROJECT_ID = "project_observation[project_id]";
@@ -133,9 +137,10 @@ public class ApiManager {
     private static void uploadObservation(Observation o, String token) {
         Uri.Builder paramsBuilder = new Uri.Builder();
         paramsBuilder
+                .appendQueryParameter(URL_SPECIES_GUESS, o.getSpeciesGuess())
                 .appendQueryParameter(URL_LATITUDE, String.valueOf(o.getLocation().latitude))
                 .appendQueryParameter(URL_LONGITUDE, String.valueOf(o.getLocation().longitude))
-                .appendQueryParameter(URL_DATE, o.getTimeStamp().toString())
+                .appendQueryParameter(URL_DATE, getFormattedDateString(o.getTimeStamp()))
                 .appendQueryParameter(URL_DESCRIPTION, o.getDescription())
                 .build();
         try {
@@ -147,6 +152,11 @@ public class ApiManager {
         } catch(Exception e) {
             Log.e(TAG, "HTTP POST Failed: " + e.getMessage());
         }
+    }
+
+    private static String getFormattedDateString(Date d) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return formatter.format(d);
     }
 
     private static String getObservationIdFromJSON(JSONArray jsonArray) throws JSONException {
