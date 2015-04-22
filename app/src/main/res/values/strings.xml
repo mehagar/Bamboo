@@ -39,21 +39,8 @@
     <string name="species_select">Select a species</string>
     <string name="genus_select">Select a genus</string>
     <string name="species_generate_detail">Generate information</string>
-    <string-array name="species">
-        <item>Species 1</item>
-        <item>Species 2</item>
-        <item>Species 3</item>
-        <item>Species 4</item>
-        <item>Species 5</item>
-    </string-array>
+    <string name="search_hint">Search for bamboo</string>
 
-    <string-array name="genus">
-        <item>Genus 1</item>
-        <item>Genus 2</item>
-        <item>Genus 3</item>
-        <item>Genus 4</item>
-        <item>Genus 5</item>
-    </string-array>
     <string name="title_activity_search_filter">Search Filter</string>
     <string name="within_radius">Within radius (in meters)</string>
     <string name="added_after">Added after:</string>
@@ -61,5 +48,8 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_searchable">SearchableActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>
