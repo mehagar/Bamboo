@@ -23,12 +23,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,10 +45,10 @@ public class ObservationDetailActivity extends ActionBarActivity {
     public static final String EXTRA_USER_LATITUDE = "latitude";
     public static final String EXTRA_USER_LONGITUDE = "longitude";
     public static final String BASE_URL = "www.inaturalist.org";
+
     private static final int ADD_OBSERVATION = 0;
     private static final int EDIT_OBSERVATION = 1;
     private static final int CAMERA_REQUEST = 1888;
-
     private static Uri imageUri;
     private static int mMode;
     private static File imagePath;
@@ -155,7 +152,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
 
                 switch(mMode) {
                     case(EDIT_OBSERVATION):
-                        if(imagePath == null) {
+                        if(mImageView.getDrawable() == null) {
                             ShowAlert();
                             break;
                         }
@@ -165,11 +162,13 @@ public class ObservationDetailActivity extends ActionBarActivity {
                                 .authority(BASE_URL)
                                 .appendPath("observations")
                                 .appendPath(mObservation.getId())
+                                .appendQueryParameter("ignore_photos", "1")
                                 .appendQueryParameter(ApiManager.URL_DESCRIPTION, mDescriptionText.getText().toString())
                                 //add any additional fields here
                                 .build();
-                        new UpdateObservationTask().execute(mObservation, token, new File(imageUri.toString()),
-                                putObservation.toString());
+                            new UpdateObservationTask().execute(mObservation, token, putObservation.toString());
+                        setResult(RESULT_OK);
+                        finish();
                         break;
                     case(ADD_OBSERVATION):
                         if(imagePath == null) {
@@ -203,6 +202,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_observation_detail, menu);
+        if(mMode == EDIT_OBSERVATION) {
+            MenuItem item = menu.findItem(R.id.menu_item_new_picture);
+            item.setVisible(false);
+            this.invalidateOptionsMenu();
+        }
         return true;
     }
 
@@ -214,7 +218,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
-                //finish();
+                finish();
                 return true;
             case R.id.menu_item_new_picture:
                 //File photoFile = null;
@@ -339,13 +343,14 @@ public class ObservationDetailActivity extends ActionBarActivity {
     class UpdateObservationTask extends  AsyncTask<Object, Void, Void> {
         @Override
         protected Void doInBackground(Object... objects) {
-            // params are the observation, token, photo file name, and api url
+            // params are the observation, token, and api url
             try {
-                URL url = new URL((String)objects[3]);
+                URL url = new URL((String)objects[2]);
+                Log.i("PUT URL", url.toString());
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 connection.setDoOutput(true);
                 connection.setRequestMethod("PUT");
-                //connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Authorization", "Bearer " + (String)objects[1]);
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String response = in.readLine();

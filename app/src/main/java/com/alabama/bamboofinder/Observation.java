@@ -28,7 +28,7 @@ public class Observation implements Serializable {
     private static final String JSON_MEDIUM_URL = "medium_url";
     private static final String JSON_NUM_PHOTOS = "observation_photos_count";
     private static final String JSON_SPECIES_GUESS = "species_guess";
-    private static final String JSON_OBSERVED_DATE = "observed_on";
+    private static final String JSON_OBSERVED_DATE = "observed_on_string";
     private static final String JSON_DESCRIPTION = "description";
     private static final String JSON_USER_LOGIN = "user_login";
 

@@ -18,6 +18,7 @@
     <string name="new_picture">New Picture</string>
     <string name="search_filter_ok">OK</string>
     <string name="search_filter_cancel">Cancel</string>
+    <string name="logout">Logout</string>
 
     <string name="title_activity_interactive_map">Interactive Map</string>
     <string name="title_activity_observation_detail">Edit Observation</string>
