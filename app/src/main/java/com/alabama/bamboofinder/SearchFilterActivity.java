@@ -3,6 +3,7 @@ package com.alabama.bamboofinder;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import java.util.Date;
 
 
 public class SearchFilterActivity extends ActionBarActivity {
+    private static final String TAG = "SearchFilter";
 
     CheckBox datePickerCheckBox;
     CheckBox ownObservationsCheckBox;
@@ -66,7 +68,9 @@ public class SearchFilterActivity extends ActionBarActivity {
             SearchFilter sf = (SearchFilter) getIntent().getSerializableExtra(InteractiveMapActivity.EXTRA_SEARCH_FILTER);
             datePickerCheckBox.setChecked(sf.isMustBeBefore());
             Date earliestDate = sf.getEarliestDate();
-            datePicker.updateDate(earliestDate.getYear(), earliestDate.getMonth(), earliestDate.getDay());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(earliestDate);
+            datePicker.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
             ownObservationsCheckBox.setChecked(sf.isOwnObservations());
         }
     }
