@@ -1,6 +1,7 @@
 package com.alabama.bamboofinder;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -75,6 +76,8 @@ public class LoginActivity extends ActionBarActivity {
                     Log.e("Waiting Error", e.toString());
                 }
                 setResult(RESULT_OK);
+
+                addUserToProject();
                 finish();
             }
         });
@@ -88,6 +91,13 @@ public class LoginActivity extends ActionBarActivity {
                 startActivity(browserIntent);
             }
         });
+    }
+
+    private void addUserToProject() {
+        SharedPreferences prefs = getSharedPreferences(
+                "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String token = prefs.getString("token", "Empty Token");
+        new AddUserToProjectTask().execute(token);
     }
 
     class GetRequestToken extends AsyncTask<String, Void, String> {
@@ -124,5 +134,12 @@ public class LoginActivity extends ActionBarActivity {
         }
     }
 
-
+    class AddUserToProjectTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... objects) {
+            // params are the observation, token, and photo file name
+            ApiManager.addUserToProject(objects[0]);
+            return null;
+        }
+    }
 }

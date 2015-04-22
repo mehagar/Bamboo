@@ -216,7 +216,9 @@ public class ApiManager {
             con.setDoInput(true);
             con.setRequestProperty("Authorization", "Bearer " + token);
 
-            writeParamsToConnection(con.getOutputStream(), params);
+            if(!params.equals("")) {
+                writeParamsToConnection(con.getOutputStream(), params);
+            }
             Log.d(TAG, "Response code: " + con.getResponseCode());
             try {
                 response = readResponseFromConnection(con.getInputStream());
@@ -238,5 +240,20 @@ public class ApiManager {
         Log.d(TAG, "writing params: " + params.substring(1));
         out.write(params.substring(1));
         out.close();
+    }
+
+    public static void addUserToProject(String token) {
+        Uri.Builder addUserBuilder = new Uri.Builder();
+        addUserBuilder
+                .scheme("https")
+                .authority(BASE_URL)
+                .appendPath("projects")
+                .appendPath(PROJECT_ID)
+                .appendPath("join.json");
+        try {
+            sendPost(addUserBuilder.toString(), "", token);
+        } catch(IOException ioe) {
+            Log.e(TAG, "Error adding user to project");
+        }
     }
 }
