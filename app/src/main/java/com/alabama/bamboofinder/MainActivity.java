@@ -91,6 +91,11 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        if(mUser.getmUsername() == null) {
+            MenuItem item = menu.findItem(R.id.menu_item_logout);
+            item.setVisible(false);
+            this.invalidateOptionsMenu();
+        }
         return true;
     }
 
@@ -115,6 +120,7 @@ public class MainActivity extends ActionBarActivity {
                                 MainActivity.this.getSharedPreferences("com.alabama.bamboofinder",
                                         Context.MODE_PRIVATE).edit().clear().commit();
                                 dialog.cancel();
+                                MainActivity.this.recreate();
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -144,6 +150,7 @@ public class MainActivity extends ActionBarActivity {
             String token = prefs.getString("token", "Empty Token");
 
             setUser(token);
+            this.invalidateOptionsMenu();
         }
     }
 
