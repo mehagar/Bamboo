@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,9 +29,6 @@ public class MainActivity extends ActionBarActivity {
     private static final int LOGIN_REQUEST_CODE = 57;
 
     private static User mUser;
-    private Button mEducationButton;
-    private Button mMapButton;
-    private Button mObservationsButton;
     private ImageButton mMyObservationsButton;
     private ImageButton mLearnMoreButton;
     private ImageButton mViewMapButton;
@@ -43,9 +39,6 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //mObservationsButton = (Button) findViewById(R.id.MyObservationsButton);
-        //mMapButton = (Button) findViewById(R.id.ViewMapButton);
-        //mEducationButton = (Button) findViewById(R.id.LearnButton);
         mLoggedInText = (TextView) findViewById(R.id.loggedInText);
         mMyObservationsButton = (ImageButton) findViewById(R.id.MyObservationsIButton);
         Resources res = this.getResources();
@@ -60,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
 
         mViewMapButton = (ImageButton) findViewById(R.id.ViewMapIButton);
         bitmap = BitmapFactory.decodeResource(res, R.drawable.view_map);
-        bitmap = Bitmap.createScaledBitmap(bitmap, 640, 480, true);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 500, 480, true);
         mViewMapButton.setImageBitmap(bitmap);
 
         mUser = new User();
@@ -194,32 +187,10 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
-
-            /*SharedPreferences prefs = this.getSharedPreferences(
-                    "com.alabama.bamboofinder", Context.MODE_PRIVATE);
-            String token = prefs.getString("token", "Empty Token");*/
-
             WelcomeUser();
             this.invalidateOptionsMenu();
         }
     }
-
-    /*private void setUser(String token) {
-        AsyncTask userTask = new User().execute(token);
-        try {
-            mUser = (User) userTask.get();
-            mLoggedInText.setText("Welcome, " + mUser.getUsername() + "!");
-
-            String prefUser = mUser.convertToJSON().toString();
-            SharedPreferences prefs = getSharedPreferences(
-                    "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
-            prefs.edit().putString("user", prefUser).apply();
-            Log.i("User prefs string", prefUser);
-        }
-        catch (Exception e) {
-            Log.e(TAG, "Failed to get user");
-        }
-    }*/
 
     private void WelcomeUser() {
         SharedPreferences prefs = getSharedPreferences(

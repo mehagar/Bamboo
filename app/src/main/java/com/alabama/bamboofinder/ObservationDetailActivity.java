@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
@@ -40,7 +36,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.net.ssl.HttpsURLConnection;
 
 public class ObservationDetailActivity extends ActionBarActivity {
@@ -64,7 +59,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
     private TextView mUsernameText;
     private TextView mLatLngText;
     private TextView mWebLinkText;
-    //private ApiManager api;
     private Observation mObservation;
 
     @Override
@@ -81,8 +75,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mUsernameText = (TextView) findViewById(R.id.usernameTextView);
         mLatLngText = (TextView) findViewById(R.id.latLngTextView);
         mWebLinkText = (TextView) findViewById(R.id.webLinkTextView);
-        //imagePath = null;
-        //api = new ApiManager();
 
         //Check if adding or editing
         Intent i = getIntent();
@@ -249,7 +241,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 finish();
                 return true;
             case R.id.menu_item_new_picture:
-                //File photoFile = null;
                 try {
                     imagePath = createImageFile();
                 } catch (IOException e) {
@@ -277,45 +268,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
             try {
                 Bitmap bitmap = BitmapFactory.decodeFile(imagePath.toString());
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
-
-                /*//Retrieve last image taken
-                String[] projection = new String[]{
-                        MediaStore.Images.ImageColumns._ID,
-                        MediaStore.Images.ImageColumns.DATA,
-                        MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
-                        MediaStore.Images.ImageColumns.DATE_TAKEN,
-                        MediaStore.Images.ImageColumns.MIME_TYPE
-                };
-                final Cursor cursor = getContentResolver()
-                        .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null,
-                                null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
-                if (cursor.moveToFirst()) {
-                    String imageLocation = cursor.getString(1);
-                    File imageFile = new File(imageLocation);
-                    ExifInterface exifInterface = new ExifInterface(imageFile.getAbsolutePath());
-
-                    //check orientation and rotate if needed
-                    Matrix matrix = new Matrix();
-                    float rotate = 0;
-                    int orientation = exifInterface.getAttributeInt(
-                            ExifInterface.TAG_ORIENTATION,
-                            ExifInterface.ORIENTATION_NORMAL);
-                    switch (orientation) {
-                        case ExifInterface.ORIENTATION_ROTATE_270:
-                            rotate = 270;
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_180:
-                            rotate = 180;
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_90:
-                            rotate = 90;
-                            break;
-                    }
-                    matrix.postRotate(rotate);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                            bitmap.getHeight(), matrix, true);
-
-                }*/
                 mImageView.setImageBitmap(bitmap);
             }
             catch (Exception e) {
@@ -366,9 +318,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        //imagePath = "file:" + image.getAbsolutePath();
         return image;
     }
 

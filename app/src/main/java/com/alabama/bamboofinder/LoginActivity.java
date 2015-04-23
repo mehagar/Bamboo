@@ -13,19 +13,14 @@ import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-
 import javax.net.ssl.HttpsURLConnection;
 
 
@@ -163,7 +158,6 @@ public class LoginActivity extends ActionBarActivity {
             SharedPreferences prefs = getSharedPreferences(
                     "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
             prefs.edit().putString("token", token).apply();
-            //setUser(token);
             return token;
         }
     }
@@ -172,7 +166,6 @@ public class LoginActivity extends ActionBarActivity {
         AsyncTask userTask = new User().execute(token);
         try {
             User user = (User) userTask.get();
-            //mLoggedInText.setText("Welcome, " + mUser.getUsername() + "!");
 
             String prefUser = user.convertToJSON().toString();
             SharedPreferences prefs = getSharedPreferences(
