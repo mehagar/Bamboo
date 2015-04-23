@@ -116,7 +116,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 }
                 else {
                     User user = new User(new JSONObject(prefUser));
-                    if (!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
+                    if (!user.getUsername().contentEquals(mObservation.getUserLogin())) {
                         mSpeciesText.setKeyListener(null);
                         mDescriptionText.setKeyListener(null);
                         mSaveButton.setVisibility(View.INVISIBLE);
@@ -175,6 +175,10 @@ public class ObservationDetailActivity extends ActionBarActivity {
                             ShowAlert();
                             break;
                         }
+                        else if(token.contentEquals("Empty Token")) {
+                            ShowLoggedOutAlert();
+                            break;
+                        }
 
                         Uri.Builder putObservation = new Uri.Builder();
                         putObservation.scheme("https")
@@ -182,8 +186,8 @@ public class ObservationDetailActivity extends ActionBarActivity {
                                 .appendPath("observations")
                                 .appendPath(mObservation.getId())
                                 .appendQueryParameter("ignore_photos", "1")
-                                .appendQueryParameter(ApiManager.URL_DESCRIPTION, mDescriptionText.getText().toString())
-                                //add any additional fields here
+                                .appendQueryParameter("observation[description]", mDescriptionText.getText().toString())
+                                .appendQueryParameter("observation[species_guess]", mSpeciesText.getText().toString())
                                 .build();
                             new UpdateObservationTask().execute(mObservation, token, putObservation.toString());
                         setResult(RESULT_OK);
@@ -194,6 +198,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
                             ShowAlert();
                             break;
                         }
+                        else if(token.contentEquals("Empty Token")) {
+                            ShowLoggedOutAlert();
+                            break;
+                        }
+
                         Observation o = new Observation();
                         double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
                         double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
@@ -270,7 +279,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 Bitmap bitmap = BitmapFactory.decodeFile(imagePath.toString());
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
 
-                //Retrieve last image taken
+                /*//Retrieve last image taken
                 String[] projection = new String[]{
                         MediaStore.Images.ImageColumns._ID,
                         MediaStore.Images.ImageColumns.DATA,
@@ -306,8 +315,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
                     matrix.postRotate(rotate);
                     Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                             bitmap.getHeight(), matrix, true);
-                    mImageView.setImageBitmap(rotatedBitmap);
-                }
+
+                }*/
+                mImageView.setImageBitmap(bitmap);
             }
             catch (Exception e) {
                 Log.e("Result Exception", e.toString());
@@ -322,6 +332,20 @@ public class ObservationDetailActivity extends ActionBarActivity {
         new AlertDialog.Builder(this)
                 .setTitle("No photo!")
                 .setMessage("You must take a photo first.")
+                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void ShowLoggedOutAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("Not Logged In!")
+                .setMessage("You must be logged in to submit an observation.")
                 .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

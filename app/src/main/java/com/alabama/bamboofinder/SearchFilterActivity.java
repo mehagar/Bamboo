@@ -67,7 +67,7 @@ public class SearchFilterActivity extends ActionBarActivity {
         if(getIntent().hasExtra(InteractiveMapActivity.EXTRA_SEARCH_FILTER)) {
             SearchFilter sf = (SearchFilter) getIntent().getSerializableExtra(InteractiveMapActivity.EXTRA_SEARCH_FILTER);
             datePickerCheckBox.setChecked(sf.isMustBeBefore());
-            ownObservationsCheckBox.setChecked(sf.isOwnObservations());
+            ownObservationsCheckBox.setChecked(sf.isOnlyOwnObservations());
             setDatePickerDate(sf.getEarliestDate());
         }
     }

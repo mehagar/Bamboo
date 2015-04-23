@@ -38,7 +38,7 @@ public class ApiManager {
     private static final String URL_LATITUDE = "observation[latitude]";
     private static final String URL_LONGITUDE = "observation[longitude]";
     private static final String URL_DATE = "observation[observed_on_string]";
-    public static final String URL_DESCRIPTION = "observation[description]";
+    private static final String URL_DESCRIPTION = "observation[description]";
     private static final String URL_SPECIES_GUESS = "observation[species_guess]";
     private static final String URL_PHOTO = "observation_photo[observation_id]";
     private static final String URL_PROJECT_OBSERVATION = "project_observation[observation_id]";
@@ -91,18 +91,19 @@ public class ApiManager {
         return response;
     }
 
+    public static void deleteObservation(String urlSpec, String token) throws IOException {
+        sendDelete(urlSpec, token);
+    }
+
     private static void sendDelete(String urlSpec, String token) throws IOException {
         URL url = new URL(urlSpec);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 
         connection.setDoInput(true);
-        connection.setDoOutput(true);
         connection.setRequestMethod("DELETE");
         connection.setRequestProperty("Authorization", "Bearer " + token);
 
         Log.d(TAG, "Response code: " + connection.getResponseCode());
-
-        connection.connect();
         connection.disconnect();
     }
 
@@ -258,10 +259,6 @@ public class ApiManager {
 
     public static String callSendGet(String urlSpec) throws IOException {
         return sendGet(urlSpec);
-    }
-
-    public static void callSendDelete(String urlSpec, String token) throws IOException {
-        sendDelete(urlSpec, token);
     }
 
     public static ArrayList<Observation> callJSONDataToObservations(String data) {
