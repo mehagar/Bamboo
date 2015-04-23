@@ -1,5 +1,6 @@
 package com.alabama.bamboofinder;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -21,8 +22,12 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +42,11 @@ public class ObservationListFragment extends ListFragment {
     private static final String TAG = "ObservationListFragment";
     private static final String BASE_URL = "www.inaturalist.org";
     private static final String URL_EXTRA = "extra";
+    private static final int DETAIL_REQUEST = 1992;
 
     private static List<Observation> mObservations = null;
+
+    ObservationAdapter observationAdapter;
 
     private ProgressDialog progressDialog;
 
@@ -51,45 +59,16 @@ public class ObservationListFragment extends ListFragment {
         getActivity().setTitle(R.string.title_activity_observation_list);
 
         progressDialog = new ProgressDialog(getActivity());
-
         prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
-        String user = prefs.getString("user", "Empty User");
 
-        AsyncTask asyncTaskObservations;
-
-        if (!user.contentEquals("Empty User")) {
-            JSONObject jsonObject;
-            try {
-                jsonObject = new JSONObject(user);
-                String username = jsonObject.getString("login") + ".json";
-
-                Uri.Builder getObservationsURL = new Uri.Builder();
-                getObservationsURL.scheme("https")
-                        .authority(BASE_URL)
-                        .appendPath("observations")
-                        .appendPath(username)
-                        .appendQueryParameter(URL_EXTRA, "projects,observation_photos")
-                        .build();
-
-                asyncTaskObservations = new getObservationList().execute(username, getObservationsURL);
-                try {
-                    asyncTaskObservations.get();
-                }
-                catch (Exception e) {
-                    Log.e(TAG, "Waiting error: " + e.toString());
-                }
-            }
-            catch (Exception e) {
-                Log.e(TAG, "Error converting to JSON Object");
-            }
-        }
+        pullUserObservationList();
 
         if (mObservations == null) {
             mObservations = new ArrayList<Observation>();
         }
 
-        ObservationAdapter adapter = new ObservationAdapter(mObservations);
-        setListAdapter(adapter);
+        observationAdapter = new ObservationAdapter(mObservations);
+        setListAdapter(observationAdapter);
     }
 
     @Override
@@ -99,11 +78,24 @@ public class ObservationListFragment extends ListFragment {
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == DETAIL_REQUEST && resultCode == Activity.RESULT_OK) {
+            ((ObservationAdapter)getListAdapter()).clear();
+            pullUserObservationList();
+            setListAdapter(observationAdapter);
+            //Log.d(TAG, "Updated");
+            //((ObservationAdapter)getListAdapter()).notifyDataSetChanged();
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            Log.d(TAG, "No good");
+        }
+    }
+
+    @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Observation observation = ((ObservationAdapter)getListAdapter()).getItem(position);
         Intent i = new Intent(getActivity(), ObservationDetailActivity.class);
         i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, observation);
-        startActivity(i);
+        startActivityForResult(i, DETAIL_REQUEST);
     }
 
     @Override
@@ -126,7 +118,6 @@ public class ObservationListFragment extends ListFragment {
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -254,6 +245,47 @@ public class ObservationListFragment extends ListFragment {
     }
 
 
+    private void pullUserObservationList() {
+
+        String user = prefs.getString("user", "Empty User");
+
+        if (!user.contentEquals("Empty User")) {
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject(user);
+                String username = jsonObject.getString("login") + ".json";
+
+                Uri.Builder getObservationsURL = new Uri.Builder();
+                getObservationsURL.scheme("https")
+                        .authority(BASE_URL)
+                        .appendPath("observations")
+                        .appendPath(username)
+                        .appendQueryParameter(URL_EXTRA, "projects,observation_photos")
+                        .build();
+
+                AsyncTask asyncTaskObservations;
+                asyncTaskObservations = new getObservationList().execute(username, getObservationsURL);
+                try {
+                    asyncTaskObservations.get();
+                }
+                catch (Exception e) {
+                    Log.e(TAG, "Waiting error: " + e.toString());
+                }
+            }
+            catch (Exception e) {
+                Log.e(TAG, "Error converting to JSON Object");
+            }
+        }
+    }
+
+
+    /*
+     *
+     * ObservationAdapter Class
+     *
+     */
+
+
     private class ObservationAdapter extends ArrayAdapter<Observation> {
         public ObservationAdapter(List<Observation> observations) {
             super(getActivity(), 0, observations);
@@ -267,6 +299,19 @@ public class ObservationListFragment extends ListFragment {
             }
 
             Observation observation = getItem(position);
+
+            ImageView iconImageView = (ImageView)convertView.findViewById(R.id.observation_list_item_icon);
+
+            if(!observation.getThumbnailUrl().equals("")) {
+                Picasso.with(getActivity())
+                        .load(observation.getThumbnailUrl())
+                        .resize(60, 60)
+                        .centerCrop()
+                        .into(iconImageView);
+            } else {
+                Log.e("ImageView Error", "Observation created without a picture");
+                iconImageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
+            }
 
             TextView titleTextView = (TextView)convertView.findViewById(R.id.observation_list_item_titleTextView);
             titleTextView.setText(observation.getSpeciesGuess());

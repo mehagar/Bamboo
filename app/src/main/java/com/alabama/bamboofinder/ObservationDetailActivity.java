@@ -190,7 +190,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         finish();
                         break;
                     case(ADD_OBSERVATION):
-                        if(mImageView.getDrawable() == null) {
+                        if(imagePath == null) {
                             ShowAlert();
                             break;
                         }
@@ -251,6 +251,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 if(imagePath != null) {
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                             Uri.fromFile(imagePath));
+
                     startActivityForResult(cameraIntent, CAMERA_REQUEST);
                 }
                 return true;
