@@ -1,7 +1,9 @@
 package com.alabama.bamboofinder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -75,10 +77,25 @@ public class LoginActivity extends ActionBarActivity {
                 catch (Exception e) {
                     Log.e("Waiting Error", e.toString());
                 }
-                setResult(RESULT_OK);
-
-                addUserToProject();
-                finish();
+                if(!token.contentEquals("Empty Token")) {
+                    setResult(RESULT_OK);
+                    addUserToProject();
+                    finish();
+                }
+                else {
+                    new AlertDialog.Builder(LoginActivity.this)
+                            .setTitle("Invalid Login!")
+                            .setMessage("Your login information was incorrect.")
+                            .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mPassword.setText("");
+                                    dialog.cancel();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
             }
         });
 
