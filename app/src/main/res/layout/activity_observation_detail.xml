@@ -27,18 +27,42 @@
                 android:layout_alignParentStart="false"
                 android:layout_centerHorizontal="true" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/usernameTextView"
+                android:layout_below="@+id/observationImage"
+                android:layout_marginTop="10dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/latLngTextView"
+                android:layout_below="@+id/usernameTextView"
+                android:layout_marginTop="10dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/webLinkTextView"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/latLngTextView"
+                android:clickable="true" />
+
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/speciesEditText"
                 android:layout_gravity="center"
                 android:hint="@string/SpeciesHint"
-                android:layout_below="@+id/observationImage"
-                android:layout_marginTop="@dimen/abc_action_bar_default_height_material" />
+                android:layout_below="@+id/webLinkTextView"
+                android:layout_marginTop="@dimen/abc_action_bar_default_height_material"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentRight="false" />
 
             <EditText
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
                 android:id="@+id/descriptionEditText"
                 android:layout_marginTop="@dimen/abc_action_bar_default_height_material"
                 android:hint="@string/DescriptionText"

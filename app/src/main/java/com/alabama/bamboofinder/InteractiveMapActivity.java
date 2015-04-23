@@ -1,9 +1,12 @@
 package com.alabama.bamboofinder;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -14,6 +17,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -34,6 +39,10 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +82,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
     protected void onResume() {
         Log.d(TAG, "onResume called");
         super.onResume();
+
+        if(!isNetworkAvailable()) {
+            Toast.makeText(this, "Must be connected to the internet to view observations!", Toast.LENGTH_LONG).show();
+        }
 
         if(!mGoogleApiClient.isConnected()) {
             Log.d(TAG, "Reconnected google api client");
@@ -138,6 +151,13 @@ public class InteractiveMapActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
     private void showNoGPSAlertDialog() {
@@ -314,7 +334,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations(SearchFilter sf) {
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
-            boolean meetsCriteria = (sf == null || sf.meetsCriteria(o));
+            boolean meetsCriteria = (sf == null || sf.meetsCriteria(o, getUserName()));
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
                 addMarkerForObservation(o);
@@ -323,6 +343,18 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 m.remove();
                 mMarkerObservationMap.inverse().remove(o);
             }
+        }
+    }
+
+    private String getUserName() {
+        String json = getIntent().getStringExtra("user");
+        try {
+            User user = new User(new JSONObject(json));
+            Log.d(TAG, "user name: " + user.getmUsername());
+            return user.getmUsername();
+        } catch(JSONException jse) {
+            Log.e(TAG, "Could not parse user sent to map");
+            return "";
         }
     }
 
