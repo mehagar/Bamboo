@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -22,19 +21,11 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONObject;
-
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Michael Walker on 4/9/2015.

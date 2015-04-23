@@ -18,5 +18,4 @@
         android:layout_width="352dp"
         android:layout_height="352dp"
         android:src="@drawable/search_bamboo"/>
-
 </FrameLayout>
