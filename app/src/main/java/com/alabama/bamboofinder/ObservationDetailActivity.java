@@ -27,7 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
@@ -40,7 +39,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.net.ssl.HttpsURLConnection;
 
 public class ObservationDetailActivity extends ActionBarActivity {

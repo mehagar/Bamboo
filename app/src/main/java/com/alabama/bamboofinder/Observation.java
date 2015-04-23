@@ -1,13 +1,10 @@
 package com.alabama.bamboofinder;
 
 import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,7 +39,6 @@ public class Observation implements Serializable {
     private String mMediumUrl;
     private String mUserLogin;
 
-    // This should be deleted once the app has finished testing.
     public Observation() {
         mDateObserved = new Date();
         mSpeciesGuess = "Default Species Guess";
