@@ -222,8 +222,30 @@ public class ObservationListFragment extends ListFragment {
 
         switch(item.getItemId()) {
             case R.id.menu_item_delete_crime:
-                //CrimeLab.get(getActivity()).deleteCrime(crime);
-                mObservations.remove(observation);
+                String token = prefs.getString("token", "Empty Token");
+                if (!token.contentEquals("Empty Token")) {
+                    try {
+                        Uri.Builder deleteObservationsURL = new Uri.Builder();
+                        deleteObservationsURL.scheme("https")
+                                .authority(BASE_URL)
+                                .appendPath("observations")
+                                .appendPath(observation.getId())
+                                .build();
+
+                        AsyncTask asyncTaskObservations;
+                        asyncTaskObservations = new deleteObservationFromList().execute(token, deleteObservationsURL.toString());
+                        try {
+                            asyncTaskObservations.get();
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "Waiting error: " + e.toString());
+                        }
+                        //mObservations.remove(observationAdapter.getItem(i));
+                        mObservations.remove(observation);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString());
+                    }
+                }
                 adapter.notifyDataSetChanged();
                 return true;
         }
