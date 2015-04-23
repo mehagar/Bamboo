@@ -64,7 +64,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
     private TextView mUsernameText;
     private TextView mLatLngText;
     private TextView mWebLinkText;
-    private ApiManager api;
+    //private ApiManager api;
     private Observation mObservation;
 
     @Override
@@ -81,7 +81,8 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mUsernameText = (TextView) findViewById(R.id.usernameTextView);
         mLatLngText = (TextView) findViewById(R.id.latLngTextView);
         mWebLinkText = (TextView) findViewById(R.id.webLinkTextView);
-        api = new ApiManager();
+        imagePath = null;
+        //api = new ApiManager();
 
         //Check if adding or editing
         Intent i = getIntent();
@@ -265,10 +266,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            //imageUri = data.getData();
-            //Log.i("Result Image URI", imageUri.toString());
             try {
-                //Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 Bitmap bitmap = BitmapFactory.decodeFile(imagePath.toString());
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
 
@@ -314,6 +312,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
             catch (Exception e) {
                 Log.e("Result Exception", e.toString());
             }
+        }
+        else if(requestCode == CAMERA_REQUEST && resultCode == RESULT_CANCELED) {
+            imagePath = null;
         }
     }
 
