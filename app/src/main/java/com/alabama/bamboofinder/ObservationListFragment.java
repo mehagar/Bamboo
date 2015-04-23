@@ -82,9 +82,8 @@ public class ObservationListFragment extends ListFragment {
         if(requestCode == DETAIL_REQUEST && resultCode == Activity.RESULT_OK) {
             ((ObservationAdapter)getListAdapter()).clear();
             pullUserObservationList();
-            setListAdapter(observationAdapter);
-            //Log.d(TAG, "Updated");
-            //((ObservationAdapter)getListAdapter()).notifyDataSetChanged();
+            ((ObservationAdapter)getListAdapter()).addAll(mObservations);
+            ((ObservationAdapter)getListAdapter()).notifyDataSetChanged();
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Log.d(TAG, "No good");
         }
@@ -111,7 +110,6 @@ public class ObservationListFragment extends ListFragment {
                 Observation observation = new Observation();
                 ObservationList.get(getActivity()).addObservation(observation);
                 Intent i = new Intent(getActivity(), InteractiveMapActivity.class);
-                //i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
                 startActivity(i);
                 return true;
             default:
