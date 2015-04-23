@@ -41,13 +41,15 @@ import java.util.Objects;
  */
 public class ObservationListFragment extends ListFragment {
 
+    private static SharedPreferences prefs;
+
     private static final String TAG = "ObservationListFragment";
     private static final String BASE_URL = "www.inaturalist.org";
     private static final String URL_EXTRA = "extra";
 
     private static List<Observation> mObservations = null;
 
-    //private ProgressDialog progressDialog = new ProgressDialog(getActivity());
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,13 +59,15 @@ public class ObservationListFragment extends ListFragment {
 
         getActivity().setTitle(R.string.title_activity_observation_list);
 
-        SharedPreferences prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        progressDialog = new ProgressDialog(getActivity());
+
+        prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
         String user = prefs.getString("user", "Empty User");
 
         AsyncTask asyncTaskObservations;
 
         if (!user.contentEquals("Empty User")) {
-            JSONObject jsonObject = null;
+            JSONObject jsonObject;
             try {
                 jsonObject = new JSONObject(user);
                 String username = jsonObject.getString("login") + ".json";
@@ -89,9 +93,8 @@ public class ObservationListFragment extends ListFragment {
             }
         }
 
-        if (mObservations == null || mObservations.size() == 0) {
+        if (mObservations == null) {
             mObservations = new ArrayList<Observation>();
-            mObservations.add(new Observation());
         }
 
         ObservationAdapter adapter = new ObservationAdapter(mObservations);
@@ -167,19 +170,40 @@ public class ObservationListFragment extends ListFragment {
                 @Override
                 public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                     switch(item.getItemId()) {
-                        case R.id.menu_item_delete_crime:
-                            ObservationAdapter observationAdapter = (ObservationAdapter)getListAdapter();
-                            //CrimeLab crimeLab = CrimeLab.get(getActivity());
-                            for (int i = observationAdapter.getCount() - 1; i >= 0; i--) {
-                                if (getListView().isItemChecked(i)) {
-                                    mObservations.remove(observationAdapter.getItem(i));
+                    case R.id.menu_item_delete_crime:
+                        ObservationAdapter observationAdapter = (ObservationAdapter)getListAdapter();
+                        for (int i = observationAdapter.getCount() - 1; i >= 0; i--) {
+                            if (getListView().isItemChecked(i)) {
+                                String token = prefs.getString("token", "Empty Token");
+                                if (!token.contentEquals("Empty Token")) {
+                                    try {
+                                        Uri.Builder deleteObservationsURL = new Uri.Builder();
+                                        deleteObservationsURL.scheme("https")
+                                                .authority(BASE_URL)
+                                                .appendPath("observations")
+                                                .appendPath(observationAdapter.getItem(i).getId())
+                                                .build();
+
+                                        AsyncTask asyncTaskObservations;
+                                        asyncTaskObservations = new deleteObservationFromList().execute(token, deleteObservationsURL.toString());
+                                        try {
+                                            asyncTaskObservations.get();
+                                        }
+                                        catch (Exception e) {
+                                            Log.e(TAG, "Waiting error: " + e.toString());
+                                        }
+                                        mObservations.remove(observationAdapter.getItem(i));
+                                    } catch (Exception e) {
+                                        Log.e(TAG, e.toString());
+                                    }
                                 }
                             }
-                            mode.finish();
-                            observationAdapter.notifyDataSetChanged();
-                            return true;
-                        default:
-                            return false;
+                        }
+                        mode.finish();
+                        observationAdapter.notifyDataSetChanged();
+                        return true;
+                    default:
+                        return false;
                     }
                 }
 
@@ -197,6 +221,7 @@ public class ObservationListFragment extends ListFragment {
         getActivity().getMenuInflater().inflate(R.menu.menu_observation_list_item_context, menu);
     }
 
+    // This method is used for api < 11 (Android 3.0)
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
@@ -243,14 +268,13 @@ public class ObservationListFragment extends ListFragment {
     private class getObservationList extends AsyncTask<Object, Void, Void> {
         @Override
         protected void onPreExecute() {
-            //progressDialog.setMessage("Loading observations...");
-            //progressDialog.show();
+            progressDialog.setMessage("Loading observations...");
+            progressDialog.show();
         }
 
         @Override
         protected Void doInBackground(Object... objects) {
             try {
-                // need to update because of error
                 String jsonObjects = ApiManager.callSendGet(objects[1].toString());
                 Log.d(TAG, jsonObjects);
                 mObservations = ApiManager.callJSONDataToObservations(jsonObjects);
@@ -263,8 +287,31 @@ public class ObservationListFragment extends ListFragment {
 
         @Override
         protected void onPostExecute(Void v) {
-            //if (progressDialog.isShowing())
-            //    progressDialog.dismiss();
+            if (progressDialog.isShowing())
+                progressDialog.dismiss();
+        }
+    }
+
+    private class deleteObservationFromList extends AsyncTask<String, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(String... str) {
+            try {
+                // token, url
+                ApiManager.callSendDelete(str[1], str[0]);
+            } catch (Exception e) {
+                Log.e(TAG, "Error in API call to delete observation.");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+
         }
     }
 }
