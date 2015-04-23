@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -15,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -45,7 +48,12 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences prefs = this.getSharedPreferences(
                 "com.alabama.bamboofinder", Context.MODE_PRIVATE);
         String token = prefs.getString("token", "Empty Token");
-        if(!token.contentEquals("Empty Token")) {
+        if(!isNetworkAvailable()) {
+            Toast toast = Toast.makeText(this, "No internet connection",
+                    Toast.LENGTH_LONG);
+            toast.show();
+        }
+        else if(!token.contentEquals("Empty Token")) {
             setUser(token);
         }
 
@@ -53,6 +61,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this,ObservationListActivity.class);
+                //TODO add check to see if user is logged in
                 i.putExtra("user", mUser.convertToJSON().toString());
                 Log.i(TAG, i.getStringExtra("user"));
                 startActivity(i);
@@ -139,6 +148,13 @@ public class MainActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
     @Override
