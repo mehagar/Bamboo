@@ -1,9 +1,14 @@
 package com.alabama.bamboofinder;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,7 +22,12 @@ import android.widget.TextView;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Michael Walker on 4/9/2015.
@@ -25,9 +35,12 @@ import java.util.List;
 public class ObservationListFragment extends ListFragment {
 
     private static final String TAG = "ObservationListFragment";
-    private List<Observation> mObservations;
+    private static List<Observation> mObservations = new ArrayList<Observation>();
+    private static final String BASE_URL = "www.inaturalist.org";
 
-    private LatLng mLastUserPosition;
+
+    // 1. Shared preferences (
+    // 2. Get users string from preferences
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +49,31 @@ public class ObservationListFragment extends ListFragment {
         // needs to receive options menu callbacks
 
         getActivity().setTitle(R.string.title_activity_observation_list);
-        mObservations = ObservationList.get(getActivity()).getObservations();
+
+        SharedPreferences prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        String user = prefs.getString("user", "Empty User");
+
+        if (!user.contentEquals("Empty User")) {
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(user);
+                String username = jsonObject.getString("login") + ".json";
+
+                Uri.Builder getObservationsURL = new Uri.Builder();
+                getObservationsURL.scheme("https")
+                        .authority(BASE_URL)
+                        .appendPath("observations")
+                        .appendPath(username)
+                        .build();
+
+                new getObservationList().execute(username, getObservationsURL);
+            }
+            catch (Exception e) {
+                Log.e(TAG, "Error converting to JSON Object");
+            }
+        }
+
+        //mObservations = ObservationList.get(getActivity()).getObservations();
 
         ObservationAdapter adapter = new ObservationAdapter(mObservations);
         setListAdapter(adapter);
@@ -103,6 +140,21 @@ public class ObservationListFragment extends ListFragment {
             //solvedCheckBox.setChecked(.isSolved());
 
             return convertView;
+        }
+    }
+
+    private class getObservationList extends AsyncTask<Object, Void, Void> {
+        @Override
+        protected Void doInBackground(Object... objects) {
+            try {
+                // need to update because of error
+                String jsonObjects = ApiManager.callSendGet(objects[1].toString());
+                Log.d(TAG, jsonObjects);
+                mObservations = ApiManager.callJSONDataToObservations(jsonObjects);
+            } catch (Exception e) {
+                Log.e(TAG, "Error in API call to receive observations.");
+            }
+            return null;
         }
     }
 }

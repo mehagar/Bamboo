@@ -22,7 +22,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -240,6 +239,14 @@ public class ApiManager {
         Log.d(TAG, "writing params: " + params.substring(1));
         out.write(params.substring(1));
         out.close();
+    }
+
+    public static String callSendGet(String urlSpec) throws IOException {
+        return sendGet(urlSpec);
+    }
+
+    public static ArrayList<Observation> callJSONDataToObservations(String data) {
+        return JSONDataToObservations(data);
     }
 
     public static void addUserToProject(String token) {

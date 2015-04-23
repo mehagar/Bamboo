@@ -25,17 +25,7 @@ public class EducationalActivity extends ActionBarActivity {
 
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
 
-        mContext = this;
-        mViewFlipper = (ViewFlipper)this.findViewById(R.id.educational_view_flipper);
-
-        mViewFlipper.setInAnimation(this, android.R.anim.slide_in_left);
-        mViewFlipper.setOutAnimation(this, android.R.anim.slide_out_right);
-
-        mViewFlipper.setAutoStart(true);
-        mViewFlipper.setFlipInterval(4000); // 4 seconds
-        mViewFlipper.startFlipping();
-
-        findViewById(R.id.species_detail_button).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.click_full_view_to_continue).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(EducationalActivity.this, SpeciesDetailActivity.class);
