@@ -81,7 +81,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mUsernameText = (TextView) findViewById(R.id.usernameTextView);
         mLatLngText = (TextView) findViewById(R.id.latLngTextView);
         mWebLinkText = (TextView) findViewById(R.id.webLinkTextView);
-        imagePath = null;
+        //imagePath = null;
         //api = new ApiManager();
 
         //Check if adding or editing
@@ -190,7 +190,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                         finish();
                         break;
                     case(ADD_OBSERVATION):
-                        if(imagePath == null) {
+                        if(mImageView.getDrawable() == null) {
                             ShowAlert();
                             break;
                         }
@@ -251,7 +251,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 if(imagePath != null) {
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                             Uri.fromFile(imagePath));
-
                     startActivityForResult(cameraIntent, CAMERA_REQUEST);
                 }
                 return true;
