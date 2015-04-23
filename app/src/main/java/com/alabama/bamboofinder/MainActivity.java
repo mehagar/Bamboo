@@ -59,10 +59,16 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this,ObservationListActivity.class);
-                //TODO add check to see if user is logged in
-                i.putExtra("user", mUser.convertToJSON().toString());
-                Log.i(TAG, i.getStringExtra("user"));
-                startActivity(i);
+                SharedPreferences prefs = MainActivity.this.getSharedPreferences(
+                        "com.alabama.bamboofinder", Context.MODE_PRIVATE);
+                String token = prefs.getString("token", "Empty Token");
+                if(token.contentEquals("Empty Token")) {
+                    Toast toast = Toast.makeText(MainActivity.this, "You must be logged in to do this",
+                            Toast.LENGTH_LONG);
+                    toast.show();
+                }
+                else
+                    startActivity(i);
             }
         });
 

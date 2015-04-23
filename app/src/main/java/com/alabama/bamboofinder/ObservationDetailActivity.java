@@ -175,6 +175,10 @@ public class ObservationDetailActivity extends ActionBarActivity {
                             ShowAlert();
                             break;
                         }
+                        else if(token.contentEquals("Empty Token")) {
+                            ShowLoggedOutAlert();
+                            break;
+                        }
 
                         Uri.Builder putObservation = new Uri.Builder();
                         putObservation.scheme("https")
@@ -194,6 +198,11 @@ public class ObservationDetailActivity extends ActionBarActivity {
                             ShowAlert();
                             break;
                         }
+                        else if(token.contentEquals("Empty Token")) {
+                            ShowLoggedOutAlert();
+                            break;
+                        }
+
                         Observation o = new Observation();
                         double latitude = intent.getDoubleExtra(EXTRA_USER_LATITUDE, -1);
                         double longitude = intent.getDoubleExtra(EXTRA_USER_LONGITUDE, -1);
@@ -322,6 +331,20 @@ public class ObservationDetailActivity extends ActionBarActivity {
         new AlertDialog.Builder(this)
                 .setTitle("No photo!")
                 .setMessage("You must take a photo first.")
+                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void ShowLoggedOutAlert() {
+        new AlertDialog.Builder(this)
+                .setTitle("Not Logged In!")
+                .setMessage("You must be logged in to submit an observation.")
                 .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
