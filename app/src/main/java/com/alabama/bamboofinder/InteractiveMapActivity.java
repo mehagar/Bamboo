@@ -160,7 +160,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
     private void showNoGPSAlertDialog() {
         new AlertDialog.Builder(this)
-                .setMessage("GPS must be enabled to add an observation")
+                .setMessage("GPS must be enabled to add an observation.")
                 .setPositiveButton("Enable GPS", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
