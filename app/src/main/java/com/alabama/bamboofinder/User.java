@@ -72,7 +72,6 @@ public class User extends AsyncTask<String, Void, User> {
             Log.e("Error Retrieving User", "Passed in more than one token");
             return null;
         }
-
         String auth = "Bearer " + token[0];
 
         JSONObject object = null;
@@ -104,12 +103,10 @@ public class User extends AsyncTask<String, Void, User> {
             connection.disconnect();
         }
         catch (Exception e) {
-
             Log.e("Error Retrieving User", e.toString());
         }
 
-        User user = new User(object);
-        return user;
+        return new User(object);
     }
 
     public JSONObject convertToJSON() {
