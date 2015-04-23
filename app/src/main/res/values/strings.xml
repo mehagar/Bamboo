@@ -37,6 +37,30 @@
     <string name="Cancel">Cancel</string>
     <string name="Validate">Validate</string>
 
+    <string name="educational_info_text_0">
+        Bamboo is an efficient resource with many uses.
+    </string>
+
+    <string name="educational_info_text_1">
+        Bamboo is the fastest growing plant on the earth!
+    </string>
+
+    <string name="educational_info_text_2">
+        Bamboo has a higher tensile strength than steel!
+    </string>
+
+    <string name="educational_info_text_3">
+        Guess what? You can even eat bamboo!
+    </string>
+
+    <string name="educational_info_text_4">
+        Bamboo is one of nature\"s best erosion control agent!
+    </string>
+
+    <string name="educational_info_text_5">
+        Visit www.blackbeltbamboost.org for more information!
+    </string>
+
     <string name="species_detail_button">Species Information</string>
     <string name="species_select">Select a species</string>
     <string name="genus_select">Select a genus</string>

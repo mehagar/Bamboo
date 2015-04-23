@@ -85,9 +85,6 @@
             android:label="@string/title_activity_educational"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
-            <!-- enable the search dialog to send searches to SearchableActivity -->
-            <meta-data android:name="android.app.default_searchable"
-                android:value=".SearchableActivity"/>
         </activity>
         <activity
             android:name=".SpeciesDetailActivity"
@@ -107,10 +104,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.alabama.bamboofinder.InteractiveMapActivity" />
-        </activity>
-        <activity
-            android:name=".SearchableActivity"
-            android:label="@string/title_activity_searchable" >
         </activity>
     </application>
 

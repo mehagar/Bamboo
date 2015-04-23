@@ -29,7 +29,10 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -97,25 +100,6 @@ public class ObservationListFragment extends ListFragment {
         startActivityForResult(i, DETAIL_REQUEST);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_fragment_observation_list, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.menu_item_new_observation:
-                Observation observation = new Observation();
-                ObservationList.get(getActivity()).addObservation(observation);
-                Intent i = new Intent(getActivity(), InteractiveMapActivity.class);
-                startActivity(i);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -314,8 +298,9 @@ public class ObservationListFragment extends ListFragment {
             TextView titleTextView = (TextView)convertView.findViewById(R.id.observation_list_item_titleTextView);
             titleTextView.setText(observation.getSpeciesGuess());
 
+            SimpleDateFormat format = new SimpleDateFormat("MMMM-dd-yyyy");
             TextView dateTextView = (TextView)convertView.findViewById(R.id.observation_list_item_dateTextView);
-            dateTextView.setText(observation.getTimeStamp().toString());
+            dateTextView.setText(format.format(observation.getTimeStamp()));
 
             return convertView;
         }
