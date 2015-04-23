@@ -1,17 +1,22 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     tools:context="com.alabama.bamboofinder.SearchFilterActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        tools:context="com.alabama.bamboofinder.SearchFilterActivity">
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/show_observations"
         android:id="@+id/show_observations_textView"
-        style="@android:style/TextAppearance.Large"/>
+        style="?android:attr/listSeparatorTextViewStyle"/>
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,23 +29,27 @@
         android:id="@+id/datePicker"
         android:calendarViewShown="false"
         android:datePickerMode="spinner"
-        android:layout_marginTop="8dp"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_marginTop="8dp"/>
     <CheckBox
+        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/own_observations"
         android:id="@+id/own_observations_checkbox"/>
+
+</LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true">
         <Button
             android:id="@+id/sf_ok_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search_filter_ok"
+            android:layout_marginRight="8dp"
             />
         <Button
             android:id="@+id/sf_cancel_button"
@@ -49,4 +58,4 @@
             android:text="@string/search_filter_cancel"
             />
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>
