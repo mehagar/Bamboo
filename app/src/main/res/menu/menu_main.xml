@@ -5,4 +5,8 @@
         android:icon="@android:drawable/ic_menu_revert"
         android:title="@string/logout"
         app:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/menu_item_login"
+        android:icon="@android:drawable/ic_menu_set_as"
+        android:title="@string/Login"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

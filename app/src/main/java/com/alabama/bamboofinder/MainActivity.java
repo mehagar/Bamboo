@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -16,8 +18,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
@@ -25,10 +30,12 @@ public class MainActivity extends ActionBarActivity {
     private static final int LOGIN_REQUEST_CODE = 57;
 
     private static User mUser;
-    private Button mMainLoginButton;
     private Button mEducationButton;
     private Button mMapButton;
     private Button mObservationsButton;
+    private ImageButton mMyObservationsButton;
+    private ImageButton mLearnMoreButton;
+    private ImageButton mViewMapButton;
     private TextView mLoggedInText;
 
     @Override
@@ -36,11 +43,26 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mObservationsButton = (Button) findViewById(R.id.MyObservationsButton);
-        mMapButton = (Button) findViewById(R.id.ViewMapButton);
-        mEducationButton = (Button) findViewById(R.id.LearnButton);
-        mMainLoginButton = (Button) findViewById(R.id.MainLoginButton);
+        //mObservationsButton = (Button) findViewById(R.id.MyObservationsButton);
+        //mMapButton = (Button) findViewById(R.id.ViewMapButton);
+        //mEducationButton = (Button) findViewById(R.id.LearnButton);
         mLoggedInText = (TextView) findViewById(R.id.loggedInText);
+        mMyObservationsButton = (ImageButton) findViewById(R.id.MyObservationsIButton);
+        Resources res = this.getResources();
+        Bitmap bitmap = BitmapFactory.decodeResource(res, R.drawable.my_observations);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 640, 480, true);
+        mMyObservationsButton.setImageBitmap(bitmap);
+
+        mLearnMoreButton = (ImageButton) findViewById(R.id.LearnMoreIButton);
+        bitmap = BitmapFactory.decodeResource(res, R.drawable.learn_more);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 640, 480, true);
+        mLearnMoreButton.setImageBitmap(bitmap);
+
+        mViewMapButton = (ImageButton) findViewById(R.id.ViewMapIButton);
+        bitmap = BitmapFactory.decodeResource(res, R.drawable.view_map);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 640, 480, true);
+        mViewMapButton.setImageBitmap(bitmap);
+
         mUser = new User();
 
         SharedPreferences prefs = this.getSharedPreferences(
@@ -52,10 +74,10 @@ public class MainActivity extends ActionBarActivity {
             toast.show();
         }
         else if(!token.contentEquals("Empty Token")) {
-            setUser(token);
+            WelcomeUser();
         }
 
-        mObservationsButton.setOnClickListener(new View.OnClickListener() {
+        mMyObservationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this,ObservationListActivity.class);
@@ -72,30 +94,20 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        mMapButton.setOnClickListener(new View.OnClickListener() {
+        mViewMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, InteractiveMapActivity.class);
-                i.putExtra("user", mUser.convertToJSON().toString());
-                i.putExtra("token", getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE).getString("token", "Empty Token")); // just testing...
                 Log.d(TAG, mUser.convertToJSON().toString());
                 startActivity(i);
             }
         });
 
-        mEducationButton.setOnClickListener(new View.OnClickListener() {
+        mLearnMoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, EducationalActivity.class);
                 startActivity(i);
-            }
-        });
-
-        mMainLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, LoginActivity.class);
-                startActivityForResult(i, LOGIN_REQUEST_CODE);
             }
         });
     }
@@ -105,8 +117,18 @@ public class MainActivity extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         if(mUser.getUsername() == null) {
-            MenuItem item = menu.findItem(R.id.menu_item_logout);
-            item.setVisible(false);
+            MenuItem logoutItem = menu.findItem(R.id.menu_item_logout);
+            logoutItem.setVisible(false);
+            MenuItem loginItem = menu.findItem(R.id.menu_item_login);
+            loginItem.setVisible(true);
+            mLoggedInText.setText("Welcome to BambooFinder!");
+            this.invalidateOptionsMenu();
+        }
+        else {
+            MenuItem logoutItem = menu.findItem(R.id.menu_item_logout);
+            logoutItem.setVisible(true);
+            MenuItem loginItem = menu.findItem(R.id.menu_item_login);
+            loginItem.setVisible(false);
             this.invalidateOptionsMenu();
         }
         return true;
@@ -120,7 +142,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.home:
-                finish();
+                //finish();
                 return true;
             case R.id.menu_item_logout:
                 new AlertDialog.Builder(this)
@@ -146,6 +168,9 @@ public class MainActivity extends ActionBarActivity {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
                 return true;
+            case R.id.menu_item_login:
+                StartLogin();
+                return true;
             case android.R.id.home:
                 finish();
                 return true;
@@ -161,20 +186,25 @@ public class MainActivity extends ActionBarActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
+    private void StartLogin() {
+        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+        startActivityForResult(i, LOGIN_REQUEST_CODE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            SharedPreferences prefs = this.getSharedPreferences(
+            /*SharedPreferences prefs = this.getSharedPreferences(
                     "com.alabama.bamboofinder", Context.MODE_PRIVATE);
-            String token = prefs.getString("token", "Empty Token");
+            String token = prefs.getString("token", "Empty Token");*/
 
-            setUser(token);
+            WelcomeUser();
             this.invalidateOptionsMenu();
         }
     }
 
-    private void setUser(String token) {
+    /*private void setUser(String token) {
         AsyncTask userTask = new User().execute(token);
         try {
             mUser = (User) userTask.get();
@@ -188,6 +218,20 @@ public class MainActivity extends ActionBarActivity {
         }
         catch (Exception e) {
             Log.e(TAG, "Failed to get user");
+        }
+    }*/
+
+    private void WelcomeUser() {
+        SharedPreferences prefs = getSharedPreferences(
+                "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
+        String user = prefs.getString("user", "Empty User");
+        try {
+            JSONObject userJSON = new JSONObject(user);
+            mUser = new User(userJSON);
+            mLoggedInText.setText("Welcome, " + userJSON.getString("login") + "!");
+        }
+        catch (Exception e) {
+            Log.e(TAG, e.toString());
         }
     }
 }

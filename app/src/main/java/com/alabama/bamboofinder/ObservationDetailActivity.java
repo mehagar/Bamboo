@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
@@ -39,6 +40,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import javax.net.ssl.HttpsURLConnection;
 
 public class ObservationDetailActivity extends ActionBarActivity {
@@ -145,7 +147,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 if(mWebLinkText.getText() != null) {
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                             Uri.parse("https://www.inaturalist.org/observations/" +
-                            mObservation.getId()));
+                                    mObservation.getId()));
                     startActivity(browserIntent);
                 }
             }
@@ -187,12 +189,12 @@ public class ObservationDetailActivity extends ActionBarActivity {
                                 .appendQueryParameter("observation[description]", mDescriptionText.getText().toString())
                                 .appendQueryParameter("observation[species_guess]", mSpeciesText.getText().toString())
                                 .build();
-                            new UpdateObservationTask().execute(mObservation, token, putObservation.toString());
+                        new UpdateObservationTask().execute(mObservation, token, putObservation.toString());
                         setResult(RESULT_OK);
                         finish();
                         break;
                     case(ADD_OBSERVATION):
-                        if(imagePath == null) {
+                        if(mImageView.getDrawable() == null) {
                             ShowAlert();
                             break;
                         }
@@ -258,7 +260,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 if(imagePath != null) {
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                             Uri.fromFile(imagePath));
-
                     startActivityForResult(cameraIntent, CAMERA_REQUEST);
                 }
                 return true;

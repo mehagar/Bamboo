@@ -80,6 +80,7 @@ public class LoginActivity extends ActionBarActivity {
                 catch (Exception e) {
                     Log.e("Waiting Error", e.toString());
                 }
+                LoginActivity.this.setUser(token);
                 if(!token.contentEquals("Empty Token")) {
                     setResult(RESULT_OK);
                     addUserToProject();
@@ -162,7 +163,25 @@ public class LoginActivity extends ActionBarActivity {
             SharedPreferences prefs = getSharedPreferences(
                     "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
             prefs.edit().putString("token", token).apply();
+            //setUser(token);
             return token;
+        }
+    }
+
+    private void setUser(String token) {
+        AsyncTask userTask = new User().execute(token);
+        try {
+            User user = (User) userTask.get();
+            //mLoggedInText.setText("Welcome, " + mUser.getUsername() + "!");
+
+            String prefUser = user.convertToJSON().toString();
+            SharedPreferences prefs = getSharedPreferences(
+                    "com.alabama.bamboofinder", Activity.MODE_PRIVATE);
+            prefs.edit().putString("user", prefUser).apply();
+            Log.i("User prefs string", prefUser);
+        }
+        catch (Exception e) {
+            Log.e("LoginActivity", "Failed to get user");
         }
     }
 
