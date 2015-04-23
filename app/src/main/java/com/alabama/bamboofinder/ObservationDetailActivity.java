@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -16,6 +17,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +26,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
@@ -49,7 +54,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
     private static final int ADD_OBSERVATION = 0;
     private static final int EDIT_OBSERVATION = 1;
     private static final int CAMERA_REQUEST = 1888;
-    private static Uri imageUri;
     private static int mMode;
     private static File imagePath;
     private ImageView mImageView;
@@ -57,7 +61,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
     private EditText mDescriptionText;
     private Button mSaveButton;
     private Button mCancelButton;
-    private Button mValidateButton;
+    private TextView mUsernameText;
+    private TextView mLatLngText;
+    private TextView mWebLinkText;
     private ApiManager api;
     private Observation mObservation;
 
@@ -72,6 +78,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mImageView = (ImageView)findViewById(R.id.observationImage);
         mCancelButton = (Button) findViewById(R.id.cancelButton);
         mSaveButton = (Button) findViewById(R.id.saveButton);
+        mUsernameText = (TextView) findViewById(R.id.usernameTextView);
+        mLatLngText = (TextView) findViewById(R.id.latLngTextView);
+        mWebLinkText = (TextView) findViewById(R.id.webLinkTextView);
         api = new ApiManager();
 
         //Check if adding or editing
@@ -117,11 +126,31 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 Log.e("ObservationDetail", e.toString());
             }
 
+            mUsernameText.setText("Created by: " + mObservation.getUserLogin());
+            LatLng latLng = mObservation.getLocation();
+            mLatLngText.setText("Lat: " + latLng.latitude + " Long: " + latLng.longitude);
+            String webLink = new String("View observation on iNaturalist");
+            SpannableString content = new SpannableString(webLink);
+            content.setSpan(new UnderlineSpan(), 0, webLink.length(), 0);
+            mWebLinkText.setText(content);
+            mWebLinkText.setTextColor(Color.parseColor("#0645AD"));
             mSpeciesText.setText(mObservation.getSpeciesGuess());
             mDescriptionText.setText(mObservation.getDescription());
         }
         else
             mMode = ADD_OBSERVATION;
+
+        mWebLinkText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mWebLinkText.getText() != null) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("https://www.inaturalist.org/observations/" +
+                            mObservation.getId()));
+                    startActivity(browserIntent);
+                }
+            }
+        });
 
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
