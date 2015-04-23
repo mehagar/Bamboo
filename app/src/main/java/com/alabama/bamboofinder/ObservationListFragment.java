@@ -172,7 +172,7 @@ public class ObservationListFragment extends ListFragment {
                                         deleteObservationsURL.scheme("https")
                                                 .authority(BASE_URL)
                                                 .appendPath("observations")
-                                                .appendPath(observationAdapter.getItem(i).getId())
+                                                .appendPath(observationAdapter.getItem(i).getId() + ".json")
                                                 .build();
 
                                         AsyncTask asyncTaskObservations;
@@ -293,7 +293,7 @@ public class ObservationListFragment extends ListFragment {
         protected Void doInBackground(String... str) {
             try {
                 // token, url
-                ApiManager.callSendDelete(str[1], str[0]);
+                ApiManager.deleteObservation(str[1], str[0]);
             } catch (Exception e) {
                 Log.e(TAG, "Error in API call to delete observation.");
             }
