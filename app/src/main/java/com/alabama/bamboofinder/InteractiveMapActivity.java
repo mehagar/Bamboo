@@ -36,8 +36,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.common.collect.HashBiMap;
 import com.squareup.picasso.Callback;
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -350,8 +348,8 @@ public class InteractiveMapActivity extends ActionBarActivity {
         String json = getIntent().getStringExtra("user");
         try {
             User user = new User(new JSONObject(json));
-            Log.d(TAG, "user name: " + user.getmUsername());
-            return user.getmUsername();
+            Log.d(TAG, "user name: " + user.getUsername());
+            return user.getUsername();
         } catch(JSONException jse) {
             Log.e(TAG, "Could not parse user sent to map");
             return "";

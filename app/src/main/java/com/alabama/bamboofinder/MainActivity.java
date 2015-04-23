@@ -16,8 +16,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.json.JSONObject;
-
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
 
@@ -91,7 +89,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        if(mUser.getmUsername() == null) {
+        if(mUser.getUsername() == null) {
             MenuItem item = menu.findItem(R.id.menu_item_logout);
             item.setVisible(false);
             this.invalidateOptionsMenu();
@@ -158,7 +156,7 @@ public class MainActivity extends ActionBarActivity {
         AsyncTask userTask = new User().execute(token);
         try {
             mUser = (User) userTask.get();
-            mLoggedInText.setText("Welcome, " + mUser.getmUsername() + "!");
+            mLoggedInText.setText("Welcome, " + mUser.getUsername() + "!");
 
             String prefUser = mUser.convertToJSON().toString();
             SharedPreferences prefs = getSharedPreferences(

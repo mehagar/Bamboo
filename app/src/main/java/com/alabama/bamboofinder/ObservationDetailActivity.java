@@ -115,7 +115,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 }
                 else {
                     User user = new User(new JSONObject(prefUser));
-                    if (!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
+                    if (!user.getUsername().contentEquals(mObservation.getUserLogin())) {
                         mSpeciesText.setKeyListener(null);
                         mDescriptionText.setKeyListener(null);
                         mSaveButton.setVisibility(View.INVISIBLE);
