@@ -70,13 +70,13 @@
     <string name="title_activity_search_filter">Search Filter</string>
     <string name="within_radius">Within radius (in meters)</string>
     <string name="added_after">Added on or after:</string>
-    <string name="show_observations">Only show observations:</string>
+    <string name="show_observations">Only show observations</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_searchable">SearchableActivity</string>
 
     <string name="hello_world">Hello world!</string>
-    <string name="own_observations">Only shown own observations</string>
+    <string name="own_observations">That are mine</string>
 
 </resources>

@@ -25,9 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -39,7 +37,6 @@ import java.util.List;
  * Created by Michael Walker on 4/9/2015.
  */
 public class ObservationListFragment extends ListFragment {
-
     private static SharedPreferences prefs;
 
     private static final String TAG = "ObservationListFragment";
