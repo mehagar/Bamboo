@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -82,6 +85,11 @@ public class LoginActivity extends ActionBarActivity {
                     addUserToProject();
                     finish();
                 }
+                else if(!isNetworkAvailable()) {
+                    Toast toast = Toast.makeText(LoginActivity.this, "No internet connection",
+                            Toast.LENGTH_LONG);
+                    toast.show();
+                }
                 else {
                     new AlertDialog.Builder(LoginActivity.this)
                             .setTitle("Invalid Login!")
@@ -115,6 +123,13 @@ public class LoginActivity extends ActionBarActivity {
                 "com.alabama.bamboofinder", Context.MODE_PRIVATE);
         String token = prefs.getString("token", "Empty Token");
         new AddUserToProjectTask().execute(token);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
     class GetRequestToken extends AsyncTask<String, Void, String> {
