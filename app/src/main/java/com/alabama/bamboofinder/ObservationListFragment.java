@@ -1,19 +1,26 @@
 package com.alabama.bamboofinder;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -34,13 +41,15 @@ import java.util.Objects;
  */
 public class ObservationListFragment extends ListFragment {
 
+    private static SharedPreferences prefs;
+
     private static final String TAG = "ObservationListFragment";
-    private static List<Observation> mObservations = new ArrayList<Observation>();
     private static final String BASE_URL = "www.inaturalist.org";
+    private static final String URL_EXTRA = "extra";
 
+    private static List<Observation> mObservations = null;
 
-    // 1. Shared preferences (
-    // 2. Get users string from preferences
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,11 +59,15 @@ public class ObservationListFragment extends ListFragment {
 
         getActivity().setTitle(R.string.title_activity_observation_list);
 
-        SharedPreferences prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
+        progressDialog = new ProgressDialog(getActivity());
+
+        prefs = getActivity().getSharedPreferences("com.alabama.bamboofinder", Context.MODE_PRIVATE);
         String user = prefs.getString("user", "Empty User");
 
+        AsyncTask asyncTaskObservations;
+
         if (!user.contentEquals("Empty User")) {
-            JSONObject jsonObject = null;
+            JSONObject jsonObject;
             try {
                 jsonObject = new JSONObject(user);
                 String username = jsonObject.getString("login") + ".json";
@@ -64,16 +77,25 @@ public class ObservationListFragment extends ListFragment {
                         .authority(BASE_URL)
                         .appendPath("observations")
                         .appendPath(username)
+                        .appendQueryParameter(URL_EXTRA, "projects,observation_photos")
                         .build();
 
-                new getObservationList().execute(username, getObservationsURL);
+                asyncTaskObservations = new getObservationList().execute(username, getObservationsURL);
+                try {
+                    asyncTaskObservations.get();
+                }
+                catch (Exception e) {
+                    Log.e(TAG, "Waiting error: " + e.toString());
+                }
             }
             catch (Exception e) {
                 Log.e(TAG, "Error converting to JSON Object");
             }
         }
 
-        //mObservations = ObservationList.get(getActivity()).getObservations();
+        if (mObservations == null) {
+            mObservations = new ArrayList<Observation>();
+        }
 
         ObservationAdapter adapter = new ObservationAdapter(mObservations);
         setListAdapter(adapter);
@@ -90,7 +112,6 @@ public class ObservationListFragment extends ListFragment {
         Observation observation = ((ObservationAdapter)getListAdapter()).getItem(position);
         Intent i = new Intent(getActivity(), ObservationDetailActivity.class);
         i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, observation);
-        // needs an extra passed
         startActivity(i);
     }
 
@@ -115,6 +136,111 @@ public class ObservationListFragment extends ListFragment {
         }
     }
 
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, parent, savedInstanceState);
+
+        ListView listView = (ListView)v.findViewById(android.R.id.list);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            // Use floating context menu on Froyo and Gingerbread
+            registerForContextMenu(listView);
+        } else {
+            // Use contextual action bar on HoneyComb and higher
+            listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+            listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+                @Override
+                public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                    // Required, but not used in this implementation
+                }
+
+                @Override
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                    MenuInflater inflater = mode.getMenuInflater();
+                    inflater.inflate(R.menu.menu_observation_list_item_context, menu);
+                    return true;
+                }
+
+                @Override
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                    // Required, but not used in this implementation
+                    return false;
+                }
+
+                @Override
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    switch(item.getItemId()) {
+                    case R.id.menu_item_delete_crime:
+                        ObservationAdapter observationAdapter = (ObservationAdapter)getListAdapter();
+                        for (int i = observationAdapter.getCount() - 1; i >= 0; i--) {
+                            if (getListView().isItemChecked(i)) {
+                                String token = prefs.getString("token", "Empty Token");
+                                if (!token.contentEquals("Empty Token")) {
+                                    try {
+                                        Uri.Builder deleteObservationsURL = new Uri.Builder();
+                                        deleteObservationsURL.scheme("https")
+                                                .authority(BASE_URL)
+                                                .appendPath("observations")
+                                                .appendPath(observationAdapter.getItem(i).getId())
+                                                .build();
+
+                                        AsyncTask asyncTaskObservations;
+                                        asyncTaskObservations = new deleteObservationFromList().execute(token, deleteObservationsURL.toString());
+                                        try {
+                                            asyncTaskObservations.get();
+                                        }
+                                        catch (Exception e) {
+                                            Log.e(TAG, "Waiting error: " + e.toString());
+                                        }
+                                        mObservations.remove(observationAdapter.getItem(i));
+                                    } catch (Exception e) {
+                                        Log.e(TAG, e.toString());
+                                    }
+                                }
+                            }
+                        }
+                        mode.finish();
+                        observationAdapter.notifyDataSetChanged();
+                        return true;
+                    default:
+                        return false;
+                    }
+                }
+
+                @Override
+                public void onDestroyActionMode(ActionMode mode) {
+                    // Required, but not used in this implementation
+                }
+            });
+        }
+        return v;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        getActivity().getMenuInflater().inflate(R.menu.menu_observation_list_item_context, menu);
+    }
+
+    // This method is used for api < 11 (Android 3.0)
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        int position = info.position;
+        ObservationAdapter adapter = (ObservationAdapter)getListAdapter();
+        Observation observation = adapter.getItem(position);
+
+        switch(item.getItemId()) {
+            case R.id.menu_item_delete_crime:
+                //CrimeLab.get(getActivity()).deleteCrime(crime);
+                mObservations.remove(observation);
+                adapter.notifyDataSetChanged();
+                return true;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
+
     private class ObservationAdapter extends ArrayAdapter<Observation> {
         public ObservationAdapter(List<Observation> observations) {
             super(getActivity(), 0, observations);
@@ -127,7 +253,6 @@ public class ObservationListFragment extends ListFragment {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_observation, null);
             }
 
-            // configure the view for this crime
             Observation observation = getItem(position);
 
             TextView titleTextView = (TextView)convertView.findViewById(R.id.observation_list_item_titleTextView);
@@ -136,25 +261,57 @@ public class ObservationListFragment extends ListFragment {
             TextView dateTextView = (TextView)convertView.findViewById(R.id.observation_list_item_dateTextView);
             dateTextView.setText(observation.getTimeStamp().toString());
 
-            CheckBox selectedObservationCheckBox = (CheckBox)convertView.findViewById(R.id.observation_list_item_solvedCheckBox);
-            //solvedCheckBox.setChecked(.isSolved());
-
             return convertView;
         }
     }
 
     private class getObservationList extends AsyncTask<Object, Void, Void> {
         @Override
+        protected void onPreExecute() {
+            progressDialog.setMessage("Loading observations...");
+            progressDialog.show();
+        }
+
+        @Override
         protected Void doInBackground(Object... objects) {
             try {
-                // need to update because of error
                 String jsonObjects = ApiManager.callSendGet(objects[1].toString());
                 Log.d(TAG, jsonObjects);
                 mObservations = ApiManager.callJSONDataToObservations(jsonObjects);
+                Log.d(TAG, Integer.toString(mObservations.size()));
             } catch (Exception e) {
                 Log.e(TAG, "Error in API call to receive observations.");
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            if (progressDialog.isShowing())
+                progressDialog.dismiss();
+        }
+    }
+
+    private class deleteObservationFromList extends AsyncTask<String, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(String... str) {
+            try {
+                // token, url
+                ApiManager.callSendDelete(str[1], str[0]);
+            } catch (Exception e) {
+                Log.e(TAG, "Error in API call to delete observation.");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+
         }
     }
 }
