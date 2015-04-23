@@ -38,7 +38,7 @@ public class ApiManager {
     private static final String URL_LATITUDE = "observation[latitude]";
     private static final String URL_LONGITUDE = "observation[longitude]";
     private static final String URL_DATE = "observation[observed_on_string]";
-    public static final String URL_DESCRIPTION = "observation[description]";
+    private static final String URL_DESCRIPTION = "observation[description]";
     private static final String URL_SPECIES_GUESS = "observation[species_guess]";
     private static final String URL_PHOTO = "observation_photo[observation_id]";
     private static final String URL_PROJECT_OBSERVATION = "project_observation[observation_id]";

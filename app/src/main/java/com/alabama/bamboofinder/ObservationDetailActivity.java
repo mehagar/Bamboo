@@ -182,15 +182,15 @@ public class ObservationDetailActivity extends ActionBarActivity {
                                 .appendPath("observations")
                                 .appendPath(mObservation.getId())
                                 .appendQueryParameter("ignore_photos", "1")
-                                .appendQueryParameter(ApiManager.URL_DESCRIPTION, mDescriptionText.getText().toString())
-                                //add any additional fields here
+                                .appendQueryParameter("observation[description]", mDescriptionText.getText().toString())
+                                .appendQueryParameter("observation[species_guess]", mSpeciesText.getText().toString())
                                 .build();
                             new UpdateObservationTask().execute(mObservation, token, putObservation.toString());
                         setResult(RESULT_OK);
                         finish();
                         break;
                     case(ADD_OBSERVATION):
-                        if(imagePath == null) {
+                        if(mImageView.getDrawable() == null) {
                             ShowAlert();
                             break;
                         }
@@ -270,7 +270,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 Bitmap bitmap = BitmapFactory.decodeFile(imagePath.toString());
                 bitmap = Bitmap.createScaledBitmap(bitmap, 864, 486, true);
 
-                //Retrieve last image taken
+                /*//Retrieve last image taken
                 String[] projection = new String[]{
                         MediaStore.Images.ImageColumns._ID,
                         MediaStore.Images.ImageColumns.DATA,
@@ -306,8 +306,9 @@ public class ObservationDetailActivity extends ActionBarActivity {
                     matrix.postRotate(rotate);
                     Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
                             bitmap.getHeight(), matrix, true);
-                    mImageView.setImageBitmap(rotatedBitmap);
-                }
+
+                }*/
+                mImageView.setImageBitmap(bitmap);
             }
             catch (Exception e) {
                 Log.e("Result Exception", e.toString());
