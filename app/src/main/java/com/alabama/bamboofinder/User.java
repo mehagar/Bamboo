@@ -38,7 +38,6 @@ public class User extends AsyncTask<String, Void, User> {
     private int mObservationsCount;
     private String mUri;
     private String mToken;
-    private boolean mAdmin;
 
     public User() {
         mCreationDate = null;
@@ -202,13 +201,5 @@ public class User extends AsyncTask<String, Void, User> {
 
     public void setToken(String mToken) {
         this.mToken = mToken;
-    }
-
-    public boolean isAdmin() {
-        return mAdmin;
-    }
-
-    public void setAdmin(boolean mAdmin) {
-        this.mAdmin = mAdmin;
     }
 }
