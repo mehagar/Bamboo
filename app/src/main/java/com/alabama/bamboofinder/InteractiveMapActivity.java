@@ -190,9 +190,9 @@ public class InteractiveMapActivity extends ActionBarActivity {
             }
         } else if(requestCode == DETAIL_REQUEST) {
             if(resultCode == RESULT_OK) {
+                Log.d(TAG, "in onactivity result: clearing map");
                 mMap.clear();
                 mMarkerObservationMap.clear();
-                showObservations(mSearchFilter);
             }
         }
     }
@@ -257,7 +257,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
                 Observation o = mMarkerObservationMap.get(marker);
                 Intent i = new Intent(InteractiveMapActivity.this, ObservationDetailActivity.class);
                 i.putExtra(ObservationDetailActivity.EXTRA_OBSERVATION, o);
-                startActivity(i);
+                startActivityForResult(i, DETAIL_REQUEST);
             }
         });
 
@@ -348,7 +348,6 @@ public class InteractiveMapActivity extends ActionBarActivity {
         String json = getIntent().getStringExtra("user");
         try {
             User user = new User(new JSONObject(json));
-            Log.d(TAG, "user name: " + user.getUsername());
             return user.getUsername();
         } catch(JSONException jse) {
             Log.e(TAG, "Could not parse user sent to map");
