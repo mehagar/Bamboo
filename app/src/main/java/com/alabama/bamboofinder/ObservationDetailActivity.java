@@ -81,7 +81,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
         mUsernameText = (TextView) findViewById(R.id.usernameTextView);
         mLatLngText = (TextView) findViewById(R.id.latLngTextView);
         mWebLinkText = (TextView) findViewById(R.id.webLinkTextView);
-        imagePath = null;
+        //imagePath = null;
         //api = new ApiManager();
 
         //Check if adding or editing
@@ -116,7 +116,7 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 }
                 else {
                     User user = new User(new JSONObject(prefUser));
-                    if (!user.getmUsername().contentEquals(mObservation.getUserLogin())) {
+                    if (!user.getUsername().contentEquals(mObservation.getUserLogin())) {
                         mSpeciesText.setKeyListener(null);
                         mDescriptionText.setKeyListener(null);
                         mSaveButton.setVisibility(View.INVISIBLE);
@@ -251,7 +251,6 @@ public class ObservationDetailActivity extends ActionBarActivity {
                 if(imagePath != null) {
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                             Uri.fromFile(imagePath));
-
                     startActivityForResult(cameraIntent, CAMERA_REQUEST);
                 }
                 return true;

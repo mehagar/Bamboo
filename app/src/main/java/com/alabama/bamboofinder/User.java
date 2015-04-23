@@ -1,6 +1,5 @@
 package com.alabama.bamboofinder;
 
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -8,7 +7,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -39,7 +38,6 @@ public class User extends AsyncTask<String, Void, User> {
     private int mObservationsCount;
     private String mUri;
     private String mToken;
-    private boolean mAdmin;
 
     public User() {
         mCreationDate = null;
@@ -74,7 +72,6 @@ public class User extends AsyncTask<String, Void, User> {
             Log.e("Error Retrieving User", "Passed in more than one token");
             return null;
         }
-
         String auth = "Bearer " + token[0];
 
         JSONObject object = null;
@@ -106,25 +103,23 @@ public class User extends AsyncTask<String, Void, User> {
             connection.disconnect();
         }
         catch (Exception e) {
-
             Log.e("Error Retrieving User", e.toString());
         }
 
-        User user = new User(object);
-        return user;
+        return new User(object);
     }
 
     public JSONObject convertToJSON() {
         JSONObject json = new JSONObject();
         try {
-            json.put(JSON_CREATED, getmCreationDate());
-            json.put(JSON_DESCRIPTION, getmDescription());
-            json.put(JSON_EMAIL, getmEmail());
-            json.put(JSON_ID, getmID());
-            json.put(JSON_LOGIN, getmUsername());
-            json.put(JSON_NAME, getmName());
-            json.put(JSON_OBSERVATIONS_COUNT, getmObservationsCount());
-            json.put(JSON_URI, getmUri());
+            json.put(JSON_CREATED, getCreationDate());
+            json.put(JSON_DESCRIPTION, getDescription());
+            json.put(JSON_EMAIL, getEmail());
+            json.put(JSON_ID, getID());
+            json.put(JSON_LOGIN, getUsername());
+            json.put(JSON_NAME, getName());
+            json.put(JSON_OBSERVATIONS_COUNT, getObservationsCount());
+            json.put(JSON_URI, getUri());
         }
         catch (Exception e) {
             Log.e("JSON Conversion Error", e.toString());
@@ -133,83 +128,75 @@ public class User extends AsyncTask<String, Void, User> {
     }
 
     // Getters and Setters
-    public String getmCreationDate() {
+    public String getCreationDate() {
         return mCreationDate;
     }
 
-    public void setmCreationDate(String mCreationDate) {
+    public void setCreationDate(String mCreationDate) {
         this.mCreationDate = mCreationDate;
     }
 
-    public String getmDescription() {
+    public String getDescription() {
         return mDescription;
     }
 
-    public void setmDescription(String mDescription) {
+    public void setDescription(String mDescription) {
         this.mDescription = mDescription;
     }
 
-    public void setmEmail(String mEmail) {
+    public void setEmail(String mEmail) {
         this.mEmail = mEmail;
     }
 
-    public String getmEmail() {
+    public String getEmail() {
         return mEmail;
     }
 
-    public int getmID() {
+    public int getID() {
         return mID;
     }
 
-    public void setmID(int mID) {
+    public void setID(int mID) {
         this.mID = mID;
     }
 
-    public String getmUsername() {
+    public String getUsername() {
         return mUsername;
     }
 
-    public void setmUsername(String mUsername) {
+    public void setUsername(String mUsername) {
         this.mUsername = mUsername;
     }
 
-    public String getmName() {
+    public String getName() {
         return mName;
     }
 
-    public void setmName(String mName) {
+    public void setName(String mName) {
         this.mName = mName;
     }
 
-    public int getmObservationsCount() {
+    public int getObservationsCount() {
         return mObservationsCount;
     }
 
-    public void setmObservationsCount(int mObservationsCount) {
+    public void setObservationsCount(int mObservationsCount) {
         this.mObservationsCount = mObservationsCount;
     }
 
-    public String getmUri() {
+    public String getUri() {
         return mUri;
     }
 
-    public void setmUri(String mUri) {
+    public void setUri(String mUri) {
         this.mUri = mUri;
     }
 
-    public String getmToken() {
+    public String getToken() {
         return mToken;
     }
 
-    public void setmToken(String mToken) {
+    public void setToken(String mToken) {
         this.mToken = mToken;
-    }
-
-    public boolean ismAdmin() {
-        return mAdmin;
-    }
-
-    public void setmAdmin(boolean mAdmin) {
-        this.mAdmin = mAdmin;
     }
 }

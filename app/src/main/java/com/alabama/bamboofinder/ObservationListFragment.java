@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -22,19 +21,11 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONObject;
-
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Michael Walker on 4/9/2015.
@@ -181,7 +172,7 @@ public class ObservationListFragment extends ListFragment {
                                         deleteObservationsURL.scheme("https")
                                                 .authority(BASE_URL)
                                                 .appendPath("observations")
-                                                .appendPath(observationAdapter.getItem(i).getId())
+                                                .appendPath(observationAdapter.getItem(i).getId() + ".json")
                                                 .build();
 
                                         AsyncTask asyncTaskObservations;
@@ -231,8 +222,30 @@ public class ObservationListFragment extends ListFragment {
 
         switch(item.getItemId()) {
             case R.id.menu_item_delete_crime:
-                //CrimeLab.get(getActivity()).deleteCrime(crime);
-                mObservations.remove(observation);
+                String token = prefs.getString("token", "Empty Token");
+                if (!token.contentEquals("Empty Token")) {
+                    try {
+                        Uri.Builder deleteObservationsURL = new Uri.Builder();
+                        deleteObservationsURL.scheme("https")
+                                .authority(BASE_URL)
+                                .appendPath("observations")
+                                .appendPath(observation.getId())
+                                .build();
+
+                        AsyncTask asyncTaskObservations;
+                        asyncTaskObservations = new deleteObservationFromList().execute(token, deleteObservationsURL.toString());
+                        try {
+                            asyncTaskObservations.get();
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "Waiting error: " + e.toString());
+                        }
+                        //mObservations.remove(observationAdapter.getItem(i));
+                        mObservations.remove(observation);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString());
+                    }
+                }
                 adapter.notifyDataSetChanged();
                 return true;
         }
@@ -302,7 +315,7 @@ public class ObservationListFragment extends ListFragment {
         protected Void doInBackground(String... str) {
             try {
                 // token, url
-                ApiManager.callSendDelete(str[1], str[0]);
+                ApiManager.deleteObservation(str[1], str[0]);
             } catch (Exception e) {
                 Log.e(TAG, "Error in API call to delete observation.");
             }

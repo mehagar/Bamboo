@@ -91,18 +91,19 @@ public class ApiManager {
         return response;
     }
 
+    public static void deleteObservation(String urlSpec, String token) throws IOException {
+        sendDelete(urlSpec, token);
+    }
+
     private static void sendDelete(String urlSpec, String token) throws IOException {
         URL url = new URL(urlSpec);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 
         connection.setDoInput(true);
-        connection.setDoOutput(true);
         connection.setRequestMethod("DELETE");
         connection.setRequestProperty("Authorization", "Bearer " + token);
 
         Log.d(TAG, "Response code: " + connection.getResponseCode());
-
-        connection.connect();
         connection.disconnect();
     }
 
@@ -258,10 +259,6 @@ public class ApiManager {
 
     public static String callSendGet(String urlSpec) throws IOException {
         return sendGet(urlSpec);
-    }
-
-    public static void callSendDelete(String urlSpec, String token) throws IOException {
-        sendDelete(urlSpec, token);
     }
 
     public static ArrayList<Observation> callJSONDataToObservations(String data) {
