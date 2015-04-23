@@ -38,7 +38,6 @@ public class User extends AsyncTask<String, Void, User> {
     private String mName;
     private int mObservationsCount;
     private String mUri;
-    private ArrayList<Observation> mObservationList;
     private String mToken;
     private boolean mAdmin;
 
@@ -51,7 +50,6 @@ public class User extends AsyncTask<String, Void, User> {
         mName = null;
         mObservationsCount = -1;
         mUri = null;
-        mObservationList = null;
     }
 
     public User (JSONObject jsonObject) {
@@ -64,8 +62,6 @@ public class User extends AsyncTask<String, Void, User> {
             mName = jsonObject.getString(JSON_NAME);
             mObservationsCount = jsonObject.getInt(JSON_OBSERVATIONS_COUNT);
             mUri = jsonObject.getString(JSON_URI);
-            mObservationList = new ArrayList<Observation>();
-                //TODO populate mObservationList
             mToken = null;
         }
         catch (JSONException e) {
@@ -129,7 +125,6 @@ public class User extends AsyncTask<String, Void, User> {
             json.put(JSON_NAME, getmName());
             json.put(JSON_OBSERVATIONS_COUNT, getmObservationsCount());
             json.put(JSON_URI, getmUri());
-            json.put("observation_list", getmObservationList());
         }
         catch (Exception e) {
             Log.e("JSON Conversion Error", e.toString());
@@ -200,14 +195,6 @@ public class User extends AsyncTask<String, Void, User> {
 
     public void setmUri(String mUri) {
         this.mUri = mUri;
-    }
-
-    public ArrayList<Observation> getmObservationList() {
-        return mObservationList;
-    }
-
-    public void setmObservationList(ArrayList<Observation> mObservationList) {
-        this.mObservationList = mObservationList;
     }
 
     public String getmToken() {

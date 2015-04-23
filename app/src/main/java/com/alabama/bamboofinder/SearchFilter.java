@@ -26,11 +26,11 @@ public class SearchFilter implements Serializable {
     }
 
     // Returns true if all criteria are met, false otherwise.
-    public boolean meetsCriteria(Observation o) {
+    public boolean meetsCriteria(Observation o, String userName) {
         if(mMustBeBefore && o.getTimeStamp().before(mEarliestDate)) {
             Log.d(TAG, "Observation was too old: " + o.getTimeStamp() + " was before " + mEarliestDate);
             return false;
-        } else if(mOwnObservations && !o.getUserLogin().equals("michael23")) {
+        } else if(mOwnObservations && !o.getUserLogin().equals(userName)) {
             Log.d(TAG, "Observation by user " + o.getUserLogin() + " not one of the users'");
             return false;
         }
