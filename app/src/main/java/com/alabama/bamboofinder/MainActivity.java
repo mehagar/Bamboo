@@ -91,6 +91,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, InteractiveMapActivity.class);
+                i.putExtra("user", mUser.convertToJSON().toString());
                 Log.d(TAG, mUser.convertToJSON().toString());
                 startActivity(i);
             }
