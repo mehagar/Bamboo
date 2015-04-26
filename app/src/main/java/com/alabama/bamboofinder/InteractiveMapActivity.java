@@ -48,6 +48,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     public static final int DETAIL_REQUEST = 2;
     public static final String EXTRA_SEARCH_FILTER = "search_filter";
     private static final String STATE_FILTER = "search_filter";
+    private static final String STATE_USER_NAME = "user_name";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private List<Observation> mObservations;
@@ -56,6 +57,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private HashBiMap<Marker, Observation> mMarkerObservationMap;
     private GoogleApiClient mGoogleApiClient;
     private SearchFilter mSearchFilter; // Might be null if search filter has not been applied or has been cleared.
+    private String mUserName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,10 @@ public class InteractiveMapActivity extends ActionBarActivity {
 
         if(savedInstanceState != null) {
             mSearchFilter = (SearchFilter) savedInstanceState.getSerializable(STATE_FILTER);
+            mUserName = savedInstanceState.getString(STATE_USER_NAME);
+        } else {
+            mSearchFilter = null;
+            mUserName = getUserName();
         }
 
         buildGoogleApiClient();
@@ -105,6 +111,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putSerializable(STATE_FILTER, mSearchFilter);
+        savedInstanceState.putString(STATE_USER_NAME, mUserName);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -329,7 +336,7 @@ public class InteractiveMapActivity extends ActionBarActivity {
     private void showObservations(SearchFilter sf) {
         for(Observation o : mObservations) {
             // Only add a marker if it is not already show, and it meets the search criteria(if any)
-            boolean meetsCriteria = (sf == null || sf.meetsCriteria(o, getUserName()));
+            boolean meetsCriteria = (sf == null || sf.meetsCriteria(o, mUserName));
             boolean alreadyShown = mMarkerObservationMap.containsValue(o);
             if(meetsCriteria && !alreadyShown) {
                 addMarkerForObservation(o);

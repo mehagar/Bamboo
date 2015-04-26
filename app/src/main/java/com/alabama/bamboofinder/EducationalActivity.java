@@ -29,6 +29,8 @@ public class EducationalActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_educational);
 
+        getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);
+
         this.findViewById(android.R.id.content).setBackgroundColor(0xB6C0D2);
 
         textSwitcher_title = (TextSwitcher) findViewById(R.id.educational_textswitcher_title);
