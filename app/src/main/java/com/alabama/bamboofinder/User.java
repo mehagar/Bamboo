@@ -63,7 +63,7 @@ public class User extends AsyncTask<String, Void, User> {
             mToken = null;
         }
         catch (JSONException e) {
-            Log.e("UserJSON", "Error parsing json for user");
+            Log.e("UserJSON", "Error parsing json for user: " + e.getMessage());
         }
     }
 
