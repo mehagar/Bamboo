@@ -85,7 +85,7 @@ public class ObservationListFragment extends ListFragment {
             ((ObservationAdapter)getListAdapter()).addAll(mObservations);
             ((ObservationAdapter)getListAdapter()).notifyDataSetChanged();
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            Log.d(TAG, "No good");
+            Log.d(TAG, "Activity Result was canceled");
         }
     }
 
@@ -151,11 +151,11 @@ public class ObservationListFragment extends ListFragment {
                                             asyncTaskObservations.get();
                                         }
                                         catch (Exception e) {
-                                            Log.e(TAG, "Waiting error: " + e.toString());
+                                            Log.e(TAG, "Waiting error: " + e.getMessage());
                                         }
                                         mObservations.remove(observationAdapter.getItem(i));
                                     } catch (Exception e) {
-                                        Log.e(TAG, e.toString());
+                                        Log.e(TAG, e.getMessage());
                                     }
                                 }
                             }
@@ -208,12 +208,12 @@ public class ObservationListFragment extends ListFragment {
                             asyncTaskObservations.get();
                         }
                         catch (Exception e) {
-                            Log.e(TAG, "Waiting error: " + e.toString());
+                            Log.e(TAG, "Waiting error: " + e.getMessage());
                         }
                         //mObservations.remove(observationAdapter.getItem(i));
                         mObservations.remove(observation);
                     } catch (Exception e) {
-                        Log.e(TAG, e.toString());
+                        Log.e(TAG, e.getMessage());
                     }
                 }
                 adapter.notifyDataSetChanged();
@@ -248,7 +248,7 @@ public class ObservationListFragment extends ListFragment {
                     asyncTaskObservations.get();
                 }
                 catch (Exception e) {
-                    Log.e(TAG, "Waiting error: " + e.toString());
+                    Log.e(TAG, "Waiting error: " + e.getMessage());
                 }
             }
             catch (Exception e) {
@@ -288,7 +288,7 @@ public class ObservationListFragment extends ListFragment {
                         .centerCrop()
                         .into(iconImageView);
             } else {
-                Log.e("ImageView Error", "Observation created without a picture");
+                Log.e(TAG, "Observation created without a picture");
                 iconImageView.setVisibility(View.GONE); // Remove the imageView if there is no picture for it
             }
 
@@ -314,9 +314,9 @@ public class ObservationListFragment extends ListFragment {
         protected Void doInBackground(Object... objects) {
             try {
                 String jsonObjects = ApiManager.callSendGet(objects[1].toString());
-                Log.d(TAG, jsonObjects);
+                Log.d(TAG, "Returned jsonObject: " + jsonObjects);
                 mObservations = ApiManager.callJSONDataToObservations(jsonObjects);
-                Log.d(TAG, Integer.toString(mObservations.size()));
+                Log.d(TAG, "Size of observations: " + Integer.toString(mObservations.size()));
             } catch (Exception e) {
                 Log.e(TAG, "Error in API call to receive observations.");
             }
