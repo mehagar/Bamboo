@@ -1,8 +1,7 @@
-package com.alabama.bamboofinder;
+package com.alabama.bamboofinder2;
 
 import android.content.Context;
 
-import java.util.Date;  // remove
 import java.util.LinkedList;
 import java.util.List;
 // import java.util.UUID;

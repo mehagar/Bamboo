@@ -5,7 +5,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "com.alabama.bamboofinder"
+        applicationId "com.alabama.bamboofinder2"
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
@@ -28,12 +28,12 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.0.0'
-    compile 'com.google.android.gms:play-services:7.0.0'
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.google.android.gms:play-services:7.3.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'org.scribe:scribe:1.3.7'
     compile 'com.loopj.android:android-async-http:1.4.6'
-    compile 'com.android.support:support-v4:22.0.0'
+    compile 'com.android.support:support-v4:22.1.1'
     compile 'com.google.maps.android:android-maps-utils:0.3.4'
     compile 'com.google.guava:guava:18.0'
 }

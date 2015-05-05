@@ -78,5 +78,6 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="own_observations">That are mine</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

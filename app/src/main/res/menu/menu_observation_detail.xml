@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.alabama.bamboofinder.ObservationDetailActivity">
+    tools:context="com.alabama.bamboofinder2.ObservationDetailActivity">
     <!--<item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" /> -->
     <item android:id="@+id/menu_item_new_picture"

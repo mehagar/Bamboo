@@ -4,15 +4,15 @@
 
     To get one, follow this link, follow the directions and press "Create" at the end:
 
-https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=6A:27:94:49:71:22:91:BA:B0:D5:FA:FB:20:23:8C:B6:AF:42:55:19%3Bcom.alabama.bamboofinder
+https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=00:92:8D:5B:60:07:B1:CD:72:D5:62:C8:42:57:A2:7F:33:95:4B:5E%3Bcom.alabama.bamboofinder2
 
     You can also add your credentials to an existing key, using this line:
-    6A:27:94:49:71:22:91:BA:B0:D5:FA:FB:20:23:8C:B6:AF:42:55:19;com.alabama.bamboofinder
+    00:92:8D:5B:60:07:B1:CD:72:D5:62:C8:42:57:A2:7F:33:95:4B:5E;com.alabama.bamboofinder2
 
     Once you have your key (it starts with "AIza"), replace the "google_maps_key"
     string in this file.
     -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-        AIzaSyBPB1_Y0khLdRIq7zLrfYc-WrvLLR1EH_4
+        AIzaSyB_GjIuhD1MLmf2JOckElVS_QohFZb1Bck
     </string>
 </resources>

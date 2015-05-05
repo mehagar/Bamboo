@@ -1,4 +1,4 @@
-package com.alabama.bamboofinder;
+package com.alabama.bamboofinder2;
 
 import android.util.Log;
 

@@ -1,4 +1,4 @@
-package com.alabama.bamboofinder;
+package com.alabama.bamboofinder2;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -30,7 +30,6 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
