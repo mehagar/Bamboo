@@ -26,7 +26,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class LoginActivity extends ActionBarActivity {
     private static final String BASE_URL = "www.inaturalist.org";
-    private static final String REDIRECT_URI = "redirect_uri";
     private static final String APP_ID = "23a5158ed4385113eeef60291289c8c96fd3dc9ba3a646f10ea93bd4b215fe41";
     private static final String APP_SECRET = "40f13b324b0728378081964b3f5c0e8e2ef0860fd1114da858c249347108f685";
     private static final String CLIENT_ID = "client_id";
@@ -75,8 +74,8 @@ public class LoginActivity extends ActionBarActivity {
                 catch (Exception e) {
                     Log.e("Waiting Error", e.toString());
                 }
-                LoginActivity.this.setUser(token);
                 if(!token.contentEquals("Empty Token")) {
+                    LoginActivity.this.setUser(token);
                     setResult(RESULT_OK);
                     addUserToProject();
                     finish();
